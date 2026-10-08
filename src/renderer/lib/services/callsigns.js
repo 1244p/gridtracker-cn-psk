@@ -400,7 +400,7 @@ function lookupKnownCallsign(object) {
         
       if (!object.cnty && GT.zipToCounty[code]) {
         const counties = GT.zipToCounty[code];
-        object.qual = counties.length === 1;
+        object.cntyQual = counties.length === 1;
         object.cnty = counties[0];
       }
     }
@@ -409,7 +409,7 @@ function lookupKnownCallsign(object) {
       object.fips = code;
 
       if (!object.cnty && GT.fipsToCounty[code]) {
-        object.qual = true
+        object.cntyQual = true
         object.cnty = GT.fipsToCounty[code];
       }
     }

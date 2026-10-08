@@ -156,6 +156,7 @@ function changeMapProjection(honorMemory = true) {
   redrawGrids();
   redrawSpots();
   redrawParks();
+  redrawDxcwSpots();
   redrawPins();
   setTrophyOverlay(GT.currentOverlay);
 }

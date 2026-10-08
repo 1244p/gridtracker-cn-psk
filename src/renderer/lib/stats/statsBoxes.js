@@ -26,7 +26,7 @@ function showCallsignBox() {
     const lotwCall = GT.lotwCallsigns;
     const eqslCall = GT.eqslCallsigns;
     const oqrsCall = GT.oqrsCallsigns;
-    const pskColors = GT.pskColors;
+    const bandColors = GT.bandColors;
 
     // Table Header (using +=)
     html += `
@@ -59,8 +59,8 @@ function showCallsignBox() {
       const ituzone = callObj.ituz || "-";
       const geo = callObj.geo;
       
-      // Use cached pskColors and direct check (!== undefined)
-      const bandColor = pskColors[callObj.band] !== undefined ? pskColors[callObj.band] : pskColors.OOB;
+      // Use cached bandColors and direct check (!== undefined)
+      const bandColor = bandColors[callObj.band] !== undefined ? bandColors[callObj.band] : bandColors.OOB;
       const age = now - callObj.time;
       let ageString = (age < 3601) ? toDHMS(age) : userTimeString(callObj.time * 1000);
 
@@ -158,7 +158,7 @@ function getBandSlots()
 
   const total = bands.reduce((acc, b) => acc + bSlots[b], 0);
 
-  const bandHeaders = bands.map(b => `<th><span style="color: #${GT.pskColors[b]}">${b}</span></th>`).join("");
+  const bandHeaders = bands.map(b => `<th><span style="color: #${GT.bandColors[b]}">${b}</span></th>`).join("");
   const bandData = bands.map(b => `<td>${bSlots[b]}</td>`).join("");
 
   return `

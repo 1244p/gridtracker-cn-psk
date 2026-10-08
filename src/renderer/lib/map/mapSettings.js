@@ -124,7 +124,7 @@ function loadMapSettings()
   equatorImg.style.filter = GT.settings.map.equator ? "" : "grayscale(1)";
   rangeRingsImg.style.filter = GT.settings.map.showRangeRings ? "" : "grayscale(1)";
   
-  GT.bandToColor = { ...GT.pskColors };
+  GT.bandToColor = { ...GT.bandColors };
 
   setGridOpacity();
   setMapColors();

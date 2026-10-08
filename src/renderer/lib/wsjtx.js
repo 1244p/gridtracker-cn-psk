@@ -138,6 +138,7 @@ function handleInstanceStatus(newMessage)
       redrawGrids();
       redrawSpots();
       redrawParks();
+      redrawDxcwSpots();
       redrawPins();
 
       let msg = "<font color='yellow'>" + GT.settings.app.myBand + "</font> / <font color='orange'>" + GT.settings.app.myMode + "</font>";
@@ -1522,6 +1523,10 @@ function LiveCallsign(DEcall, DXcall, grid, mode, band, msg, dxcc, time) {
   this.RSTrecv = "-";
   this.dt = 0.0;
   this.delta = -1;
+  this.freq = 0;
+  this.spotter = "";
+  this.fullGrid = "";
+  this.readOnly = false;
   this.wspr = null;
 
   // 4. Geographic Data
@@ -1548,7 +1553,7 @@ function LiveCallsign(DEcall, DXcall, grid, mode, band, msg, dxcc, time) {
   this.digital = true;
   this.phone = false;
   this.even = false;
-  this.qual = false;
+  this.cntyQual = false;
   this.locked = false;
   this.reset = false;
   this.CQ = false;

@@ -53,6 +53,9 @@
         <button data-i18n="roster.ignores.label" id="ingoresbox" class="infoTablinks" onclick="openInfoTab(event, 'ignoresBoxDiv', renderIgnoresTab)">
           Ignores
         </button>
+        <button data-i18n="roster.feeds.label" id="feedsbox" class="infoTablinks" style="display:none;" onclick="openInfoTab(event, 'feedsBoxDiv', renderFeedsTab)">
+          Feeds
+        </button>
       </div>
       <div id="generalSettingsDiv" class="infoTabcontent">
         <div class="mapItem"  align="center">
@@ -406,6 +409,29 @@
           <label id="ingnoreAddResultLabel"></label>
         </div>
         <div id="ignoresEditView"></div>
+      </div>
+      <div id="feedsBoxDiv" class="infoTabcontent">
+        <div class="mapItem" align="center">
+          <table>
+            <tr>
+              <td align="left">
+                <input type="checkbox" id="feedAlertsEnable" onchange="feedsSettingChanged()" />
+                <label data-i18n="roster.feeds.alerts.label" for="feedAlertsEnable">Allow Alerting (Audio and Custom)</label>
+              </td>
+            </tr>
+            <tr>
+              <td align="left">
+                <input type="checkbox" id="feedNotificationsEnable" onchange="feedsSettingChanged()" />
+                <label data-i18n="roster.feeds.notifications.label" for="feedNotificationsEnable">Allow Notifications (Pushover, Simplepush, Alert Script)</label>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <br />
+        <div class="mapItem" align="center">
+          <div data-i18n="roster.feeds.bands.label">Bands</div>
+          <div id="feedBands" class="feedBands"></div>
+        </div>
       </div>
     </div>
     <div id="MainCallRoster" style="display:block;">

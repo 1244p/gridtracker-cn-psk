@@ -494,6 +494,30 @@ table.rosterTable td:last-child {
   box-shadow: inset 0px 11px 6px -8px #888, inset 0px -11px 6px -8px #888;
 }
 
+/* Feed spots that can't be worked from any rig (marked with ▲ before the callsign) */
+.rosterTable tr.feedReadOnly *,
+.compact.feedReadOnly,
+.compact.feedReadOnly * {
+  cursor: default !important;
+}
+
+.compact.feedReadOnly:active {
+  border-style: outset;
+}
+
+.feedBands {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 2px 12px;
+  margin-top: 4px;
+  text-align: left;
+}
+
+.feedBand {
+  white-space: nowrap;
+  cursor: pointer;
+}
+
 .acknowledged {
   float: right;
   font-size: 70%;

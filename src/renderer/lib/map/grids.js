@@ -309,13 +309,13 @@ function qthToBox(iQTH, iDEcallsign, iCQ, locked, DE, band, wspr, hash, fromLive
   }
   if (wspr != null)
   {
-    if (wspr in GT.pskColors)
+    if (wspr in GT.bandColors)
     {
-      boxColor = "#" + GT.pskColors[wspr] + GT.gridAlpha
+      boxColor = "#" + GT.bandColors[wspr] + GT.gridAlpha
     }
     else
     {
-      boxColor = "#" + GT.pskColors.OOB + GT.gridAlpha;
+      boxColor = "#" + GT.bandColors.OOB + GT.gridAlpha;
     }
   }
   let zIndex = 2;

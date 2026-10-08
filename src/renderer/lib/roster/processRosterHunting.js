@@ -118,7 +118,7 @@ function processRosterHunting(callRoster, rosterSettings)
 
     // Baseline Style Configurations
     let callPointer = callObj.CQ ? "cursor:pointer" : "";
-    let cntyPointer = (callObj.cnty && !callObj.qual) ? "cursor: pointer;" : "";
+    let cntyPointer = (callObj.cnty && !callObj.cntyQual) ? "cursor: pointer;" : "";
     
     let callColor = "#FFFF00", gridColor = "#00FFFF", callingColor = "#90EE90", dxccColor = "#FFA500",
         stateColor = "#90EE90", cntyColor = "#CCDD00", contColor = "#00DDDD", potaColor = "#fbb6fc",
@@ -449,10 +449,10 @@ function processRosterHunting(callRoster, rosterSettings)
       {
         let cntyHash = callObj.cnty + (layeredMode ? layeredHashSuffix : workHashSuffix);
 
-        if ((huntIdx && !(cntyHash in huntIdx.cnty)) || callObj.qual === false)
+        if ((huntIdx && !(cntyHash in huntIdx.cnty)) || callObj.cntyQual === false)
         {
           let shouldAlert = false;
-          if (callObj.qual === false)
+          if (callObj.cntyQual === false)
           {
             let counties = GT.zipToCounty[callObj.zipcode];
             let foundHit = false;

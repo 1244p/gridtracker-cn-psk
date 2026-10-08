@@ -626,6 +626,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div id="gtFlagButton" onclick="toggleGtMap();" class="iconButton" title="Toggle View GridTracker Spotters">
           <img id="gtFlagImg" src="" class="buttonImg" />
         </div>
+        <div id="dxcwFeedButton" onclick="toggleDxcwFeed();" class="iconButton" style="display:none;" title="Toggle DX Cluster / CW Skimmer Feed" data-i18n="settings.map.dxcwFeed.hover">
+          <img id="dxcwFeedImg" src="img/feed_menu.png" class="buttonImg" />
+        </div>
       </div>
       <div id="trafficDiv" class="roundBorder" style="
             position: relative;
@@ -1218,6 +1221,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <td data-i18n="settings.BandActivity.neighbor.enable.label" for="oamsBandActivityNeighbors">Neighboring Grids</td>
             <td>
               <input  type="checkbox" id="oamsBandActivityNeighbors" onclick="setOamsBandActivityNeighbors(this);" />
+            </td>
+          </tr>
+          <tr id="feedDxClusterTr">
+            <td data-i18n="settings.feeds.dxCluster.label" for="feedDxCluster">DX Cluster Feed</td>
+            <td>
+              <input title="Show DX Cluster spots in the Call Roster" type="checkbox" id="feedDxCluster" onclick="setFeedSettings();" />
+            </td>
+          </tr>
+          <tr id="feedCwSkimmerTr">
+            <td data-i18n="settings.feeds.cwSkimmer.label" for="feedCwSkimmer">CW Skimmer Feed</td>
+            <td>
+              <input title="Show CW Skimmer spots in the Call Roster" type="checkbox" id="feedCwSkimmer" onclick="setFeedSettings();" />
             </td>
           </tr>
           </table>

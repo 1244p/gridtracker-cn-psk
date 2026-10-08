@@ -386,7 +386,7 @@ const def_qso = {
   band: "", cnty: null, confirmed: false, confSrcs: {}, cont: null,
   cqz: null, DEcall: "", delta: -1, digital: false, DXcall: "", dxcc: -1,
   grid: "", grid4: "", IOTA: null, ituz: null, mode: "", msg: "-", phone: false,
-  pota: null, propMode: "", px: null, qso: true, qual: false, RSTrecv: "",
+  pota: null, propMode: "", px: null, qso: true, cntyQual: false, RSTrecv: "",
   RSTsent: "", state: null, time: 0, vucc_grids: [], worked: true, zipcode: null,
   zone: null
 };
@@ -435,7 +435,7 @@ function addQSO(qso) {
     if (details.dxcc === 390 && details.zone === 1) details.cont = "EU";
   }
 
-  if (details.cnty && details.confirmed === true) details.qual = true;
+  if (details.cnty && details.confirmed === true) details.cntyQual = true;
 
   if (details.state === null && details.grid4 > 0 && isKnownCallsignUS(details.dxcc)) {
     let fourGrid = details.grid4;

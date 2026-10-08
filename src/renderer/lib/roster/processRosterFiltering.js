@@ -36,14 +36,23 @@ function processRosterFiltering(callRoster, rosterSettings)
       continue;
     }
 
+    const isFeed = callObj.instance === GT.feedInstance;
+
     // Missing requirements & disabled instances
-    if (!callObj.dxcc || !(callObj.instance in instances))
+    if (!callObj.dxcc || (!isFeed && !(callObj.instance in instances)))
     {
       entry.tx = false;
       continue;
     }
 
-    if (GT.instanceCount > 1 && instances[callObj.instance].crEnable === false)
+    // Feed spots on bands the user unticked in the roster's Feeds tab
+    if (isFeed && !winOpener.feedBandAllowed(callObj))
+    {
+      entry.tx = false;
+      continue;
+    }
+
+    if (!isFeed && GT.instanceCount > 1 && instances[callObj.instance].crEnable === false)
     {
       entry.tx = false;
       continue;

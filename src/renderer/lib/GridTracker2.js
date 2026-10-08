@@ -116,6 +116,20 @@ function loadAllSettings()
     GT.settings.roster.columnOrder.splice(indexOfOAMS, 1);
   }
 
+  // Saved column orders predate the Spotter column; place it after Calling
+  if (GT.settings.roster.columnOrder.indexOf("Spotter") == -1)
+  {
+    let indexOfCalling = GT.settings.roster.columnOrder.indexOf("Calling");
+    if (indexOfCalling > -1)
+    {
+      GT.settings.roster.columnOrder.splice(indexOfCalling + 1, 0, "Spotter");
+    }
+    else
+    {
+      GT.settings.roster.columnOrder.push("Spotter");
+    }
+  }
+
   // Deprecated single app log path
   if (GT.settings.app.wsjtLogPath)
   {
@@ -409,40 +423,40 @@ GT.cntyToCounty = {};
 GT.us48Data = {};
 GT.lastLookupAddress = null;
 GT.lookupCache = {};
-GT.pskColors = {};
-GT.pskColors.OOB = "888888";
-GT.pskColors["4000m"] = "45E0FF";
-GT.pskColors["2200m"] = "FF4500";
-GT.pskColors["630m"] = "1E90FF";
-GT.pskColors["160m"] = "7CFC00";
-GT.pskColors["80m"] = "E550E5";
-GT.pskColors["60m"] = "99CCFF";
-GT.pskColors["40m"] = "00FFFF";
-GT.pskColors["30m"] = "62FF62";
-GT.pskColors["20m"] = "FFC40C";
-GT.pskColors["17m"] = "F2F261";
-GT.pskColors["15m"] = "CCA166";
-GT.pskColors["12m"] = "CB3D3D";
-GT.pskColors["11m"] = "00FF00";
-GT.pskColors["10m"] = "FF69B4";
-GT.pskColors["8m"] = "8b00fb";
-GT.pskColors["6m"] = "4dfff9";
-GT.pskColors["4m"] = "93ff05";
-GT.pskColors["2m"] = "FF1493";
-GT.pskColors["1.25m"] = "beff00";
-GT.pskColors["70cm"] = "999900";
-GT.pskColors["33cm"] = "ff8c90";
-GT.pskColors["23cm"] = "5AB8C7";
-GT.pskColors["13cm"] = "ff7540";
-GT.pskColors["9cm"] = "b77ac7";
-GT.pskColors["6cm"] = "b77ac7";
-GT.pskColors["3cm"] = "696969";
-GT.pskColors["1.2cm"] = "b77ac7";
-GT.pskColors["6mm"] = "b77ac7";
-GT.pskColors["4mm"] = "b77ac7";
-GT.pskColors["2.5mm"] = "b77ac7";
-GT.pskColors["2mm"] = "b77ac7";
-GT.pskColors["1mm"] = "b77ac7";
+GT.bandColors = {};
+GT.bandColors.OOB = "888888";
+GT.bandColors["4000m"] = "45E0FF";
+GT.bandColors["2200m"] = "FF4500";
+GT.bandColors["630m"] = "1E90FF";
+GT.bandColors["160m"] = "7CFC00";
+GT.bandColors["80m"] = "E550E5";
+GT.bandColors["60m"] = "99CCFF";
+GT.bandColors["40m"] = "00FFFF";
+GT.bandColors["30m"] = "62FF62";
+GT.bandColors["20m"] = "FFC40C";
+GT.bandColors["17m"] = "F2F261";
+GT.bandColors["15m"] = "8080FF";
+GT.bandColors["12m"] = "DF4343";
+GT.bandColors["11m"] = "00FF00";
+GT.bandColors["10m"] = "FF69B4";
+GT.bandColors["8m"] = "8b00fb";
+GT.bandColors["6m"] = "4dfff9";
+GT.bandColors["4m"] = "93ff05";
+GT.bandColors["2m"] = "FF1493";
+GT.bandColors["1.25m"] = "beff00";
+GT.bandColors["70cm"] = "999900";
+GT.bandColors["33cm"] = "ff8c90";
+GT.bandColors["23cm"] = "5AB8C7";
+GT.bandColors["13cm"] = "ff7540";
+GT.bandColors["9cm"] = "b77ac7";
+GT.bandColors["6cm"] = "b77ac7";
+GT.bandColors["3cm"] = "696969";
+GT.bandColors["1.2cm"] = "b77ac7";
+GT.bandColors["6mm"] = "b77ac7";
+GT.bandColors["4mm"] = "b77ac7";
+GT.bandColors["2.5mm"] = "b77ac7";
+GT.bandColors["2mm"] = "b77ac7";
+GT.bandColors["1mm"] = "b77ac7";
 
 GT.bandToColor = {};
 GT.colorLeafletPins = {};

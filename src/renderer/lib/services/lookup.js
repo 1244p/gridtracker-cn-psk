@@ -582,12 +582,12 @@ function getLookupCachedObject(call, gridPass, resultFunction = null, noResultFu
       callObject.cnty = lookupObject.cnty;
       if (callObject.cnty in GT.countyData)
       {
-        callObject.qual = true;
+        callObject.cntyQual = true;
       }
       else
       {
         callObject.cnty = null;
-        callObject.qual = false;
+        callObject.cntyQual = false;
       }
       return;
     }
@@ -704,14 +704,18 @@ function cacheLookupObject(lookup, gridPass, cacheable = false, display = true)
 
     if (lookup.cnty in GT.countyData)
     {
-      for (const hash in GT.liveCallsigns)
+      // Decoded and feed (DX Cluster / CW Skimmer) callsigns both appear in the roster
+      for (const callsigns of [GT.liveCallsigns, GT.feedCallsigns])
       {
-        if (GT.liveCallsigns[hash].DEcall == lookup.call && GT.liveCallsigns[hash].state == "US-" + lookup.state)
+        for (const hash in callsigns)
         {
-          GT.liveCallsigns[hash].cnty = lookup.cnty;
-          GT.liveCallsigns[hash].qual = true;
-          GT.liveCallsigns[hash].cntys = 0;
-          foundCounty = true;
+          if (callsigns[hash].DEcall == lookup.call && callsigns[hash].state == "US-" + lookup.state)
+          {
+            callsigns[hash].cnty = lookup.cnty;
+            callsigns[hash].cntyQual = true;
+            callsigns[hash].cntys = 0;
+            foundCounty = true;
+          }
         }
       }
       if (foundCounty)
@@ -1204,10 +1208,10 @@ function searchLogForCallsign(call)
     }
     if (list[row].confirmed)
     {
-      conf[what] = GT.pskColors[list[row].band];
+      conf[what] = GT.bandColors[list[row].band];
       if (what in work) delete work[what];
     }
-    else if (!(what in conf)) work[what] = GT.pskColors[list[row].band];
+    else if (!(what in conf)) work[what] = GT.bandColors[list[row].band];
   }
   html.push("<div class='mapItemNoSize'><table align='center' class='darkTable'>");
   if (Object.keys(work).length > 0)
@@ -1233,7 +1237,7 @@ function searchLogForCallsign(call)
   if (lastRow)
   {
     html.push("<tr><th style='color:cyan'>Last QSO</th><td>");
-    html.push("<font color='#" + GT.pskColors[list[lastRow].band] + "'>" + list[lastRow].band + "," + list[lastRow].mode + " </font> " + userTimeString(list[lastRow].time * 1000));
+    html.push("<font color='#" + GT.bandColors[list[lastRow].band] + "'>" + list[lastRow].band + "," + list[lastRow].mode + " </font> " + userTimeString(list[lastRow].time * 1000));
     html.push("</td></tr>");
   }
 
@@ -1244,7 +1248,7 @@ function searchLogForCallsign(call)
     {
       let strike = "";
       if (String(dxcc) + "|" + GT.colorBands[band] in GT.tracker.confirmed.dxcc) { strike = "text-decoration: underline overline;"; }
-      html.push("<div style='" + strike + "display:inline-block;color:#" + GT.pskColors[GT.colorBands[band]] + "'>" + GT.colorBands[band] + "</div>&nbsp;");
+      html.push("<div style='" + strike + "display:inline-block;color:#" + GT.bandColors[GT.colorBands[band]] + "'>" + GT.colorBands[band] + "</div>&nbsp;");
     }
   }
 

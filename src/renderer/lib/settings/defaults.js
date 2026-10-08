@@ -74,6 +74,8 @@ const def_settings = {
 
     offAirServicesEnable: true,
     spottingEnable: true,
+    feedDxCluster: false,
+    feedCwSkimmer: false,
     loadAdifAtStartup: false,
     locale: "en",
     lookupLoginCq: "",
@@ -174,6 +176,7 @@ const def_settings = {
     rangeRingColor: 0,
     equator: false,
     equatorColor: 0,
+    dxcwFeed: false,
     trafficDecode: true,
     usRadar: false,
     timezonesEnable: 0,
@@ -523,6 +526,7 @@ const def_settings = {
       Band: false,
       Mode: false,
       Calling: true,
+      Spotter: false,
       Rig: false,
       Wanted: false,
       Grid: true,
@@ -551,7 +555,7 @@ const def_settings = {
       UTC: false
     },
     columnOrder: [
-      "Callsign", "Band", "Mode", "Calling", "Rig", "Wanted", "Grid", "Msg",
+      "Callsign", "Band", "Mode", "Calling", "Spotter", "Rig", "Wanted", "Grid", "Msg",
       "POTA", "DXCC", "Flag", "DXM", "State", "County", "Cont",
       "dB", "Freq", "DT", "Dist", "Azim", 
       "CQz", "ITUz", "PX",
@@ -580,7 +584,13 @@ const def_settings = {
     rosterDelayTime: 1500,
     rosterTime: 120,
     compactEntity: "DXCC",
-    watchers: {}
+    watchers: {},
+    feeds: {
+      alerts: false,
+      notifications: false,
+      // Bands the user unticked; anything not listed is shown
+      hiddenBands: {}
+    }
   },
   ByBandMode: {
     roster: {},

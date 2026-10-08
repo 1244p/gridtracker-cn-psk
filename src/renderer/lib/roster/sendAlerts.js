@@ -10,6 +10,7 @@ function sendAlerts()
   let shouldAudioAlert = 0;
   let audioAlertCounts = createEmptyAudioAlerts();
   let scriptReport = {};
+  const feedSettings = CR.rosterSettings.feeds;
 
   for (const entry in callRoster)
   {
@@ -19,21 +20,32 @@ function sendAlerts()
     // otherwise the entire roster will be sent out, including all the ones that were filtered by exceptions
     if (callRoster[entry].tx == false) continue;
 
-    let call = callObj.DEcall;
-    scriptReport[call] = Object.assign({}, callObj);
-    scriptReport[call].dxccName = GT.dxccToAltName[callObj.dxcc];
-    scriptReport[call].distance = (callObj.distance > 0) ? parseInt(callObj.distance * MyCircle.validateRadius(window.opener.distanceUnit.value)) : 0;
-
-    delete scriptReport[call].DEcall;
-    delete scriptReport[call].style;
-    delete scriptReport[call].wspr;
-    delete scriptReport[call].qso;
-    delete scriptReport[call].instance;
-
-    if (callObj.shouldRosterAlert == true && callObj.rosterAlerted == false)
+    // Feed spots alert and notify only when enabled in the roster's Feeds tab
+    const isFeed = callObj.instance === GT.feedInstance;
+    if (isFeed && !feedSettings.alerts)
     {
-      callObj.rosterAlerted = true;
-      shouldRosterAlert++;
+      callObj.shouldAudioAlert = false;
+    }
+
+    // Notifications: Pushover, Simplepush and the alert script (which receives scriptReport)
+    if (!isFeed || feedSettings.notifications)
+    {
+      let call = callObj.DEcall;
+      scriptReport[call] = Object.assign({}, callObj);
+      scriptReport[call].dxccName = GT.dxccToAltName[callObj.dxcc];
+      scriptReport[call].distance = (callObj.distance > 0) ? parseInt(callObj.distance * MyCircle.validateRadius(window.opener.distanceUnit.value)) : 0;
+
+      delete scriptReport[call].DEcall;
+      delete scriptReport[call].style;
+      delete scriptReport[call].wspr;
+      delete scriptReport[call].qso;
+      delete scriptReport[call].instance;
+
+      if (callObj.shouldRosterAlert == true && callObj.rosterAlerted == false)
+      {
+        callObj.rosterAlerted = true;
+        shouldRosterAlert++;
+      }
     }
     callObj.shouldRosterAlert = false;
 

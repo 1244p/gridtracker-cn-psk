@@ -7,9 +7,9 @@ function renderNormalRosterHeaders(columns)
   return html;
 }
 
-function renderNormalRosterRow(columns, callObj)
+function renderNormalRosterRow(columns, callObj, rowClass = "", rowTitle = "")
 {
-  let html = `<tr id='${callObj.hash}' >`;
+  let html = `<tr id='${callObj.hash}'` + (rowClass ? ` class='${rowClass}'` : "") + (rowTitle ? ` title='${rowTitle}'` : "") + " >";
   html += columns.map(column => renderEntryForColumn(column, callObj)).join("");
   html += "</tr>";
 

@@ -1,11 +1,18 @@
 const DEFAULT_COLUMN_ORDER = [
-  "Callsign", "Band", "Mode", "Calling", "Rig", "Wanted", "Grid", "Msg",
+  "Callsign", "Band", "Mode", "Calling", "Spotter", "Rig", "Wanted", "Grid", "Msg",
   "POTA", "DXCC", "Flag", "DXM", "State", "County", "Cont",
   "dB", "Freq", "DT", "Dist", "Azim", 
   "CQz", "ITUz", "PX",
   "LoTW", "eQSL", "OQRS",
   "Life", "Spot",  "Age", "UTC"
 ]
+
+// Feed spots show ▲ before the callsign when read-only, ▼ when a rig on their band and mode can work them
+function markFeedCallsign(callObj, html)
+{
+  if (callObj.instance !== GT.feedInstance) return html;
+  return (callObj.readOnly ? "&#9650;" : "&#9660;") + html;
+}
 
 const getterSimpleComparer = (getter) => (a, b) =>
 {
@@ -61,7 +68,7 @@ const ROSTER_COLUMNS = {
         align: "left",
         onClick: `initiateQso("${callObj.hash}")`,
         rawAttrs: callObj.style.call,
-        html: html = formatCallsign((callObj.DEcallHTML || callObj.DEcall))
+        html: markFeedCallsign(callObj, formatCallsign((callObj.DEcallHTML || callObj.DEcall)))
       }
 
       let acks = GT.acknowledgedCalls || {};
@@ -85,7 +92,7 @@ const ROSTER_COLUMNS = {
   Band: {
     compare: callObjSimpleComparer("band"),
     tableData: (callObj) => ({
-      style: `color: #${GT.pskColors[callObj.band]};`,
+      style: `color: #${GT.bandColors[callObj.band]};`,
       html: callObj.band
     })
   },
@@ -93,7 +100,7 @@ const ROSTER_COLUMNS = {
   Mode: {
     compare: callObjSimpleComparer("mode"),
     tableData: (callObj) => ({
-      style: `color: #${CR.modeColors[callObj.mode] || "888888"};`,
+      style: `color: #${CR.modeColors[callObj.mode] || "FFFFFF"};`,
       html: callObj.mode
     })
   },
@@ -117,6 +124,18 @@ const ROSTER_COLUMNS = {
       rawAttrs: callObj.style.calling,
       name: callObj.CQ ? "CQ" : "Calling",
       html: (GT.activeExceptions.wantRRCQ && callObj.RR73) ? callObj.RR73 : formatCallsign(callObj.DXcallHTML || callObj.DXcall)
+    })
+  },
+
+  // Station that reported a DX Cluster / CW Skimmer spot; blank for WSJT-X decodes
+  Spotter: {
+    label: () => I18N("rosterColumns.Spotter.header"),
+    compare: callObjLocaleComparer("spotter"),
+    tableHeader: () => ({ html: I18N("rosterColumns.Spotter.header"), title: I18N("rosterColumns.Spotter.title") }),
+    tableData: (callObj) => ({
+      name: "Spotter",
+      style: "color: #5caeff;",
+      html: callObj.spotter ? formatCallsign(callObj.spotter) : "&nbsp;"
     })
   },
 
@@ -177,7 +196,7 @@ const ROSTER_COLUMNS = {
         rawAttrs: callObj.style.cnty,
         html: callObj.cnty ? GT.cntyToCounty[callObj.cnty] : "&nbsp;"
       }
-      if (callObj.cnty && callObj.qual == false)
+      if (callObj.cnty && callObj.cntyQual == false)
       {
         attrs.title = I18N("rosterColumns.County.title")
         attrs.onClick = `window.opener.lookupCallsign("${callObj.DEcall}", "${callObj.grid}")`
@@ -208,7 +227,7 @@ const ROSTER_COLUMNS = {
     compare: callObjSimpleComparer("delta"),
     tableData: (callObj) => ({
       style: "color: #00FF00;",
-      html: callObj.delta
+      html: callObj.instance === GT.feedInstance ? (callObj.freq > 0 ? formatMhz(callObj.freq / 1000) : "&nbsp;") : callObj.delta
     })
   },
 
@@ -216,7 +235,7 @@ const ROSTER_COLUMNS = {
     compare: callObjSimpleComparer("dt"),
     tableData: (callObj) => ({
       style: "color: #5caeff;",
-      html: callObj.dt
+      html: callObj.instance === GT.feedInstance ? "&nbsp;" : callObj.dt
     })
   },
 

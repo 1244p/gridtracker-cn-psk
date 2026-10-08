@@ -35,8 +35,37 @@ function updateOffAirServicesViews()
   setMsgSettingsView();
   updateBandActivityViews();
   updateSpottingViews();
+  updateFeedViews();
   setVisualHunting();
   goProcessRoster();
+}
+
+function updateFeedViews()
+{
+  const show = GT.settings.app.offAirServicesEnable == true && GT.settings.map.offlineMode == false;
+  feedDxClusterTr.style.display = feedCwSkimmerTr.style.display = show ? "" : "none";
+  feedDxCluster.checked = GT.settings.app.feedDxCluster;
+  feedCwSkimmer.checked = GT.settings.app.feedCwSkimmer;
+
+  // Main button panel: shown while either feed is on, grey when the map option is off
+  const active = feedsActive();
+  dxcwFeedButton.style.display = (active.dx || active.cw) ? "" : "none";
+  dxcwFeedImg.style.filter = GT.settings.map.dxcwFeed ? "" : "grayscale(1)";
+
+  redrawDxcwSpots();
+  updateRosterFeeds();
+}
+
+function setFeedSettings()
+{
+  GT.settings.app.feedDxCluster = feedDxCluster.checked;
+  GT.settings.app.feedCwSkimmer = feedCwSkimmer.checked;
+  if (!GT.settings.app.feedDxCluster && !GT.settings.app.feedCwSkimmer)
+  {
+    clearFeedCallsigns();
+  }
+  gtChatSendFeeds();
+  updateFeedViews();
 }
 
 function updateGTFlagViews()
@@ -62,6 +91,7 @@ function updateGTFlagViews()
     // Clear list
     GT.rtsnPins = {};
     GT.rtsnCallsigns = {};
+    clearFeedCallsigns();
 
     conditionsButton.style.background = "";
     conditionsButton.innerHTML = "<img src=\"img/conditions.png\" class=\"buttonImg\" />";

@@ -11,6 +11,11 @@ function createTooltTipTable(toolElement)
     return createSpotTipTable(toolElement);
   }
 
+  if ("feedHash" in toolElement)
+  {
+    return createFeedTipTable(toolElement);
+  }
+
   const isQso = toolElement.qso === true;
   const qth = toolElement.qth;
 
@@ -284,6 +289,10 @@ function onRightClickGridSquare(feature)
     {
       spotLookupAndSetCall(feature.spot);
     }
+    else if ("feedHash" in feature)
+    {
+      leftClickFeedSpot(feature.feedHash);
+    }
   }
   return false;
 }
@@ -368,6 +377,35 @@ function createSpotTipTable(toolElement)
     return 10;
   }
   catch (err) { console.error("Unexpected error at createSpotTipTable", toolElement, err) }
+}
+
+function createFeedTipTable(toolElement)
+{
+  const callObj = GT.feedCallsigns[toolElement.feedHash];
+  if (!callObj) return 0;
+
+  const now = timeNowSec();
+  const LL = squareToCenter(callObj.fullGrid);
+  const bearing = parseInt(MyCircle.bearing(GT.myLat, GT.myLon, LL.a, LL.o));
+  const dist = parseInt(MyCircle.distance(GT.myLat, GT.myLon, LL.a, LL.o) * MyCircle.validateRadius(distanceUnit.value));
+  const freq = callObj.freq > 0 ? formatMhz(callObj.freq / 1000) + " " : "";
+
+  myTooltip.innerHTML = `
+    <table id='tooltipTable' class='darkTable'>
+      <tr><th colspan=2 style='color:cyan'>${I18N("gt.feedSpot.title")}</th></tr>
+      <tr><td>${I18N("gt.newCallList.Call")}</td><td style='color:#ff0'>${formatCallsign(callObj.DEcall)}</td></tr>
+      <tr><td>${I18N("rosterColumns.Spotter.header")}</td><td style='color:#5caeff'>${formatCallsign(callObj.spotter)}</td></tr>
+      <tr><td>${I18N("gt.feedSpot.age")}</td><td>${toDHMS(now - callObj.age)}</td></tr>
+      ${callObj.dxcc > 0 ? `<tr><td>${I18N("gt.newCallList.DXCC")}</td><td style='color:orange;'>${GT.dxccToAltName[callObj.dxcc]} <font color='lightgreen'>(${GT.dxccInfo[callObj.dxcc].pp})</font></td></tr>` : ""}
+      <tr><td>${I18N("gt.callsignBox.Grid")}</td><td style='${lookupGridCellStyle(callObj.grid, callObj.band, callObj.mode)}'>${callObj.fullGrid}</td></tr>
+      <tr><td>${I18N("gt.newCallList.Freq")}</td><td style='color:lightgreen'>${freq}<font color='yellow'>(${callObj.band})</font></td></tr>
+      <tr><td>${I18N("gt.newCallList.Mode")}</td><td style='color:orange'>${callObj.mode}</td></tr>
+      <tr><td>${I18N("gt.feedSpot.dist")}</td><td style='color:cyan'>${dist}${distanceUnit.value.toLowerCase()}</td></tr>
+      <tr><td>${I18N("gt.feedSpot.azim")}</td><td style='color:yellow'>${bearing}&deg;</td></tr>
+      <tr><td>${I18N("gt.newCallList.Time")}</td><td>${userTimeString(callObj.time * 1000)}</td></tr>
+      <tr><td>${I18N("gt.newCallList.LastMsg")}</td><td>${htmlEntities(callObj.msg)}</td></tr>
+    </table>`;
+  return 10;
 }
 
 function createFlagTipTable(feature)
@@ -765,6 +803,7 @@ function initHoverFunctors()
   GT.hoverFunctors.parkFlag = { hover: mouseOverPark, move: mouseParkMove, out: mouseOutPark };
   GT.hoverFunctors.gtFlag = { hover: mouseOverGtFlag, move: mouseGtFlagMove, out: mouseOutGtFlag };
   GT.hoverFunctors.spot = { hover: mouseOverSpotItem, move: mouseMoveDataItem, out: mouseOutOfDataItem };
+  GT.hoverFunctors.feed = { hover: mouseOverSpotItem, move: mouseMoveDataItem, out: mouseOutOfDataItem };
 }
 
 function mouseDownEvent(event)

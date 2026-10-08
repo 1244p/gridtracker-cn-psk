@@ -342,6 +342,7 @@ function renderMap()
   createGlobalMapLayer("pskSpots");
   createGlobalMapLayer("pskHop");
   createGlobalMapLayer("pota");
+  createGlobalMapLayer("dxcwSpots");
   createGlobalMapLayer("flight");
   createGlobalMapLayer("transmit");
   createGlobalMapLayer("gtflags");
@@ -386,6 +387,7 @@ function renderMap()
       GT.layerVectors.pskSpots,
       GT.layerVectors.pskHop,
       GT.layerVectors.pota,
+      GT.layerVectors.dxcwSpots,
       GT.layerVectors.flight,
       GT.layerVectors.transmit,
       GT.layerVectors.gtflags,

@@ -26,6 +26,7 @@ Object.assign(CR,
   callMenuRotator: null,
   callingMenu: null,
   callingMenuRotator: null,
+  spotterMenu: null,
   ageMenu: null,
   compactMenuHide: null,
   compactMenuShow: null,
@@ -56,7 +57,10 @@ Object.assign(CR,
     JT9: "7CFC00",
     JT65: "E550E5",
     QRA64: "FF00FF",
-    MSK144: "1149FF"
+    MSK144: "1149FF",
+    CW: "FFFF00",
+    SSB: "FF66CC",
+    RTTY: "C080FF"
   },
   rosterTimeout: null,
   rosterFocus: false,
@@ -338,14 +342,30 @@ function getSpotString(callObj)
   return `${toDHM(elapsed)} / ${spot.snr}`;
 }
 
+function isFeedEntry(thisHash)
+{
+  return thisHash in CR.callRoster && CR.callRoster[thisHash].callObj.instance === GT.feedInstance;
+}
+
 function initiateQso(thisHash)
 {
+  if (isFeedEntry(thisHash))
+  {
+    window.opener.workFeedSpot(thisHash);
+    return;
+  }
   window.opener.initiateQso(thisHash);
 }
 
 function callLookup(thisHash, grid)
 {
   window.opener.startLookup(CR.callRoster[thisHash].DEcall, CR.callRoster[thisHash].grid);
+}
+
+// DX Cluster spotters can carry a node suffix (W3LPL-#, DK9IP-2); lookups and watchers need the callsign
+function spotterBaseCallsign(thisHash)
+{
+  return CR.callRoster[thisHash].callObj.spotter.split("-")[0];
 }
 
 function callingLookup(thisHash, grid)
@@ -355,6 +375,11 @@ function callingLookup(thisHash, grid)
 
 function callGenMessage(thisHash, grid)
 {
+  if (isFeedEntry(thisHash))
+  {
+    window.opener.genFeedMessages(thisHash);
+    return;
+  }
   let thisCall = CR.callRoster[thisHash].DEcall;
   let instance = CR.callRoster[thisHash].callObj.instance;
 
@@ -363,6 +388,8 @@ function callGenMessage(thisHash, grid)
 
 function callingGenMessage(thisHash, grid)
 {
+  // On a feed spot the "calling" station is the spotter
+  if (isFeedEntry(thisHash)) return;
   let thisCall = CR.callRoster[thisHash].DXcall;
   let instance = CR.callRoster[thisHash].callObj.instance;
 
@@ -1245,6 +1272,53 @@ function closeSettings()
   settingsDiv.style.display = "none";
 }
 
+// Feeds tab: only shown while at least one feed is enabled in the main settings
+function updateFeedsTab()
+{
+  const active = window.opener.feedsActive();
+  const anyActive = active.dx || active.cw;
+
+  feedsbox.style.display = anyActive ? "" : "none";
+  if (!anyActive && feedsBoxDiv.style.display === "block")
+  {
+    openInfoTab("generalbox", "generalSettingsDiv");
+  }
+  renderFeedsTab();
+}
+
+function renderFeedsTab()
+{
+  const feeds = CR.rosterSettings.feeds;
+
+  feedAlertsEnable.checked = feeds.alerts;
+  feedNotificationsEnable.checked = feeds.notifications;
+
+  feedBands.innerHTML = window.opener.feedBandPlan().map(band =>
+    `<label class='feedBand' style='color:#${GT.bandColors[band]};'>` +
+    `<input type='checkbox' ${band in feeds.hiddenBands ? "" : "checked"} onchange='feedBandChanged(this, "${band}")' />${band}</label>`
+  ).join("");
+}
+
+function feedBandChanged(checkbox, band)
+{
+  const hidden = CR.rosterSettings.feeds.hiddenBands;
+  if (checkbox.checked)
+  {
+    delete hidden[band];
+  }
+  else
+  {
+    hidden[band] = true;
+  }
+  viewRoster();
+}
+
+function feedsSettingChanged()
+{
+  CR.rosterSettings.feeds.alerts = feedAlertsEnable.checked;
+  CR.rosterSettings.feeds.notifications = feedNotificationsEnable.checked;
+}
+
 function renderIgnoresTab()
 {
   let html = [];
@@ -1456,6 +1530,7 @@ function addControls()
   setRosterTimeView();
   setCompactView();
   initSelectors();
+  updateFeedsTab();
   setVisual();
   document.addEventListener("keydown", onMyKeyDown, false);
   CR.timerInterval = nodeTimers.setInterval(realtimeRoster, 1000);
@@ -1642,6 +1717,11 @@ function handleContextMenu(ev)
     {
       CR.targetHash = parent.id;
       CR.MsgMenu.popup();
+    }
+    else if (name === "Spotter" && CR.callRoster[parent.id] && CR.callRoster[parent.id].callObj.spotter)
+    {
+      CR.targetHash = parent.id;
+      CR.spotterMenu.popup();
     }
     else if (name === "Grid")
     {
@@ -3473,19 +3553,40 @@ function createRestOfMenus()
   });
   CR.callingMenu.append(CR.callingMenuRotator);
 
+  // Calling menu minus Gen Msgs (a spotter isn't a station to call) and Aim Rotator (feeds carry no spotter grid)
+  CR.spotterMenu = new Menu();
+  CR.spotterMenu.append(new MenuItem({
+    type: "normal",
+    label: I18N("roster.menu.Lookup"),
+    click: function () { window.opener.startLookup(spotterBaseCallsign(CR.targetHash), ""); }
+  }));
+
+  CR.spotterMenu.append(new MenuItem({
+    type: "normal",
+    label: I18N("roster.add.watcher.label"),
+    click: function () { addWatcher(spotterBaseCallsign(CR.targetHash), "Callsign"); }
+  }));
+
+  CR.spotterMenu.append(new MenuItem({
+    type: "normal",
+    label: I18N("copy"),
+    click: function () { navigator.clipboard.writeText(CR.callRoster[CR.targetHash].callObj.spotter); }
+  }));
+
   CR.columnMenu = new Menu();
 
   for (const key of CR.rosterSettings.columnOrder)
   {
     if (key !== "Callsign")
     {
+      const column = ROSTER_COLUMNS[key];
       let itemx = new MenuItem({
         type: "checkbox",
-        label: key,
+        label: (column && column.label) ? column.label() : key,
         checked: CR.rosterSettings.columns[key],
         click: function (item)
         {
-          toggleColumn(item);
+          toggleColumn(item, key);
           logbookValuesChanged();
         }
       });

@@ -94,6 +94,7 @@ function gtBandFilterChanged(selector)
   redrawPins();
   redrawSpots();
   redrawParks();
+  redrawDxcwSpots();
 }
 
 function gtModeFilterChanged(selector)
@@ -105,6 +106,7 @@ function gtModeFilterChanged(selector)
   redrawPins();
   redrawSpots();
   redrawParks();
+  redrawDxcwSpots();
 }
 
 function gtPropFilterChanged(selector)
@@ -122,6 +124,7 @@ function setBandAndModeToAuto()
   redrawPins();
   redrawSpots();
   redrawParks();
+  redrawDxcwSpots();
 }
 
 // from GridTracker.html

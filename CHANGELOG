@@ -350,6 +350,37 @@ Logging:
     Support added for "WS - Digital Mode Suite" (formerly WSJT-X Improved)
 
 
+Off-Air Services:
+  New DX Cluster and CW Skimmer spot feeds (Settings -> Off-Air Services -> "DX Cluster Feed" / "CW Skimmer Feed", off by default)
+    Beacon spots (BEACON / NCDXF) are ignored
+Call Roster:
+  Feed spots now appear in the Call Roster alongside WSJT-X/JTDX decodes
+    ▼ before the callsign: a rig is on the spot's band and mode, left-click sets the DX call and grid on that rig
+    ▲ before the callsign: no rig is on that band and mode (read-only), hover shows how to work it
+    "Gen Msgs" works on any feed spot, using a rig on the spot's band and mode, otherwise the active rig
+    A WSJT-X/JTDX decode of the same station, band and mode takes the place of the feed spot
+    Freq column shows the spot's frequency, Rig column shows "Feed", Calling column shows "CQ" for CQ spots
+    US feed spots get the same state and county lookups as decodes
+  New "Feeds" tab in Call Roster Settings (shown when a feed is enabled):
+    Allow Alerting (Audio and Custom) for feed spots
+    Allow Notifications (Pushover, Simplepush, Alert Script) for feed spots
+    Bands: choose which bands' feed spots appear in the Call Roster, based on a US or non-US band plan (all bands on by default)
+  New "Spotter" column (off by default): the station that reported a feed spot
+    Right-click a spotter for Lookup, Add Watcher or Copy
+  Mode column: CW, SSB and RTTY now have their own colors, other unlisted modes show in white
+Map / UI:
+  New DX/CW feed button in the main button panel (shown when a feed is enabled) shows feed spots on the map
+    Green target: a rig is on the spot's band and mode
+    Teal triangle: a rig is on the spot's band, in a different mode
+    Grey triangle: no rig is on the spot's band
+    Shows all bands, following only the map's Band / Mode filters
+    Hover (or right-click) shows the spot's call, spotter, age, DXCC, grid, frequency, mode, distance, azimuth, time and message
+    Left-click sets the DX call and grid on a rig on the spot's band and mode, otherwise the active rig
+  15m band color changed to periwinkle so it no longer resembles 20m, 12m color 10% brighter
+App:
+  All new text translated for every supported language
+
+
 ### Fixed
 
 

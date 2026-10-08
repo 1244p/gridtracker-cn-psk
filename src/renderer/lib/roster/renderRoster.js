@@ -57,6 +57,17 @@ function renderRoster(callRoster, rosterSettings)
 
   let html = [CR.rosterSettings.compact ? renderCompactRosterHeaders() : renderNormalRosterHeaders(rosterColumns)];
 
+  // Feed spots can only be worked from a rig already on their band and mode
+  const workableFeeds = {};
+  for (const id in GT.instances)
+  {
+    const instance = GT.instances[id];
+    if (instance.valid && instance.open && instance.status)
+    {
+      workableFeeds[instance.status.Band + "|" + instance.status.MO] = true;
+    }
+  }
+
   // Third loop: render all rows
   for (const x in visibleCallList)
   {
@@ -66,7 +77,24 @@ function renderRoster(callRoster, rosterSettings)
     if (callObj.shouldRosterAlert == false && rosterSettings.onlyHits == true && callObj.qrz == false)
     { continue; }
 
-    if (callObj.DEcall == GT.instances[callObj.instance].status.DXcall)
+    let rowClass = "";
+    let rowTitle = "";
+
+    if (callObj.instance === GT.feedInstance)
+    {
+      callObj.readOnly = !((callObj.band + "|" + callObj.mode) in workableFeeds);
+      if (!callObj.readOnly)
+      {
+        rowTitle = I18N("renderRoster.feedSpotted").replace("{spotter}", callObj.spotter);
+      }
+      else
+      {
+        rowClass = "feedReadOnly";
+        rowTitle = I18N("renderRoster.feedReadOnly").replace("{spotter}", callObj.spotter).replace("{band}", callObj.band).replace("{mode}", callObj.mode);
+      }
+      rowTitle = htmlEntities(rowTitle).replace(/'/g, "&#39;");
+    }
+    else if (callObj.DEcall == GT.instances[callObj.instance].status.DXcall)
     {
       if (GT.instances[callObj.instance].status.TxEnabled == 1)
       {
@@ -78,7 +106,7 @@ function renderRoster(callRoster, rosterSettings)
       }
     }
 
-    html.push(CR.rosterSettings.compact ? renderCompactRosterRow(callObj, multiInstance || multiBand) : renderNormalRosterRow(rosterColumns, callObj));
+    html.push(CR.rosterSettings.compact ? renderCompactRosterRow(callObj, multiInstance || multiBand, rowClass, rowTitle) : renderNormalRosterRow(rosterColumns, callObj, rowClass, rowTitle));
   }
 
   html.push(CR.rosterSettings.compact ? renderCompactRosterFooter() : renderNormalRosterFooter());

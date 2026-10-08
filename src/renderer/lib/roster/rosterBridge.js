@@ -4,7 +4,7 @@
 
 // Call Roster, main-window side: opening the roster and feeding it messages, worked status and instances (moved from GridTracker2.js)
 
-function insertMessageInRoster(newMessage, msgDEcallsign, msgDXcallsign, callObj, hash)
+function scheduleRosterUpdate()
 {
     if (GT.rosterUpdateTimer) {
         if (typeof GT.rosterUpdateTimer.refresh === "function") {
@@ -16,6 +16,11 @@ function insertMessageInRoster(newMessage, msgDEcallsign, msgDXcallsign, callObj
     } else {
         GT.rosterUpdateTimer = nodeTimers.setTimeout(delayedRosterUpdate, 150);
     }
+}
+
+function insertMessageInRoster(newMessage, msgDEcallsign, msgDXcallsign, callObj, hash)
+{
+    scheduleRosterUpdate();
 
     // 2. Adjust Hash for SP=7 (Fox/Hound or SuperFox)
     if (newMessage.SP === 7) {
@@ -80,6 +85,21 @@ function updateRosterWorked()
     try
     {
       GT.callRosterWindowHandle.window.updateWorked();
+    }
+    catch (e)
+    {
+      console.error(e);
+    }
+  }
+}
+
+function updateRosterFeeds()
+{
+  if (GT.callRosterWindowInitialized)
+  {
+    try
+    {
+      GT.callRosterWindowHandle.window.updateFeedsTab();
     }
     catch (e)
     {
