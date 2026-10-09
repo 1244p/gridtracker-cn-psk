@@ -431,6 +431,8 @@ ipcMain.on('log', (event, value) => {
 });
 
 let mainWindow = null;
+// frameName of the window being opened by setWindowOpenHandler, consumed in browser-window-created
+let pendingWindowFrameName = null;
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -492,6 +494,7 @@ function createMainWindow() {
         },
       };
 
+      pendingWindowFrameName = details.frameName;
       return { action: 'allow', overrideBrowserWindowOptions: options };
     } else {
       shell.openExternal(details.url);
@@ -577,8 +580,10 @@ app.whenReady().then(() => {
 
   app.on('browser-window-created', (_, window) => {
     // window.title works on Windows, window.tabbingIdentifier works on macOS,
-    // except frameless windows (band activity) which get no tabbingIdentifier, so they use the title
-    const title = (isMac && window.tabbingIdentifier) ? window.tabbingIdentifier : window.title;
+    // except frameless windows (band activity) which get no tabbingIdentifier and an empty title,
+    // so fall back to the frameName captured in setWindowOpenHandler
+    const title = (isMac ? window.tabbingIdentifier : window.title) || pendingWindowFrameName;
+    pendingWindowFrameName = null;
 
     if (title in allowedWindows) {
       // save the window handle (not the dom handle);
