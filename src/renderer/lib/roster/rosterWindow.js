@@ -1334,6 +1334,10 @@ function renderFeedsTab()
   feedAlertsEnable.checked = feeds.alerts;
   feedNotificationsEnable.checked = feeds.notifications;
 
+  feedModeDigital.checked = !("Digital" in feeds.hiddenModes);
+  feedModePhone.checked = !("Phone" in feeds.hiddenModes);
+  feedModeCW.checked = !("CW" in feeds.hiddenModes);
+
   feedBands.innerHTML = window.opener.feedBandPlan().map(band =>
     `<label class='feedBand' style='color:#${GT.bandColors[band]};'>` +
     `<input type='checkbox' ${band in feeds.hiddenBands ? "" : "checked"} onchange='feedBandChanged(this, "${band}")' />${band}</label>`
@@ -1350,6 +1354,20 @@ function feedBandChanged(checkbox, band)
   else
   {
     hidden[band] = true;
+  }
+  viewRoster();
+}
+
+function feedModeChanged(checkbox, type)
+{
+  const hidden = CR.rosterSettings.feeds.hiddenModes;
+  if (checkbox.checked)
+  {
+    delete hidden[type];
+  }
+  else
+  {
+    hidden[type] = true;
   }
   viewRoster();
 }

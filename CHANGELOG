@@ -365,6 +365,7 @@ Call Roster:
     Allow Alerting (Audio, Alert Script) for feed spots
     Allow Notifications (Pushover, Simplepush) for feed spots
     Feed spots never trigger Custom Alerts
+    Modes: choose which feed spots appear in the Call Roster by Digital, Phone or CW (all on by default)
     Bands: choose which bands' feed spots appear in the Call Roster, based on a US or non-US band plan (all bands on by default)
   New "Spotter" column (off by default): the station that reported a feed spot
     Right-click a spotter for Lookup, Add Watcher, Copy, Ignore Spotter or Edit Ignores

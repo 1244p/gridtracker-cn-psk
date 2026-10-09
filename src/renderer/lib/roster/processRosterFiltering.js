@@ -45,8 +45,8 @@ function processRosterFiltering(callRoster, rosterSettings)
       continue;
     }
 
-    // Feed spots on bands the user unticked in the roster's Feeds tab
-    if (isFeed && !winOpener.feedBandAllowed(callObj))
+    // Feed spots on bands or modes the user unticked in the roster's Feeds tab
+    if (isFeed && !(winOpener.feedBandAllowed(callObj) && winOpener.feedModeAllowed(callObj)))
     {
       entry.tx = false;
       continue;

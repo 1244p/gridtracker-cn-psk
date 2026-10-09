@@ -517,6 +517,10 @@ table.rosterTable td:last-child {
   text-align: left;
 }
 
+.feedModes {
+  grid-template-columns: repeat(3, auto);
+}
+
 .feedBand {
   white-space: nowrap;
   cursor: pointer;

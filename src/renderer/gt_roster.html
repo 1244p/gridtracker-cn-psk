@@ -430,6 +430,15 @@
         </div>
         <br />
         <div class="mapItem" align="center">
+          <div data-i18n="roster.feeds.modes.label">Modes</div>
+          <div class="feedBands feedModes">
+            <label class="feedBand"><input type="checkbox" id="feedModeDigital" onchange="feedModeChanged(this, 'Digital')" /><span data-i18n="roster.feeds.modes.Digital">Digital</span></label>
+            <label class="feedBand"><input type="checkbox" id="feedModePhone" onchange="feedModeChanged(this, 'Phone')" /><span data-i18n="roster.feeds.modes.Phone">Phone</span></label>
+            <label class="feedBand"><input type="checkbox" id="feedModeCW" onchange="feedModeChanged(this, 'CW')" /><span data-i18n="roster.feeds.modes.CW">CW</span></label>
+          </div>
+        </div>
+        <br />
+        <div class="mapItem" align="center">
           <div data-i18n="roster.feeds.bands.label">Bands</div>
           <div id="feedBands" class="feedBands"></div>
         </div>

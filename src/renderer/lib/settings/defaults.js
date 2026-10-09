@@ -597,7 +597,9 @@ const def_settings = {
       alerts: false,
       notifications: false,
       // Bands the user unticked; anything not listed is shown
-      hiddenBands: {}
+      hiddenBands: {},
+      // Mode groups (Digital, Phone, CW) the user unticked; anything not listed is shown
+      hiddenModes: {}
     }
   },
   ByBandMode: {

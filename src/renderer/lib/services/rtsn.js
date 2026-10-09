@@ -400,7 +400,7 @@ function redrawDxcwSpots()
   {
     const callObj = GT.feedCallsigns[hash];
     if (callObj.fullGrid.length < 4 || now - callObj.age > FEED_MAX_AGE_SEC) continue;
-    // Map shows all bands: only the map's own Band / Mode filter applies (the Feeds tab band list is roster-only)
+    // Map shows all bands and modes: only the map's own Band / Mode filter applies (the Feeds tab lists are roster-only)
     if (!validateMapBandAndMode(callObj.band, callObj.mode)) continue;
 
     const LL = squareToCenter(callObj.fullGrid);
@@ -440,6 +440,16 @@ function leftClickFeedSpot(hash)
 function feedBandAllowed(callObj)
 {
   return feedBandPlan().includes(callObj.band) && !(callObj.band in GT.settings.roster.feeds.hiddenBands);
+}
+
+// Roster-only, like the band list; a mode in neither mode list is always shown
+function feedModeAllowed(callObj)
+{
+  let type = "";
+  if (callObj.mode == "CW") type = "CW";
+  else if (GT.modes[callObj.mode]) type = "Digital";
+  else if (GT.modes_phone[callObj.mode]) type = "Phone";
+  return !(type in GT.settings.roster.feeds.hiddenModes);
 }
 
 // Feed spots share the roster with WSJT-X decodes; a local decode of the same call/band/mode wins
