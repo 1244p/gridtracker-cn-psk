@@ -391,6 +391,7 @@ Map / UI:
     MH4 pin mode with Auto or a single band: logbook pins use the band colors
     The confirmed V cap is used with band colors, not with the Mixed bands Gridsquare Colors
   Fixed a logbook pin staying "worked" after its grid was confirmed, until the next map redraw
+  Fixed flight paths in the AEQD projection skirting around the poles instead of crossing them
 App:
   All new text translated for every supported language
   Fixed the Democratic Republic of the Congo (DRC) and Republic of the Congo flags being swapped

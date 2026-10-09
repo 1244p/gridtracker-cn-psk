@@ -261,6 +261,10 @@ function flightFeature(points, opts, layer, canAnimate) {
   let generator = new arc.GreatCircle({ x: start[0], y: start[1] }, { x: end[0], y: end[1] });
   let path = generator.Arc(steps, { offset: 10 });
 
+  // Going through EPSG:3857 clamps latitude to ~85 when transformed to AEQD, so go straight
+  // from lon/lat to the map projection, otherwise paths near or over the poles skirt around them
+  const projection = GT.useTransform ? GT.settings.map.projection : "EPSG:3857";
+
   let line = [];
   let geom = path.geometries;
   let lonOff = 0;
@@ -271,10 +275,10 @@ function flightFeature(points, opts, layer, canAnimate) {
       if (isNaN(c[0])) continue;
       if (Math.abs(lastc - c[0]) > 270) (c[0] < lastc) ? lonOff += 360 : lonOff -= 360;
       lastc = c[0];
-      line.push(ol.proj.fromLonLat([ lastc + lonOff, c[1]]));
+      line.push(ol.proj.fromLonLat([ lastc + lonOff, c[1]], projection));
     }
   }
-  if (line.length == 0) line.push(ol.proj.fromLonLat(start));
+  if (line.length == 0) line.push(ol.proj.fromLonLat(start, projection));
 
   let dash = [];
   let dashOff = 0;
@@ -285,11 +289,6 @@ function flightFeature(points, opts, layer, canAnimate) {
 
   let featureArrow = new ol.Feature(new ol.geom.Point(line[0]));
   let feature = new ol.Feature({ geometry: new ol.geom.LineString(line), prop: 'flight' });
-
-  if (GT.useTransform) {
-    featureArrow.getGeometry().transform("EPSG:3857", GT.settings.map.projection);
-    feature.getGeometry().transform("EPSG:3857", GT.settings.map.projection);
-  }
 
   if (!GT.sharedStyles) {
     GT.sharedStyles = {
