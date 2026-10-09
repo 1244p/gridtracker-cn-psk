@@ -391,6 +391,7 @@ Map / UI:
 App:
   All new text translated for every supported language
   Fixed the Democratic Republic of the Congo (DRC) and Republic of the Congo flags being swapped
+  Fixed the Band Activity popout window not opening on macOS
 
 
 ### Fixed

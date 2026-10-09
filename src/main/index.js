@@ -576,8 +576,9 @@ app.whenReady().then(() => {
 
 
   app.on('browser-window-created', (_, window) => {
-    // window.title works on Windows, window.tabbingIdentifier works on macOS
-    const title = isMac ? window.tabbingIdentifier : window.title;
+    // window.title works on Windows, window.tabbingIdentifier works on macOS,
+    // except frameless windows (band activity) which get no tabbingIdentifier, so they use the title
+    const title = (isMac && window.tabbingIdentifier) ? window.tabbingIdentifier : window.title;
 
     if (title in allowedWindows) {
       // save the window handle (not the dom handle);
@@ -687,7 +688,6 @@ app.whenReady().then(() => {
         return { action: 'deny' };
       });
     } else if (window.id !== 1) {
-      // we need to fix this for Mac, it's the band activity window which doesn't have a tabbing title
       // console.log(`WARNING: id: "${window.id}"  title: "${title}" not found in allowedWindows`);
     }
 
