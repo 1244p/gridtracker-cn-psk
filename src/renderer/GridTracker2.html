@@ -758,6 +758,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           z-index: 600;
         " class="roundBorder">
       <div class="settingstab">
+        <div style="float: right">
+          <button class="Xbutton" onclick="rootSettingsDiv.style.display='none';">X</button>
+        </div>
         <button data-i18n="settings.General.label" id="generalbut" class="settingsTablinks active"
           onclick="openSettingsTab(event, 'generalSettingsDiv')">General</button>
         <button data-i18n="settings.Features.label" id="featuresbut" class="settingsTablinks"
@@ -780,7 +783,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           onclick="openSettingsTab(event, 'customAlertsDiv')">Custom Alerts</button>
         <button data-i18n="settings.Logbook.label" id="logbut" class="settingsTablinks"
           onclick="openSettingsTab(event, 'logbookSettingsDiv')">Logbook</button>
-        <button data-i18n="settings.About.label" id="aboutbut" class="settingsTablinks" style="margin-right: 25px"
+        <button data-i18n="settings.About.label" id="aboutbut" class="settingsTablinks"
           onclick="openSettingsTab(event, 'aboutDiv')">About</button>
       </div>
     <div id="generalSettingsDiv" class="settingsTabcontent" style="display: block">
@@ -2759,9 +2762,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         
         <img src="img/gridtracker.png" /> <br />
       </div>
-    </div>
-    <div style="top: 0; right: 1px; position: absolute">
-      <button class="Xbutton" onclick="rootSettingsDiv.style.display='none';">X</button>
     </div>
   </div>
   </div>

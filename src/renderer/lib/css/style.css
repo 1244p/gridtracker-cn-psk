@@ -545,15 +545,25 @@ a {
   color: inherit;
 }
 
+/* Shown as inline-flex: a column capped at the window size, so the tab bar wraps
+   and the tab content takes the remaining height and scrolls */
+#rootSettingsDiv {
+  flex-direction: column;
+  max-width: calc(100vw - 12px);
+  max-height: calc(100vh - 2px);
+}
+
 /* Style the tab */
 .settingstab {
   overflow: hidden;
   -webkit-border-radius: 6px;
   background-color: black;
+  white-space: normal;
+  flex-shrink: 0;
 }
 
 /* Style the buttons that are used to open the tab content */
-.settingstab button {
+.settingstab button.settingsTablinks {
   border: 1px solid blue;
   padding: 3px;
   font-weight: bold;
@@ -571,16 +581,19 @@ a {
 }
 
 /* Create an active/current tablink class */
-.settingstab button.active {
+.settingstab button.settingsTablinks.active {
   background-color: blue;
   color: yellow;
 }
 
-/* Settings -> Band Colors: fixed grid so the tab is no wider than the others */
+/* Settings -> Band Colors: as many 70px columns as fit, adding rows as the window narrows */
+#bandColorsSettingsDiv > .mapItem {
+  display: block;
+}
+
 .bandColorsGrid {
   display: grid;
-  /* 33 bands: 3 even rows of 11; 70px keeps it inside the narrowest tab row */
-  grid-template-columns: repeat(11, 70px);
+  grid-template-columns: repeat(auto-fill, 70px);
   gap: 4px;
   justify-content: center;
   margin-top: 6px;
@@ -607,6 +620,9 @@ a {
   -webkit-border-radius: 6px;
   white-space: normal;
   max-height: 600px;
+  /* shrinks within rootSettingsDiv so overflow:auto scrolls in small windows */
+  min-height: 0;
+  box-sizing: border-box;
   overflow: auto;
   /* animation: fadeEffect .3s;  Fading effect takes 1 second */
 }

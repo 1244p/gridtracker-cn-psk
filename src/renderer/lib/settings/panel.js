@@ -6,7 +6,7 @@
 
 function showSettingsBox()
 {
-  if (rootSettingsDiv.style.display == "inline-block")
+  if (rootSettingsDiv.style.display == "inline-flex")
   {
     rootSettingsDiv.style.display = "none";
   }
@@ -14,7 +14,7 @@ function showSettingsBox()
   {
     helpDiv.style.display = "none";
     GT.helpShow = false;
-    rootSettingsDiv.style.display = "inline-block";
+    rootSettingsDiv.style.display = "inline-flex";
   }
 }
 
@@ -78,7 +78,7 @@ function openAboutBox()
   openSettingsTab(aboutbut, 'aboutDiv');
   helpDiv.style.display = "none";
   GT.helpShow = false;
-  rootSettingsDiv.style.display = "inline-block";
+  rootSettingsDiv.style.display = "inline-flex";
 }
 
 function openLogbookSettings()
@@ -86,7 +86,7 @@ function openLogbookSettings()
   openSettingsTab(logbut, 'logbookSettingsDiv');
   helpDiv.style.display = "none";
   GT.helpShow = false;
-  rootSettingsDiv.style.display = "inline-block";
+  rootSettingsDiv.style.display = "inline-flex";
 }
 
 function openAudioAlertSettings()
@@ -94,7 +94,7 @@ function openAudioAlertSettings()
   openSettingsTab(audioalertbut, 'audioAlertsDiv');
   helpDiv.style.display = "none";
   GT.helpShow = false;
-  rootSettingsDiv.style.display = "inline-block";
+  rootSettingsDiv.style.display = "inline-flex";
   electron.ipcRenderer.send("showWin", "GridTracker2")
 }
 
