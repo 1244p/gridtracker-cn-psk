@@ -392,6 +392,7 @@
             <option value="Grid">Grid</option>
             <option value="CQz">CQ Zone</option>
             <option value="ITUz">ITU Zone</option>
+            <option value="Spotter" data-i18n="roster.ignores.spotters">Spotters</option>
           </select>
           <input id="ignoreCallsignValue" type="text" class="inputTextValue" size="10" style="text-transform: uppercase;" />
           <input id="ignoreGridValue" type="text" class="inputTextValue"  oninput="gridInputValidate(this)" size="10"/>
@@ -416,13 +417,13 @@
             <tr>
               <td align="left">
                 <input type="checkbox" id="feedAlertsEnable" onchange="feedsSettingChanged()" />
-                <label data-i18n="roster.feeds.alerts.label" for="feedAlertsEnable">Allow Alerting (Audio and Custom)</label>
+                <label data-i18n="roster.feeds.alerts.label" for="feedAlertsEnable">Allow Alerting (Audio, Alert Script)</label>
               </td>
             </tr>
             <tr>
               <td align="left">
                 <input type="checkbox" id="feedNotificationsEnable" onchange="feedsSettingChanged()" />
-                <label data-i18n="roster.feeds.notifications.label" for="feedNotificationsEnable">Allow Notifications (Pushover, Simplepush, Alert Script)</label>
+                <label data-i18n="roster.feeds.notifications.label" for="feedNotificationsEnable">Allow Notifications (Pushover, Simplepush)</label>
               </td>
             </tr>
           </table>

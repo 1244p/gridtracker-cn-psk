@@ -446,7 +446,7 @@ function feedBandAllowed(callObj)
 function addFeedToRoster(hash, callObj, now)
 {
   const entry = GT.callRoster[hash];
-  if (entry && entry.callObj.instance !== GT.feedInstance) return false;
+  if (entry && entry.callObj.instance !== GT.feedInstance) return;
 
   if (callObj.reset)
   {
@@ -463,7 +463,6 @@ function addFeedToRoster(hash, callObj, now)
     entry.callObj = callObj;
     entry.DXcall = callObj.DXcall;
   }
-  return true;
 }
 
 function clearFeedCallsigns()
@@ -479,6 +478,23 @@ function clearFeedCallsigns()
   }
   GT.feedCallsigns = {};
   if (removed) goProcessRoster();
+  redrawDxcwSpots();
+}
+
+// Called when the user ignores a spotter: drop the spots they currently own from the roster and map
+function dropFeedSpotter(base)
+{
+  for (const hash in GT.feedCallsigns)
+  {
+    if (GT.feedCallsigns[hash].spotter.split("-")[0] === base)
+    {
+      delete GT.feedCallsigns[hash];
+      if (hash in GT.callRoster && GT.callRoster[hash].callObj.instance === GT.feedInstance)
+      {
+        delete GT.callRoster[hash];
+      }
+    }
+  }
   redrawDxcwSpots();
 }
 
@@ -543,6 +559,8 @@ function addFeedSpot(parts, now)
   let grid = parts[3].trim().toUpperCase();
 
   if (!CALLSIGN_REGEXP.test(DEcall) || !FEED_MODE_REGEXP.test(mode) || !FEED_SPOTTER_REGEXP.test(spotter)) return false;
+  // Spotters the user ignored in the roster (by base callsign, so W3LPL covers W3LPL-#)
+  if (spotter.split("-")[0] in GT.settings.ignoredSpotters) return false;
   if (band == "OOB" || !Object.prototype.hasOwnProperty.call(GT.bandColors, band)) return false;
   // The roster works in 4-character grids; the map places spots with the full 4 or 6
   const fullGrid = FEED_GRID_REGEXP.test(grid) ? grid : "";
@@ -633,10 +651,8 @@ function addFeedSpot(parts, now)
     callObj.state = "CA-" + GT.cacCallsigns[callObj.DEcall];
   }
 
-  if (addFeedToRoster(hash, callObj, now) && GT.settings.roster.feeds.alerts && feedBandAllowed(callObj))
-  {
-    checkAlerts(DEcall, callObj.grid.length > 0 ? callObj.grid : null, msg, callObj, band, mode);
-  }
+  // Feed spots never trigger custom alerts; audio alerts come from the roster (Feeds tab "Allow Alerting")
+  addFeedToRoster(hash, callObj, now);
   return true;
 }
 

@@ -13,6 +13,7 @@ Object.assign(CR,
   ignoredGrid: {},
   ignoredCQz: {},
   ignoredITUz: {},
+  ignoredSpotters: {},
   modes: {},
   modes_phone: {},
   rosterSettings: GT.settings.roster,
@@ -113,6 +114,7 @@ CR.ignoredGrid = GT.settings.ignoredGrid;
 CR.ignoredCQz = GT.settings.ignoredCQz;
 CR.ignoredITUz = GT.settings.ignoredITUz;
 CR.ignoredCQ = GT.settings.ignoredCQ;
+CR.ignoredSpotters = GT.settings.ignoredSpotters;
 
 function storeBlocks(render = true)
 {
@@ -122,6 +124,7 @@ function storeBlocks(render = true)
   GT.settings.ignoredCQz = CR.ignoredCQz;
   GT.settings.ignoredITUz = CR.ignoredITUz;
   GT.settings.ignoredCQ = CR.ignoredCQ;
+  GT.settings.ignoredSpotters = CR.ignoredSpotters;
   if (render)
   {
     renderIgnoresTab();
@@ -1020,7 +1023,8 @@ function initSelectors()
     CQ: ignoreCqDiv,
     DXCC: ignoreDxccSelect,
     CQz: ignoreCqzSelect,
-    ITUz: ignoreItuzSelect
+    ITUz: ignoreItuzSelect,
+    Spotter: ignoreCallsignValue
   };
 
   ignoreTypeChanged("Callsign");
@@ -1100,6 +1104,13 @@ function addNewIgnore()
   {
     ignoreITUz(ignoreItuzSelect.value);
   }
+  else if (CR.ignoreType === "Spotter")
+  {
+    if (ValidateTextInput(ignoreCallsignValue, ingnoreAddResultLabel))
+    {
+      ignoreSpotter(ignoreCallsignValue.value);
+    }
+  }
 }
 
 function updateWorked()
@@ -1162,6 +1173,31 @@ function ignoreCQz(cqz)
 function ignoreITUz(ituz)
 {
   CR.ignoredITUz[ituz] = true;
+  storeBlocks();
+  viewRoster();
+}
+
+// Spotters are ignored by base callsign, so W3LPL also covers W3LPL-# and W3LPL-2
+function ignoreSpotter(spotter)
+{
+  const base = spotter.split("-")[0].toUpperCase();
+  if (base.length === 0) return;
+  CR.ignoredSpotters[base] = true;
+  storeBlocks();
+  window.opener.dropFeedSpotter(base);
+  viewRoster();
+}
+
+function deleteSpotterIgnore(key)
+{
+  delete CR.ignoredSpotters[key];
+  storeBlocks();
+  viewRoster();
+}
+
+function clearAllSpotterIgnores()
+{
+  CR.ignoredSpotters = {};
   storeBlocks();
   viewRoster();
 }
@@ -1389,6 +1425,17 @@ function renderIgnoresTab()
     Object.keys(CR.ignoredITUz).sort().forEach(function (key)
     {
       html.push(`<tr><td align='left' style='color:cyan;'>${key}</td><td style='cursor:pointer;' onclick='deleteITUzIgnore("${key}")'><img src='img/trash_24x48.png' style='height:17px;margin:-1px;margin-bottom:-3px;padding:0px'></td></tr>`);
+    });
+    html.push("</table></div>");
+  }
+
+  if (Object.keys(CR.ignoredSpotters).length > 0)
+  {
+    clearString = "<th style='cursor:pointer;' onclick='clearAllSpotterIgnores()'>Clear All</th>";
+    html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${I18N("roster.ignores.spotters")}</th>${clearString}</tr>`);
+    Object.keys(CR.ignoredSpotters).sort().forEach(function (key)
+    {
+      html.push(`<tr><td align='left' style='color:#5caeff;'>${key}</td><td style='cursor:pointer;' onclick='deleteSpotterIgnore("${key}")'><img src='img/trash_24x48.png' style='height:17px;margin:-1px;margin-bottom:-3px;padding:0px'></td></tr>`);
     });
     html.push("</table></div>");
   }
@@ -3571,6 +3618,18 @@ function createRestOfMenus()
     type: "normal",
     label: I18N("copy"),
     click: function () { navigator.clipboard.writeText(CR.callRoster[CR.targetHash].callObj.spotter); }
+  }));
+
+  CR.spotterMenu.append(new MenuItem({
+    type: "normal",
+    label: I18N("roster.menu.IgnoreSpotter"),
+    click: function () { ignoreSpotter(CR.callRoster[CR.targetHash].callObj.spotter); }
+  }));
+
+  CR.spotterMenu.append(new MenuItem({
+    type: "normal",
+    label: I18N("roster.menu.EditIgnores"),
+    click: function () { openIgnores(); }
   }));
 
   CR.columnMenu = new Menu();

@@ -14,6 +14,7 @@ const validSettings = [
   "ignoredDxcc",
   "ignoredCQz",
   "ignoredITUz",
+  "ignoredSpotters",
   "callsignLookups",
   "audioAlerts",
   "currentVersion",
@@ -480,6 +481,8 @@ const def_settings = {
   ignoredDxcc: {},
   ignoredCQz: {},
   ignoredITUz: {},
+  // DX Cluster / CW Skimmer spotters (base callsign) whose spots are dropped
+  ignoredSpotters: {},
   roster: {
     exceptions: {
       onlyHits: false,

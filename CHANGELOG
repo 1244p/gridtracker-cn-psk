@@ -362,11 +362,14 @@ Call Roster:
     Freq column shows the spot's frequency, Rig column shows "Feed", Calling column shows "CQ" for CQ spots
     US feed spots get the same state and county lookups as decodes
   New "Feeds" tab in Call Roster Settings (shown when a feed is enabled):
-    Allow Alerting (Audio and Custom) for feed spots
-    Allow Notifications (Pushover, Simplepush, Alert Script) for feed spots
+    Allow Alerting (Audio, Alert Script) for feed spots
+    Allow Notifications (Pushover, Simplepush) for feed spots
+    Feed spots never trigger Custom Alerts
     Bands: choose which bands' feed spots appear in the Call Roster, based on a US or non-US band plan (all bands on by default)
   New "Spotter" column (off by default): the station that reported a feed spot
-    Right-click a spotter for Lookup, Add Watcher or Copy
+    Right-click a spotter for Lookup, Add Watcher, Copy, Ignore Spotter or Edit Ignores
+  New "Spotters" category in Call Roster Settings -> Ignores, for spotters sending false or too many questionable spots
+    An ignored spotter's spots are dropped from the Call Roster and the map (W3LPL also covers W3LPL-# and W3LPL-2)
   Mode column: CW, SSB and RTTY now have their own colors, other unlisted modes show in white
 Map / UI:
   New DX/CW feed button in the main button panel (shown when a feed is enabled) shows feed spots on the map
@@ -379,6 +382,7 @@ Map / UI:
   15m band color changed to periwinkle so it no longer resembles 20m, 12m color 10% brighter
 App:
   All new text translated for every supported language
+  Fixed the Democratic Republic of the Congo (DRC) and Republic of the Congo flags being swapped
 
 
 ### Fixed

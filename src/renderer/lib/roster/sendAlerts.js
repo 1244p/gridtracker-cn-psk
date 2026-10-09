@@ -6,9 +6,11 @@ function sendAlerts()
   let everyDecode = GT.settings.audioAlerts.rules.everyDecode;
   let dirPath = path.dirname(scriptPath);
   let scriptExists = false;
-  let shouldRosterAlert = 0;
+  let pushAlerts = 0;
+  let scriptAlerts = 0;
   let shouldAudioAlert = 0;
   let audioAlertCounts = createEmptyAudioAlerts();
+  let pushReport = {};
   let scriptReport = {};
   const feedSettings = CR.rosterSettings.feeds;
 
@@ -20,32 +22,42 @@ function sendAlerts()
     // otherwise the entire roster will be sent out, including all the ones that were filtered by exceptions
     if (callRoster[entry].tx == false) continue;
 
-    // Feed spots alert and notify only when enabled in the roster's Feeds tab
+    // Feed spots, per the roster's Feeds tab: "Allow Alerting" covers audio and the alert script,
+    // "Allow Notifications" covers Pushover and Simplepush
     const isFeed = callObj.instance === GT.feedInstance;
+    const allowScript = !isFeed || feedSettings.alerts;
+    const allowPush = !isFeed || feedSettings.notifications;
     if (isFeed && !feedSettings.alerts)
     {
       callObj.shouldAudioAlert = false;
     }
 
-    // Notifications: Pushover, Simplepush and the alert script (which receives scriptReport)
-    if (!isFeed || feedSettings.notifications)
+    if (allowScript || allowPush)
     {
       let call = callObj.DEcall;
-      scriptReport[call] = Object.assign({}, callObj);
-      scriptReport[call].dxccName = GT.dxccToAltName[callObj.dxcc];
-      scriptReport[call].distance = (callObj.distance > 0) ? parseInt(callObj.distance * MyCircle.validateRadius(window.opener.distanceUnit.value)) : 0;
+      // Copied before rosterAlerted is set below, so the push messages can tell which entries are new
+      let report = Object.assign({}, callObj);
+      report.dxccName = GT.dxccToAltName[callObj.dxcc];
+      report.distance = (callObj.distance > 0) ? parseInt(callObj.distance * MyCircle.validateRadius(window.opener.distanceUnit.value)) : 0;
 
-      delete scriptReport[call].DEcall;
-      delete scriptReport[call].style;
-      delete scriptReport[call].wspr;
-      delete scriptReport[call].qso;
-      delete scriptReport[call].instance;
+      delete report.DEcall;
+      delete report.style;
+      delete report.wspr;
+      delete report.qso;
+      delete report.instance;
 
-      if (callObj.shouldRosterAlert == true && callObj.rosterAlerted == false)
+      const newAlert = callObj.shouldRosterAlert == true && callObj.rosterAlerted == false;
+      if (allowScript)
       {
-        callObj.rosterAlerted = true;
-        shouldRosterAlert++;
+        scriptReport[call] = report;
+        if (newAlert) scriptAlerts++;
       }
+      if (allowPush)
+      {
+        pushReport[call] = report;
+        if (newAlert) pushAlerts++;
+      }
+      if (newAlert) callObj.rosterAlerted = true;
     }
     callObj.shouldRosterAlert = false;
 
@@ -79,17 +91,20 @@ function sendAlerts()
     window.opener.processAudioAlertsFromRoster(audioAlertCounts);
   }
 
-  if (shouldRosterAlert > 0)
+  if (pushAlerts > 0)
   {
     if (GT.settings.msg.msgPushover)
     {
-      sendPushOverAlert(parseCRJson(scriptReport));
+      sendPushOverAlert(parseCRJson(pushReport));
     }
     if (GT.settings.msg.msgSimplepush)
     {
-      sendSimplePushMessage(GT.settings.msg.msgSimplepushNotifyOnly ? parseCRJson(scriptReport) : parseCRJsonToMarkdown(scriptReport));
+      sendSimplePushMessage(GT.settings.msg.msgSimplepushNotifyOnly ? parseCRJson(pushReport) : parseCRJsonToMarkdown(pushReport));
     }
+  }
 
+  if (scriptAlerts > 0)
+  {
     try
     {
       if (fs.existsSync(scriptPath))
