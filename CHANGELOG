@@ -371,6 +371,7 @@ Call Roster:
   New "Spotters" category in Call Roster Settings -> Ignores, for spotters sending false or too many questionable spots
     An ignored spotter's spots are dropped from the Call Roster and the map (W3LPL also covers W3LPL-# and W3LPL-2)
   Mode column: CW, SSB and RTTY now have their own colors, other unlisted modes show in white
+  DXCC column: click to center the map on the entity and highlight (dazzle) its outline, like clicking a Grid
 Map / UI:
   New DX/CW feed button in the main button panel (shown when a feed is enabled) shows feed spots on the map
     Green target: a rig is on the spot's band and mode
@@ -379,7 +380,14 @@ Map / UI:
     Shows all bands, following only the map's Band / Mode filters
     Hover (or right-click) shows the spot's call, spotter, age, DXCC, grid, frequency, mode, distance, azimuth, time and message
     Left-click sets the DX call and grid on a rig on the spot's band and mode, otherwise the active rig
-  15m band color changed to periwinkle so it no longer resembles 20m, 12m color 10% brighter
+  New Main App -> Settings -> "Band Colors" tab: change any band's color, with "Reset Colors" to return to the defaults
+    Applies to the Call Roster, map spots, grids and pins, Stats and Lookup
+  Map pins are now drawn in the band colors instead of images
+    Worked: plain pin, Confirmed: black V cap, Live/heard: diamond head
+    MH4 pin mode with Mixed bands: logbook pins use the Gridsquare Colors Worked/Confirmed colors instead of a red dot
+    MH4 pin mode with Auto or a single band: logbook pins use the band colors
+    The confirmed V cap is used with band colors, not with the Mixed bands Gridsquare Colors
+  Fixed a logbook pin staying "worked" after its grid was confirmed, until the next map redraw
 App:
   All new text translated for every supported language
   Fixed the Democratic Republic of the Congo (DRC) and Republic of the Congo flags being swapped

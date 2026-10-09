@@ -29,11 +29,13 @@ const validSettings = [
   "startupLogs",
   "trustedQsl",
   "legendColors",
+  "bandColors",
   "pstrotator",
   "HRDLogbookLog",
   "defaultsApplied"
 ];
 
+// The Gridsquare Colors (Settings -> Grids); the "legend" name is kept to match the saved settings key
 const def_legendColors = {
   QSO: "#EEEE00",
   QSL: "#EE0000",
@@ -347,6 +349,7 @@ const def_settings = {
     lastUpdate: {},
     lines: {}
   },
+  // The Gridsquare Colors; saved under this name in existing settings files, so it is not renamed
   legendColors: {
     QSO: "#EEEE00",
     QSL: "#EE0000",
@@ -481,6 +484,8 @@ const def_settings = {
   ignoredDxcc: {},
   ignoredCQz: {},
   ignoredITUz: {},
+  // Band colors the user changed (band -> 6-digit hex); bands not listed use the built-in GT.bandColors table
+  bandColors: {},
   // DX Cluster / CW Skimmer spotters (base callsign) whose spots are dropped
   ignoredSpotters: {},
   roster: {

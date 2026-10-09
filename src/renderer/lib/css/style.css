@@ -576,6 +576,23 @@ a {
   color: yellow;
 }
 
+/* Settings -> Band Colors: fixed grid so the tab is no wider than the others */
+.bandColorsGrid {
+  display: grid;
+  /* 33 bands: 3 even rows of 11; 70px keeps it inside the narrowest tab row */
+  grid-template-columns: repeat(11, 70px);
+  gap: 4px;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.bandColorCell {
+  border: 1px inset #aaa;
+  border-radius: 4px;
+  padding: 2px;
+  text-align: center;
+}
+
 /* Style the tab content */
 .settingsTabcontent {
   margin: 0;

@@ -428,7 +428,7 @@ GT.bandColors.OOB = "888888";
 GT.bandColors["4000m"] = "45E0FF";
 GT.bandColors["2200m"] = "FF4500";
 GT.bandColors["630m"] = "1E90FF";
-GT.bandColors["160m"] = "7CFC00";
+GT.bandColors["160m"] = "FF8C00";
 GT.bandColors["80m"] = "E550E5";
 GT.bandColors["60m"] = "99CCFF";
 GT.bandColors["40m"] = "00FFFF";
@@ -440,7 +440,7 @@ GT.bandColors["12m"] = "DF4343";
 GT.bandColors["11m"] = "00FF00";
 GT.bandColors["10m"] = "FF69B4";
 GT.bandColors["8m"] = "8b00fb";
-GT.bandColors["6m"] = "4dfff9";
+GT.bandColors["6m"] = "C0C0C0";
 GT.bandColors["4m"] = "93ff05";
 GT.bandColors["2m"] = "FF1493";
 GT.bandColors["1.25m"] = "beff00";
@@ -448,19 +448,19 @@ GT.bandColors["70cm"] = "999900";
 GT.bandColors["33cm"] = "ff8c90";
 GT.bandColors["23cm"] = "5AB8C7";
 GT.bandColors["13cm"] = "ff7540";
-GT.bandColors["9cm"] = "b77ac7";
-GT.bandColors["6cm"] = "b77ac7";
-GT.bandColors["3cm"] = "696969";
-GT.bandColors["1.2cm"] = "b77ac7";
-GT.bandColors["6mm"] = "b77ac7";
-GT.bandColors["4mm"] = "b77ac7";
-GT.bandColors["2.5mm"] = "b77ac7";
-GT.bandColors["2mm"] = "b77ac7";
-GT.bandColors["1mm"] = "b77ac7";
+GT.bandColors["9cm"] = "139A52";
+GT.bandColors["6cm"] = "BBF7B4";
+GT.bandColors["3cm"] = "F6BB76";
+GT.bandColors["1.2cm"] = "F6B8F8";
+GT.bandColors["6mm"] = "03FCB6";
+GT.bandColors["4mm"] = "4FA806";
+GT.bandColors["2.5mm"] = "8A8B4F";
+GT.bandColors["2mm"] = "8A80C1";
+GT.bandColors["1mm"] = "B97394";
 
-GT.bandToColor = {};
-GT.colorLeafletPins = {};
-GT.colorLeafletQPins = {};
+GT.colorPins = {};
+GT.colorQPins = {};
+GT.mixedPins = {};
 
 GT.KColors = [
   "#0F0",
@@ -589,13 +589,6 @@ GT.gtFlagIcon = new ol.style.Icon({
   anchor: [12, 17]
 });
 
-GT.pushPinIconOff = new ol.style.Icon({
-  src: "img/red-circle.png",
-  anchorYUnits: "pixels",
-  anchorXUnits: "pixels",
-  anchor: [5, 18]
-});
-
 GT.mapSourceTypes = {
   XYZ: ol.source.XYZ,
   TileWMS: ol.source.TileWMS,
@@ -650,7 +643,7 @@ GT.filterQSL = "All";
 GT.lastSearchSelection = null;
 GT.statBoxTimer = null;
 GT.timezoneLayer = null;
-GT.redrawFromLegendTimeoutHandle = null;
+GT.redrawGridsquareColorsTimeoutHandle = null;
 GT.defaultButtons = [];
 GT.finishedLoading = false;
 GT.wsjtCurrentPort = -1;
@@ -1019,6 +1012,7 @@ function clearAndReload(fullReset = true)
     delete GT.settings.app;
     delete GT.settings.map;
     delete GT.settings.legendColors;
+    delete GT.settings.bandColors;
     delete GT.settings.audio;
   }
 

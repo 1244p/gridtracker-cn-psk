@@ -770,6 +770,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           onclick="openSettingsTab(event, 'mapSettingsDiv')">Map</button>
         <button data-i18n="settings.Grids.label" class="settingsTablinks"
           onclick="openSettingsTab(event, 'gridSettingsDiv')">Grids</button>
+        <button data-i18n="settings.BandColors.label" class="settingsTablinks"
+          onclick="openSettingsTab(event, 'bandColorsSettingsDiv')">Band Colors</button>
         <button data-i18n="settings.Logging.label" class="settingsTablinks"
           onclick="openSettingsTab(event, 'logSettingsDiv')">Logging</button>
         <button data-i18n="settings.alerts.AudioAlert.label" id="audioalertbut" class="settingsTablinks"
@@ -1695,7 +1697,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </tr>
             <tr align="center">
               <td title="Reset Gridsquare Colors To Default">
-                <div data-i18n="settings.grids.reset.label" class="button" onclick="resetLegendColors()">Reset Colors
+                <div data-i18n="settings.grids.reset.label" class="button" onclick="resetGridsquareColors()">Reset Colors
                 </div>
               </td>
             </tr>
@@ -1709,7 +1711,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </tr>
             <tr align="center">
               <td colspan="2">
-                <input type="color" id="QSOgridValue" value="#000000" oninput="changeLegendColor(this)" />
+                <input type="color" id="QSOgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
               </td>
             </tr>
           </table>
@@ -1721,7 +1723,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </tr>
             <tr align="center">
               <td colspan="2">
-                <input type="color" id="QSLgridValue" value="#000000" oninput="changeLegendColor(this)" />
+                <input type="color" id="QSLgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
               </td>
             </tr>
           </table>
@@ -1733,7 +1735,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </tr>
             <tr align="center">
               <td colspan="2">
-                <input type="color" id="QSXgridValue" value="#000000" oninput="changeLegendColor(this)" />
+                <input type="color" id="QSXgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
               </td>
             </tr>
           </table>
@@ -1746,7 +1748,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </tr>
             <tr align="center">
               <td colspan="2">
-                <input type="color" id="CQgridValue" value="#000000" oninput="changeLegendColor(this)" />
+                <input type="color" id="CQgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
               </td>
             </tr>
           </table>
@@ -1759,7 +1761,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </tr>
             <tr align="center">
               <td colspan="2">
-                <input type="color" id="CQDXgridValue" value="#000000" oninput="changeLegendColor(this)" />
+                <input type="color" id="CQDXgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
               </td>
             </tr>
           </table>
@@ -1771,7 +1773,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </tr>
             <tr align="center">
               <td colspan="2">
-                <input type="color" id="QRZgridValue" value="#000000" oninput="changeLegendColor(this)" />
+                <input type="color" id="QRZgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
               </td>
             </tr>
           </table>
@@ -1783,7 +1785,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </tr>
             <tr align="center">
               <td colspan="2">
-                <input type="color" id="QTHgridValue" value="#000000" oninput="changeLegendColor(this)" />
+                <input type="color" id="QTHgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
               </td>
             </tr>
           </table>
@@ -1859,6 +1861,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </td>
           </tr>
         </table>
+      </div>
+    </div>
+    <div id="bandColorsSettingsDiv" class="settingsTabcontent">
+      <div class="mapItem" style="padding:10px;">
+        <div class="mapItem" style="height:49px;">
+          <table align="center">
+            <tr align="center">
+              <td data-i18n="settings.BandColors.label" align="center"><b><i>Band Colors</i></b></td>
+            </tr>
+            <tr align="center">
+              <td data-i18n="settings.BandColors.reset.hover" title="Reset Band Colors To Default">
+                <div data-i18n="settings.grids.reset.label" class="button" onclick="resetBandColors()">Reset Colors</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div id="bandColorsDiv" class="bandColorsGrid"></div>
       </div>
     </div>
     <div id="mapSettingsDiv" class="settingsTabcontent" style="background-color: #00000044; text-shadow: 0 0 5px #000000ff">
@@ -1962,7 +1981,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div class="flexItem" id="spotPathColorDiv">
           <label data-i18n="settings.map.RXSpotPath.color.label">RX Spot Color</label>
           <input type="range" min="-1" max="361" value="-1" class="slider" id="spotPathColorValue" oninput="spotPathChange();" onkeyup="redrawSpots();" onmouseup="redrawSpots();" />
-          <label data-i18n="settings.map.RXSpotPath.color.default" id="spotPathInfoLabel">PSK-Reporter Palette</label>
+          <label data-i18n="settings.map.RXSpotPath.color.default" id="spotPathInfoLabel">Band Colors Palette</label>
         </div>
         <div class="flexItem" id="spotPathWidthDiv">
           <label data-i18n="settings.map.RXSpotPath.width.label" >Spot Path Width</label>

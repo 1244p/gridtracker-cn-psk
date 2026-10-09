@@ -768,7 +768,7 @@ function processRosterHunting(callRoster, rosterSettings)
     styleObj.call = makeStyle(callConf, callBg, callColor, callPointer);
     styleObj.grid = makeStyle(gridConf, gridBg, gridColor, "cursor:pointer");
     styleObj.calling = makeStyle(callingConf, callingBg, callingColor);
-    styleObj.dxcc = makeStyle(dxccConf, dxccBg, dxccColor);
+    styleObj.dxcc = makeStyle(dxccConf, dxccBg, dxccColor, CR.rosterSettings.compact ? "" : "cursor:pointer");
     styleObj.state = makeStyle(stateConf, stateBg, stateColor);
     styleObj.cnty = makeStyle(cntyConf, cntyBg, cntyColor, cntyPointer);
     styleObj.pota = makeStyle(potaConf, potaBg, potaColor);

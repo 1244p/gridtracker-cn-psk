@@ -153,6 +153,8 @@ const ROSTER_COLUMNS = {
       title: GT.dxccInfo[callObj.dxcc].pp,
       name: `DXCC (${callObj.dxcc})`,
       rawAttrs: callObj.style.dxcc,
+      // Like Grid: click centers the map on the entity and dazzles it (not in compact mode, where the tile click starts a QSO)
+      onClick: CR.rosterSettings.compact ? null : `centerOnDxcc(${callObj.dxcc})`,
       html: GT.dxccToAltName[callObj.dxcc]
     })
   },

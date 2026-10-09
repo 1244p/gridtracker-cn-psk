@@ -162,7 +162,7 @@ function createSpot(report, key, fromPoint, addToLayer = true)
 
     let spot = spotFeature([LL.o, LL.a]);
 
-    let colorNoAlpha = "#" + GT.bandToColor[report.band];
+    let colorNoAlpha = "#" + GT.bandColors[report.band];
     let colorAlpha = intAlphaToRGB(colorNoAlpha, report.color);
     let spotColor = colorAlpha;
 

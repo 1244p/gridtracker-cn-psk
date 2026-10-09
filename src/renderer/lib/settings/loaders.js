@@ -125,7 +125,7 @@ function loadViewSettings()
   gridModeDiv.style.display = GT.pushPinMode ? "" : "none";
 
   spotPathChange();
-  setLegendGridSettings();
+  setGridsquareColorSettings();
 
   mapRightValue.checked = GT.settings.app.mapRight;
 

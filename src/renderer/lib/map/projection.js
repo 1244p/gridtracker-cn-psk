@@ -201,6 +201,16 @@ function fitViewBetweenPoints(points, maxZoom = 20)
   });
 }
 
+// Roster DXCC click: center the map on the entity (keeping the zoom) and dazzle its shape
+function centerOnDxcc(dxcc)
+{
+  const info = GT.dxccInfo[dxcc];
+  if (!info || !info.geo || info.geo == "deleted") return;
+
+  dazzleDxcc(dxcc);
+  GT.map.getView().setCenter(ol.proj.fromLonLat([info.lon, info.lat], GT.settings.map.projection));
+}
+
 function centerOn(grid, dazzle = true)
 {
   if (grid.length >= 4)

@@ -404,6 +404,11 @@ function centerOn(grid)
   window.opener.centerOn(grid);
 }
 
+function centerOnDxcc(dxcc)
+{
+  window.opener.centerOnDxcc(dxcc);
+}
+
 function instanceChange(what)
 {
   GT.instances[what.id].crEnable = what.checked;

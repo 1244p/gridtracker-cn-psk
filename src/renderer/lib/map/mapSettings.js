@@ -2,7 +2,7 @@
 // All rights reserved.
 // See LICENSE for more information.
 
-// Map settings: map sources and API keys, night map, colours, legend, offline maps, pins (moved from GridTracker2.js)
+// Map settings: map sources and API keys, night map, colours, Gridsquare Colors, offline maps, pins (moved from GridTracker2.js)
 
 function mapApiKeyInputChanged()
 {
@@ -123,8 +123,8 @@ function loadMapSettings()
   gridOverlayImg.style.filter = GT.settings.map.showAllGrids ? "" : "grayscale(1)";
   equatorImg.style.filter = GT.settings.map.equator ? "" : "grayscale(1)";
   rangeRingsImg.style.filter = GT.settings.map.showRangeRings ? "" : "grayscale(1)";
-  
-  GT.bandToColor = { ...GT.bandColors };
+
+  applyBandColorSettings();
 
   setGridOpacity();
   setMapColors();
@@ -246,32 +246,33 @@ function changeMapValues()
   changeMapLayer();
 }
 
-function setLegendGrid(name, newColor)
+function setGridsquareColor(name, newColor)
 {
   document.getElementById(name + "gridValue").value = newColor;
 }
 
-function setLegendGridSettings()
+function setGridsquareColorSettings()
 {
   for (let key in GT.settings.legendColors)
   {
-    setLegendGrid(key, GT.settings.legendColors[key]);
+    setGridsquareColor(key, GT.settings.legendColors[key]);
   }
 }
 
-function resetLegendColors()
+function resetGridsquareColors()
 {
   for (let key in def_legendColors)
   {
     GT.settings.legendColors[key] = def_legendColors[key];
   }
 
-  setLegendGridSettings();
-  
+  setGridsquareColorSettings();
+
+  setPins();
   redrawGrids();
 }
 
-function changeLegendColor(source)
+function changeGridsquareColor(source)
 {
   let newColor = source.value;
 
@@ -279,11 +280,82 @@ function changeLegendColor(source)
 
   GT.settings.legendColors[name] = newColor;
 
-  if (GT.redrawFromLegendTimeoutHandle != null)
+  if (GT.redrawGridsquareColorsTimeoutHandle != null)
   {
-    nodeTimers.clearTimeout(GT.redrawFromLegendTimeoutHandle);
+    nodeTimers.clearTimeout(GT.redrawGridsquareColorsTimeoutHandle);
   }
-  GT.redrawFromLegendTimeoutHandle = nodeTimers.setTimeout(redrawGrids, 500);
+  GT.redrawGridsquareColorsTimeoutHandle = nodeTimers.setTimeout(() =>
+  {
+    setPins();
+    redrawGrids();
+  }, 500);
+}
+
+// Band colors (Settings -> Band Colors): GT.bandColors starts as the built-in table,
+// GT.settings.bandColors holds only the bands the user changed
+GT.defaultBandColors = null;
+GT.redrawBandColorsTimeout = null;
+const BAND_COLOR_REGEXP = /^[0-9A-Fa-f]{6}$/;
+
+function applyBandColorSettings()
+{
+  if (GT.defaultBandColors == null) GT.defaultBandColors = { ...GT.bandColors };
+
+  for (const band in GT.defaultBandColors)
+  {
+    const saved = GT.settings.bandColors[band];
+    // Saved colors end up in HTML style attributes, so only plain 6-digit hex is used
+    GT.bandColors[band] = (typeof saved === "string" && BAND_COLOR_REGEXP.test(saved)) ? saved : GT.defaultBandColors[band];
+  }
+  renderBandColorSettings();
+}
+
+function renderBandColorSettings()
+{
+  bandColorsDiv.innerHTML = GT.colorBands.map((band) =>
+    `<div class="bandColorCell">` +
+    `<b id="bandColorLabel_${band}" style="color:#${GT.bandColors[band]};">${band}</b><br />` +
+    `<input type="color" value="#${GT.bandColors[band]}" oninput="changeBandColor('${band}', this)" />` +
+    `</div>`
+  ).join("");
+}
+
+function changeBandColor(band, input)
+{
+  const hex = input.value.substring(1).toUpperCase();
+  GT.bandColors[band] = hex;
+
+  if (hex === GT.defaultBandColors[band].toUpperCase())
+  {
+    delete GT.settings.bandColors[band];
+  }
+  else
+  {
+    GT.settings.bandColors[band] = hex;
+  }
+
+  document.getElementById("bandColorLabel_" + band).style.color = "#" + hex;
+
+  nodeTimers.clearTimeout(GT.redrawBandColorsTimeout);
+  GT.redrawBandColorsTimeout = nodeTimers.setTimeout(redrawBandColors, 500);
+}
+
+function resetBandColors()
+{
+  GT.settings.bandColors = {};
+  applyBandColorSettings();
+  redrawBandColors();
+}
+
+// Everything drawn with band colors; Stats and Lookup windows pick them up on their next render
+function redrawBandColors()
+{
+  GT.redrawBandColorsTimeout = null;
+  setPins();
+  redrawGrids();
+  redrawSpots();
+  goProcessRoster();
+  updateRosterFeeds();
 }
 
 function changeMapLayer()
@@ -380,36 +452,89 @@ function changeMapBackgroundColor(fromSettings = true)
   mapDiv.style.backgroundColor = mapBackgroundColor.value = GT.settings.map.backgroundColor[GT.currentMapIndex];
 }
 
+// Map pins are drawn in the band colors: 12x20, rendered at 2x for sharpness and shown at half scale
+const PIN_SCALE = 2;
+
+// variant: "live" (diamond head), "worked" (plain) or "confirmed" (black V cap)
+function drawBandPin(color, variant)
+{
+  const canvas = document.createElement("canvas");
+  canvas.width = 12 * PIN_SCALE;
+  canvas.height = 20 * PIN_SCALE;
+  const g = canvas.getContext("2d");
+  g.scale(PIN_SCALE, PIN_SCALE);
+
+  // Needle
+  g.strokeStyle = "#000";
+  g.lineWidth = 1.8;
+  g.beginPath();
+  g.moveTo(6, 12);
+  g.lineTo(6, 20);
+  g.stroke();
+
+  // Head: a diamond for live, otherwise a circle tapering to a point
+  const head = new Path2D();
+  if (variant == "live")
+  {
+    head.moveTo(6, 0.6);
+    head.lineTo(11.4, 6.4);
+    head.lineTo(6, 13.8);
+    head.lineTo(0.6, 6.4);
+  }
+  else
+  {
+    const cx = 6, cy = 5.6, r = 5.1, tipY = 13.8;
+    const a = Math.acos(r / (tipY - cy));
+    head.moveTo(cx, tipY);
+    head.arc(cx, cy, r, Math.PI / 2 + a, Math.PI / 2 - a + Math.PI * 2);
+  }
+  head.closePath();
+  g.fillStyle = color;
+  g.fill(head);
+  g.strokeStyle = "#000";
+  g.lineWidth = 1;
+  g.stroke(head);
+
+  if (variant == "confirmed")
+  {
+    g.fillStyle = "#000";
+    g.beginPath();
+    g.moveTo(0.8, 0);
+    g.lineTo(11.2, 0);
+    g.lineTo(11.2, 1.9);
+    g.lineTo(6, 8.7);
+    g.lineTo(0.8, 1.9);
+    g.closePath();
+    g.fill();
+  }
+
+  return new ol.style.Icon({
+    img: canvas,
+    scale: 1 / PIN_SCALE,
+    anchorYUnits: "pixels",
+    anchorXUnits: "pixels",
+    anchor: [6 * PIN_SCALE, 18 * PIN_SCALE]
+  });
+}
+
 function setPins()
 {
-  GT.colorLeafletPins = {};
-  GT.colorLeafletQPins = {};
-  GT.colorLeafletQPins.worked = {};
-  GT.colorLeafletQPins.confirmed = {};
-  for (let i = 0; i < GT.colorBands.length; i++)
+  GT.colorPins = {};
+  GT.colorQPins = {};
+  GT.colorQPins.worked = {};
+  GT.colorQPins.confirmed = {};
+  for (const band of GT.colorBands)
   {
-    let pin = new ol.style.Icon({
-      src: "img/pin/" + GT.colorBands[i] + ".png",
-      anchorYUnits: "pixels",
-      anchorXUnits: "pixels",
-      anchor: [5, 18]
-    });
-    GT.colorLeafletPins[GT.colorBands[i]] = pin;
-    pin = new ol.style.Icon({
-      src: "img/pin/" + GT.colorBands[i] + "w.png",
-      anchorYUnits: "pixels",
-      anchorXUnits: "pixels",
-      anchor: [5, 18]
-    });
-    GT.colorLeafletQPins.worked[GT.colorBands[i]] = pin;
-    pin = new ol.style.Icon({
-      src: "img/pin/" + GT.colorBands[i] + "q.png",
-      anchorYUnits: "pixels",
-      anchorXUnits: "pixels",
-      anchor: [5, 18]
-    });
-    GT.colorLeafletQPins.confirmed[GT.colorBands[i]] = pin;
+    const color = "#" + (GT.bandColors[band] || "888888");
+    GT.colorPins[band] = drawBandPin(color, "live");
+    GT.colorQPins.worked[band] = drawBandPin(color, "worked");
+    GT.colorQPins.confirmed[band] = drawBandPin(color, "confirmed");
   }
+  // MH4 pins with Mixed bands can cover many bands, so they use the Gridsquare Colors worked/confirmed colors
+  GT.mixedPins = {
+    worked: drawBandPin(GT.settings.legendColors.QSO, "worked"),
+    confirmed: drawBandPin(GT.settings.legendColors.QSL, "worked")
+  };
 }
 
 function registerLegendContextMenus()

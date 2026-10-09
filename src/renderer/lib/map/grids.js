@@ -196,15 +196,12 @@ function qthToQsoBox(iQTH, iHash, locked, DE, worked, confirmed, band)
 
     if (GT.pushPinMode == false && entityVisibility == true) { GT.layerSources.qso.addFeature(newRect.rectangle); }
 
-    let newPin = GT.colorLeafletQPins.worked[band];
-    if (confirmed) newPin = GT.colorLeafletQPins.confirmed[band];
-
     let lat = (LL.la1 + LL.la2) / 2;
     let lon = (LL.lo1 + LL.lo2) / 2;
 
     newRect.rectangle.pin = iconFeature(
       ol.proj.fromLonLat([lon, lat]),
-      GT.settings.app.sixWideMode == 1 ? newPin : GT.pushPinIconOff,
+      qsoPinIcon(band, confirmed),
       zIndex,
       "pin"
     );
@@ -238,7 +235,13 @@ function qthToQsoBox(iQTH, iHash, locked, DE, worked, confirmed, band)
       return rect.rectangle;
     }
     if (worked && !rect.rectangle.worked) rect.rectangle.worked = worked;
-    if (confirmed && !rect.rectangle.confirmed) { rect.rectangle.confirmed = confirmed; }
+    if (confirmed && !rect.rectangle.confirmed)
+    {
+      rect.rectangle.confirmed = confirmed;
+      // The pin was chosen when the grid was first worked, switch it to confirmed
+      rect.rectangle.pin.getStyle().setImage(qsoPinIcon(band, true));
+      rect.rectangle.pin.changed();
+    }
     borderColor = GT.mainBorderColor;
     if (myDEbox) borderWeight = 1;
     zIndex = 2;
@@ -261,6 +264,17 @@ function qthToQsoBox(iQTH, iHash, locked, DE, worked, confirmed, band)
     });
     rect.rectangle.setStyle(featureHoverStyle);
   }
+}
+
+// Pins use the band color with a V cap when confirmed, except MH4 with Mixed bands where a grid
+// can hold many bands: plain pins in the Gridsquare Colors worked/confirmed colors
+function qsoPinIcon(band, confirmed)
+{
+  if (GT.settings.app.sixWideMode == 0 && GT.settings.app.gtBandFilter.length == 0)
+  {
+    return confirmed ? GT.mixedPins.confirmed : GT.mixedPins.worked;
+  }
+  return confirmed ? GT.colorQPins.confirmed[band] : GT.colorQPins.worked[band];
 }
 
 function MapGridRect(qth, age = 0) {
@@ -401,7 +415,7 @@ function qthToBox(iQTH, iDEcallsign, iCQ, locked, DE, band, wspr, hash, fromLive
 
       newRect.rectangle.pin = iconFeature(
         ol.proj.fromLonLat([lon, lat]),
-        GT.colorLeafletPins[band],
+        GT.colorPins[band],
         zIndex,
         "pin"
       );
@@ -631,12 +645,24 @@ function removeDazzleGrid()
 
 function dazzleGrid(LL)
 {
+  let bounds = [[LL.lo1, LL.la1], [LL.lo2, LL.la2]];
+  startDazzle(rectangle(bounds, "dazzle"));
+}
+
+// Same dazzle for a DXCC entity's shape (roster DXCC click)
+function dazzleDxcc(dxcc)
+{
+  startDazzle(shapeFeature("dazzle", GT.dxccInfo[dxcc].geo, "dazzle", "#00000000", "#000", 5));
+}
+
+// Animated dashed outline on the temp layer for 3 seconds; GT.dazzleGrid is animated by the flight-path code
+function startDazzle(feature)
+{
   removeDazzleGrid();
 
-  let borderWeight = 5;
-  let bounds = [[LL.lo1, LL.la1], [LL.lo2, LL.la2]];
+  let borderWeight = 3;
 
-  GT.dazzleGrid = rectangle(bounds, "dazzle");
+  GT.dazzleGrid = feature;
 
   const featureStyle = new ol.style.Style({
     stroke: new ol.style.Stroke({

@@ -505,6 +505,10 @@ table.rosterTable td:last-child {
   border-style: outset;
 }
 
+#feedsBoxDiv .mapItem {
+  padding: 4px;
+}
+
 .feedBands {
   display: grid;
   grid-template-columns: repeat(4, auto);
