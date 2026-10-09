@@ -20,10 +20,13 @@ function onDrop(event)
   if (event.target.draggable && event.target.nodeName === "TH")
   {
     let dragName = event.dataTransfer.getData("Column");
-    let columns = rosterColumnList(CR.rosterSettings.columns, { Callsign: true });
+    // Reorder the full column order: Band and Mode can be shown without being enabled,
+    // and hidden columns keep their place
+    let columns = CR.rosterSettings.columnOrder.slice();
     const movingColumn = columns.indexOf(dragName);
     const targetColumn = columns.indexOf(event.target.attributes.name.nodeValue);
-  
+    if (movingColumn === -1 || targetColumn === -1 || movingColumn === targetColumn) return;
+
     if (movingColumn < targetColumn)
     {
       columns.splice(targetColumn + 1, 0, dragName);

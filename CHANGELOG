@@ -373,6 +373,8 @@ Call Roster:
     An ignored spotter's spots are dropped from the Call Roster and the map (W3LPL also covers W3LPL-# and W3LPL-2)
   Mode column: CW, SSB and RTTY now have their own colors, other unlisted modes show in white
   DXCC column: click to center the map on the entity and highlight (dazzle) its outline, like clicking a Grid
+  Fixed dragging the Band or Mode column when it is shown for multiple bands or modes but not enabled
+    Hidden columns now keep their place when other columns are dragged
 Map / UI:
   New DX/CW feed button in the main button panel (shown when a feed is enabled) shows feed spots on the map
     Green target: a rig is on the spot's band and mode
