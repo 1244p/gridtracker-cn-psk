@@ -47,6 +47,11 @@ function updateFeedViews()
   feedDxCluster.checked = GT.settings.app.feedDxCluster;
   feedCwSkimmer.checked = GT.settings.app.feedCwSkimmer;
 
+  // Feed Spot Age slider: only while a feed is on
+  feedMaxAgeDiv.style.display = (show && (GT.settings.app.feedDxCluster || GT.settings.app.feedCwSkimmer)) ? "" : "none";
+  feedMaxAge.value = GT.settings.app.feedMaxAge;
+  feedMaxAgeTd.innerHTML = toDHMS(GT.settings.app.feedMaxAge);
+
   // Main button panel: shown while either feed is on, grey when the map option is off
   const active = feedsActive();
   dxcwFeedButton.style.display = (active.dx || active.cw) ? "" : "none";
@@ -66,6 +71,12 @@ function setFeedSettings()
   }
   gtChatSendFeeds();
   updateFeedViews();
+}
+
+function changeFeedMaxAge()
+{
+  GT.settings.app.feedMaxAge = parseInt(feedMaxAge.value);
+  feedMaxAgeTd.innerHTML = toDHMS(GT.settings.app.feedMaxAge);
 }
 
 function updateGTFlagViews()

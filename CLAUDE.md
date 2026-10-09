@@ -45,6 +45,7 @@ ws.close();
 - Try window sizes without touching the real window: `Emulation.setDeviceMetricsOverride { width, height, deviceScaleFactor: 1, mobile: false }`, then `Emulation.clearDeviceMetricsOverride`.
 - Screenshot with `Page.captureScreenshot` and view the PNG.
 - Hot-swap CSS: set the `style.css` `<link>`'s `href` to `…/style.css?v=<Date.now()>`, wait ~1s. Don't await the link's `onload`, it doesn't fire reliably.
+- Don't use `scrollIntoView()` in the main window: even with `body` `overflow: hidden` it scrolls the page and cuts off the top (undo with `document.scrollingElement.scrollTop = 0`).
 - Shortly after launch the main UI may not be laid out yet (everything measures 0), so wait ~10s.
 - Only open the debugging port on dev runs. Anything local can control the app while it's open.
 

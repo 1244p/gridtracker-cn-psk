@@ -375,6 +375,8 @@
     "settings.feeds.dxCluster.hover": "DXクラスターのスポットをコールロースターに表示します",
     "settings.feeds.cwSkimmer.label": "CWスキマーフィード",
     "settings.feeds.cwSkimmer.hover": "CWスキマーのスポットをコールロースターに表示します",
+    "settings.feeds.maxAge.label": "フィードスポットの最大保持時間",
+    "settings.feeds.maxAge.hover": "最後に報告されてからフィードスポットを地図上に表示しておく時間",
     "renderRoster.feedSpotted": "{spotter} によるスポット",
     "renderRoster.feedReadOnly": "{spotter} によるスポット。この局と交信するには、リグを {band} {mode} に設定してください",
     "roster.feeds.label": "フィード",

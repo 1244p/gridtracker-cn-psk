@@ -79,6 +79,8 @@ const def_settings = {
     spottingEnable: true,
     feedDxCluster: false,
     feedCwSkimmer: false,
+    // Seconds a feed spot is kept (shown on the map) after it was last spotted
+    feedMaxAge: 300,
     loadAdifAtStartup: false,
     locale: "en",
     lookupLoginCq: "",

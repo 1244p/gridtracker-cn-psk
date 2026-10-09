@@ -399,7 +399,7 @@ function redrawDxcwSpots()
   for (const hash in GT.feedCallsigns)
   {
     const callObj = GT.feedCallsigns[hash];
-    if (callObj.fullGrid.length < 4 || now - callObj.age > FEED_MAX_AGE_SEC) continue;
+    if (callObj.fullGrid.length < 4 || now - callObj.age > GT.settings.app.feedMaxAge) continue;
     // Map shows all bands and modes: only the map's own Band / Mode filter applies (the Feeds tab lists are roster-only)
     if (!validateMapBandAndMode(callObj.band, callObj.mode)) continue;
 
@@ -551,7 +551,6 @@ const FEED_MODE_REGEXP = /^[A-Z0-9-]{1,12}$/;
 const FEED_SPOTTER_REGEXP = /^[A-Z0-9/#-]{1,20}$/;
 const FEED_GRID_REGEXP = /^[A-R]{2}[0-9]{2}([A-X]{2})?$/;
 const FEED_OFFSET_REGEXP = /^[0-9]{1,9}$/;
-const FEED_MAX_AGE_SEC = 300;
 // Roster filters read SR/DF/DT from the WSJT-X message; feed spots have none, so those filters pass them
 const FEED_MESSAGE = Object.freeze({});
 
@@ -673,7 +672,7 @@ function pruneFeedCallsigns(now)
 
   for (const hash in GT.feedCallsigns)
   {
-    if (now - GT.feedCallsigns[hash].age > FEED_MAX_AGE_SEC)
+    if (now - GT.feedCallsigns[hash].age > GT.settings.app.feedMaxAge)
     {
       delete GT.feedCallsigns[hash];
     }

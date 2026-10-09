@@ -375,6 +375,8 @@
     "settings.feeds.dxCluster.hover": "Show DX Cluster spots in the Call Roster",
     "settings.feeds.cwSkimmer.label": "CW Skimmer Feed",
     "settings.feeds.cwSkimmer.hover": "Show CW Skimmer spots in the Call Roster",
+    "settings.feeds.maxAge.label": "Feed Spot Max Age",
+    "settings.feeds.maxAge.hover": "How long a feed spot is kept on the map after it was last spotted",
     "renderRoster.feedSpotted": "Spotted by {spotter}",
     "renderRoster.feedReadOnly": "Spotted by {spotter}. Set a rig to {band} {mode} to work this station",
     "roster.feeds.label": "Feeds",

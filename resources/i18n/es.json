@@ -375,6 +375,8 @@
   "settings.feeds.dxCluster.hover": "Mostrar spots del DX Cluster en la lista de llamadas",
   "settings.feeds.cwSkimmer.label": "Fuente CW Skimmer",
   "settings.feeds.cwSkimmer.hover": "Mostrar spots del CW Skimmer en la lista de llamadas",
+  "settings.feeds.maxAge.label": "Antigüedad máx. de spots de la fuente",
+  "settings.feeds.maxAge.hover": "Cuánto tiempo se mantiene un spot de la fuente en el mapa desde su último reporte",
   "renderRoster.feedSpotted": "Reportado por {spotter}",
   "renderRoster.feedReadOnly": "Reportado por {spotter}. Pon un equipo en {band} {mode} para trabajar esta estación",
   "roster.feeds.label": "Fuentes",

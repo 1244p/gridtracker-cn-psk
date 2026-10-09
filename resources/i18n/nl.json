@@ -375,6 +375,8 @@
   "settings.feeds.dxCluster.hover": "Toon DX Cluster-spots in de Oproeplijst",
   "settings.feeds.cwSkimmer.label": "CW Skimmer-feed",
   "settings.feeds.cwSkimmer.hover": "Toon CW Skimmer-spots in de Oproeplijst",
+  "settings.feeds.maxAge.label": "Max. leeftijd feed-spots",
+  "settings.feeds.maxAge.hover": "Hoe lang een feed-spot op de kaart blijft na de laatste melding",
   "renderRoster.feedSpotted": "Gespot door {spotter}",
   "renderRoster.feedReadOnly": "Gespot door {spotter}. Zet een transceiver op {band} {mode} om dit station te werken",
   "roster.feeds.label": "Feeds",

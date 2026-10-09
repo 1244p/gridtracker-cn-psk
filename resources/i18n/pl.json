@@ -375,6 +375,8 @@
   "settings.feeds.dxCluster.hover": "Pokaż spoty DX Cluster na Liście wywołań",
   "settings.feeds.cwSkimmer.label": "Kanał CW Skimmer",
   "settings.feeds.cwSkimmer.hover": "Pokaż spoty CW Skimmer na Liście wywołań",
+  "settings.feeds.maxAge.label": "Maks. wiek spotów z kanału",
+  "settings.feeds.maxAge.hover": "Jak długo spot z kanału pozostaje na mapie od ostatniego zgłoszenia",
   "renderRoster.feedSpotted": "Zgłoszone przez {spotter}",
   "renderRoster.feedReadOnly": "Zgłoszone przez {spotter}. Ustaw radio na {band} {mode}, aby nawiązać łączność z tą stacją",
   "roster.feeds.label": "Kanały",

@@ -375,6 +375,8 @@
     "settings.feeds.dxCluster.hover": "Afficher les spots DX Cluster dans la liste d'appels",
     "settings.feeds.cwSkimmer.label": "Flux CW Skimmer",
     "settings.feeds.cwSkimmer.hover": "Afficher les spots CW Skimmer dans la liste d'appels",
+    "settings.feeds.maxAge.label": "Âge max. des spots du flux",
+    "settings.feeds.maxAge.hover": "Durée pendant laquelle un spot du flux reste sur la carte après son dernier signalement",
     "renderRoster.feedSpotted": "Signalé par {spotter}",
     "renderRoster.feedReadOnly": "Signalé par {spotter}. Réglez une radio sur {band} {mode} pour contacter cette station",
     "roster.feeds.label": "Flux",

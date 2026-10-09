@@ -376,6 +376,8 @@
     "settings.feeds.dxCluster.hover": "在呼叫清單中顯示 DX Cluster 報告",
     "settings.feeds.cwSkimmer.label": "CW Skimmer 資料來源",
     "settings.feeds.cwSkimmer.hover": "在呼叫清單中顯示 CW Skimmer 報告",
+    "settings.feeds.maxAge.label": "資料來源點位最長保留時間",
+    "settings.feeds.maxAge.hover": "資料來源點位在最後一次回報後在地圖上保留的時間",
     "renderRoster.feedSpotted": "由 {spotter} 報告",
     "renderRoster.feedReadOnly": "由 {spotter} 報告。將電台設定為 {band} {mode} 即可聯絡該電台",
     "roster.feeds.label": "資料來源",

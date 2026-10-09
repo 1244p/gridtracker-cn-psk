@@ -378,6 +378,8 @@
     "settings.feeds.dxCluster.hover": "DX-Cluster-Spots in der Rufzeichenliste anzeigen",
     "settings.feeds.cwSkimmer.label": "CW-Skimmer-Feed",
     "settings.feeds.cwSkimmer.hover": "CW-Skimmer-Spots in der Rufzeichenliste anzeigen",
+    "settings.feeds.maxAge.label": "Max. Feed-Spot-Alter",
+    "settings.feeds.maxAge.hover": "Wie lange ein Feed-Spot nach der letzten Meldung auf der Karte bleibt",
     "renderRoster.feedSpotted": "Gemeldet von {spotter}",
     "renderRoster.feedReadOnly": "Gemeldet von {spotter}. Stellen Sie ein Funkgerät auf {band} {mode}, um diese Station zu arbeiten",
     "roster.feeds.label": "Feeds",

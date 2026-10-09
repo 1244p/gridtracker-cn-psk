@@ -375,6 +375,8 @@
     "settings.feeds.dxCluster.hover": "Mostra gli spot DX Cluster nell'elenco delle chiamate",
     "settings.feeds.cwSkimmer.label": "Feed CW Skimmer",
     "settings.feeds.cwSkimmer.hover": "Mostra gli spot CW Skimmer nell'elenco delle chiamate",
+    "settings.feeds.maxAge.label": "Età max degli spot del feed",
+    "settings.feeds.maxAge.hover": "Per quanto tempo uno spot del feed resta sulla mappa dopo l'ultima segnalazione",
     "renderRoster.feedSpotted": "Segnalato da {spotter}",
     "renderRoster.feedReadOnly": "Segnalato da {spotter}. Imposta una radio su {band} {mode} per collegare questa stazione",
     "roster.feeds.label": "Feed",
