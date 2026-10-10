@@ -6,13 +6,6 @@
 Object.assign(CR,
 {
   developerMode: false,
-  ignoredCalls: {},
-  ignoredCQ: {},
-  ignoredDxcc: {},
-  ignoredGrid: {},
-  ignoredCQz: {},
-  ignoredITUz: {},
-  ignoredSpotters: {},
   modes: {},
   modes_phone: {},
   day: 0,
@@ -87,9 +80,11 @@ CR.profiles = {
     roster: () => GT.activeRoster,
     exceptions: () => GT.activeExceptions,
     audioAlerts: () => GT.activeAudioAlerts,
+    // Holds ignoredCalls, ignoredCQ, ignoredDxcc, ignoredGrid, ignoredCQz and ignoredITUz
+    ignores: () => GT.settings,
     // Entries from instances that are gone, or unticked in a multi-instance roster, are hidden
     filter: (callObj) => (callObj.instance in GT.instances) && !(GT.instanceCount > 1 && GT.instances[callObj.instance].crEnable === false),
-    excludedColumns: { Spotter: true },
+    excludedColumns: { Spotter: true, CQ: true, DEDXCC: true },
     watchersTest: {},
     alertTimer: null
   },
@@ -101,9 +96,13 @@ CR.profiles = {
     roster: () => GT.settings.feedRoster,
     exceptions: () => GT.settings.feedRoster.exceptions,
     audioAlerts: () => GT.settings.feedAudioAlerts,
-    // Bands and modes unticked in the Feeds tab, and ignored spotters, are hidden
-    filter: (callObj) => window.opener.feedBandAllowed(callObj) && window.opener.feedModeAllowed(callObj) && !(callObj.spotter.split("-")[0] in CR.ignoredSpotters),
-    excludedColumns: { Rig: true, dB: true, DT: true, Spot: true },
+    // Its own ignores, not the Call Roster's (no CQ ignores: CR.ignoredCQ is always empty), plus DE DXCC (the spotter's)
+    ignores: () => GT.settings.feedRoster,
+    // Bands unticked in the Feeds tab, modes unticked in the Mode selector, and ignored spotters, are hidden
+    // (mode groups are chosen in Settings -> Feeds)
+    filter: (callObj) => window.opener.feedBandAllowed(callObj) && GT.settings.feedRoster.feeds.modes[callObj.mode] !== false &&
+      !(callObj.spotter.split("-")[0] in CR.ignoredSpotters),
+    excludedColumns: { Rig: true, dB: true, DT: true, Spot: true, Calling: true },
     watchersTest: {},
     alertTimer: null
   }
@@ -120,8 +119,21 @@ Object.defineProperties(CR, {
   watchers: { get: () => CR.profile.settings().watchers },
   watchersTest: { get: () => CR.profile.watchersTest },
   // Settings for the roster window itself, shared by both tabs (filters, controls, always on top, focus delay)
-  windowSettings: { get: () => GT.settings.roster }
+  windowSettings: { get: () => GT.settings.roster },
+  // Spotter ignores only exist for the Feed Roster
+  ignoredSpotters: { get: () => GT.settings.ignoredSpotters, set: (value) => { GT.settings.ignoredSpotters = value; } }
 });
+
+// Each roster's ignores, read and written (Clear All replaces the object) in its profile's settings;
+// one the roster doesn't have (the Feed Roster's CQ, the Call Roster's DE DXCC) reads as empty
+const NO_IGNORES = Object.freeze({});
+for (const key of ["ignoredCalls", "ignoredCQ", "ignoredDxcc", "ignoredDeDxcc", "ignoredGrid", "ignoredCQz", "ignoredITUz"])
+{
+  Object.defineProperty(CR, key, {
+    get: () => CR.profile.ignores()[key] || NO_IGNORES,
+    set: (value) => { CR.profile.ignores()[key] = value; }
+  });
+}
 
 function isFeedRoster()
 {
@@ -168,28 +180,16 @@ const WATCHER_CLEAN_NAME_REGEX = /[$%.'"\\,<>]/g;
 const MSG_CLEAN_REGEX = /[^A-Z0-9/<>\s]+/g;
 const CALLING_CLEAN_REGEX = /[^A-Z0-9/\s]+/g;
 const CALLSIGN_CLEAN_REGEX = /[^A-Z0-9/]+/g;
+// Spotters can carry a skimmer suffix, e.g. W3LPL-# or W3LPL-2
+const SPOTTER_CLEAN_REGEX = /[^A-Z0-9/#-]+/g;
 
 // awardTrackersActive is a much smaller object than awardTracker
 CR.awardTrackersActive = GT.settings.awardTracker;
 CR.awardTracker = {};
 
-CR.ignoredCalls = GT.settings.ignoredCalls;
-CR.ignoredDxcc = GT.settings.ignoredDxcc;
-CR.ignoredGrid = GT.settings.ignoredGrid;
-CR.ignoredCQz = GT.settings.ignoredCQz;
-CR.ignoredITUz = GT.settings.ignoredITUz;
-CR.ignoredCQ = GT.settings.ignoredCQ;
-CR.ignoredSpotters = GT.settings.ignoredSpotters;
-
+// The ignores live in GT.settings (see the CR.ignored* accessors above), so there's nothing to copy back
 function storeBlocks(render = true)
 {
-  GT.settings.ignoredCalls = CR.ignoredCalls;
-  GT.settings.ignoredDxcc = CR.ignoredDxcc;
-  GT.settings.ignoredGrid = CR.ignoredGrid;
-  GT.settings.ignoredCQz = CR.ignoredCQz;
-  GT.settings.ignoredITUz = CR.ignoredITUz;
-  GT.settings.ignoredCQ = CR.ignoredCQ;
-  GT.settings.ignoredSpotters = CR.ignoredSpotters;
   if (render)
   {
     renderIgnoresTab();
@@ -381,6 +381,8 @@ function runRoster(render)
   if (render)
   {
     renderRoster(CR.callRoster, rosterSettings);
+    // New spots can bring new modes
+    if (CR.profile === CR.profiles.feed) updateFeedModes();
   }
 
   const profile = CR.profile;
@@ -515,6 +517,15 @@ function instanceChange(what)
 
 function updateInstances()
 {
+  // The Feed Roster uses this selector for its modes
+  if (CR.visibleProfile === CR.profiles.feed)
+  {
+    updateFeedModes();
+    return;
+  }
+  CR.feedModesKey = null;
+  instancesDiv.classList.remove("feedModes");
+
   if (GT.instanceCount > 1)
   {
     let instances = GT.instances;
@@ -543,6 +554,34 @@ function updateInstances()
     instancesDiv.innerHTML = "";
     instancesWrapper.style.display = "none";
   }
+}
+
+// Feed Roster: the instance selector as a Mode selector, always shown (with the extended controls, like the
+// instances), listing every mode seen in feed spots, ticked or not; it wraps past 80% of the window's width
+function updateFeedModes()
+{
+  const modes = feedSettings().modes;
+  const list = Object.keys(modes).sort();
+
+  // Redrawn only when the list or a tick changes, so a click isn't lost to a redraw
+  const key = list.map(mode => mode + (modes[mode] === false ? "-" : "+")).join(",");
+  if (key !== CR.feedModesKey)
+  {
+    CR.feedModesKey = key;
+    instancesDiv.innerHTML = list.map(mode =>
+      `<div class='button' style='background-color:blue;'>` +
+      `<label style='cursor:pointer;'>` +
+      `<input type='checkbox' ${modes[mode] === false ? "" : "checked"} onchange='feedModeChange(this, "${mode}");' />&nbsp;${mode}</label></div>`
+    ).join("");
+  }
+  instancesDiv.classList.add("feedModes");
+  instancesWrapper.style.display = (CR.windowSettings.controls && CR.windowSettings.controlsExtended) ? "" : "none";
+}
+
+function feedModeChange(checkbox, mode)
+{
+  feedSettings().modes[mode] = checkbox.checked;
+  viewRoster();
 }
 
 function processStatus(newMessage)
@@ -1142,6 +1181,7 @@ function initSelectors()
     Grid: ignoreGridValue,
     CQ: ignoreCqDiv,
     DXCC: ignoreDxccSelect,
+    DEDXCC: ignoreDxccSelect,
     CQz: ignoreCqzSelect,
     ITUz: ignoreItuzSelect,
     Spotter: ignoreCallsignValue
@@ -1212,6 +1252,10 @@ function addNewIgnore()
   {
     ignoreDxcc(ignoreDxccSelect.value);
   }
+  else if (CR.ignoreType === "DEDXCC")
+  {
+    ignoreDeDxcc(ignoreDxccSelect.value);
+  }
   else if (CR.ignoreType === "Grid")
   {
     ignoreGrid(ignoreGridValue.value);
@@ -1257,6 +1301,14 @@ function ignoreCallsign(callsign)
 function ignoreDxcc(dxcc)
 {
   CR.ignoredDxcc[dxcc] = true;
+  storeBlocks();
+  viewRoster();
+}
+
+// Feed Roster: spots from spotters in this DXCC
+function ignoreDeDxcc(dxcc)
+{
+  CR.ignoredDeDxcc[dxcc] = true;
   storeBlocks();
   viewRoster();
 }
@@ -1329,6 +1381,13 @@ function deleteDxccIgnore(key)
   viewRoster();
 }
 
+function deleteDeDxccIgnore(key)
+{
+  delete CR.ignoredDeDxcc[key];
+  storeBlocks();
+  viewRoster();
+}
+
 function deleteGridIgnore(key)
 {
   delete CR.ignoredGrid[key];
@@ -1367,6 +1426,13 @@ function clearAllCallsignIgnores()
 function clearAllDxccIgnores()
 {
   CR.ignoredDxcc = {};
+  storeBlocks();
+  viewRoster();
+}
+
+function clearAllDeDxccIgnores()
+{
+  CR.ignoredDeDxcc = {};
   storeBlocks();
   viewRoster();
 }
@@ -1431,8 +1497,7 @@ function closeSettings()
 
 function feedsActive()
 {
-  const active = window.opener.feedsActive();
-  return active.dx || active.cw;
+  return window.opener.feedsActive();
 }
 
 // From the main window when feed settings change: the Feed Roster tab exists only while a feed is on
@@ -1479,16 +1544,36 @@ function showRosterTab(name, render = true)
     setVisual();
     viewRoster();
   }
+  updateInstances();
 }
 
-// Settings that only one roster has: Feeds tab, Spotter ignores and Spotter column for the Feed Roster;
-// dB / DT / Freq exceptions and Clear Roster on Band change for the Call Roster
+// Settings that only one roster has: Feeds tab, Spotter ignores and watchers, and Spotter column for the Feed Roster;
+// CQ ignores, Calling watchers, dB / DT / Freq exceptions and Clear Roster on Band change for the Call Roster
 function updateRosterTabControls()
 {
   const feed = isFeedRoster();
 
   feedsbox.style.display = feed ? "" : "none";
   ignoreSpotterOption.style.display = feed ? "" : "none";
+  ignoreCqOption.style.display = feed ? "none" : "";
+  watcherSpotterOption.style.display = feed ? "" : "none";
+  watcherCallingOption.style.display = feed ? "none" : "";
+  // DXCC exceptions: the Feed Roster has the spotted station's (DX) and the spotter's (DE)
+  noMyDeDxccDiv.style.display = onlyMyDeDxccDiv.style.display = hideSelfSpotsDiv.style.display = feed ? "" : "none";
+  setI18nText(noMyDxccLabel, feed ? "roster.secondary.exceptions.noMyDXDXCC" : "roster.secondary.exceptions.noMyDXCC");
+  setI18nText(onlyMyDxccLabel, feed ? "roster.secondary.exceptions.onlyMyDXDXCC" : "roster.secondary.exceptions.onlyMyDXCC");
+  // DXCC ignores: likewise DX DXCC and DE DXCC in the Feed Roster
+  ignoreDeDxccOption.style.display = feed ? "" : "none";
+  ignoreDxccOption.textContent = feed ? I18N("rosterColumns.DXCC.feedHeader") : "DXCC";
+  if (CR.dxccIgnoreItem)
+  {
+    CR.dxccIgnoreItem.visible = !feed;
+    CR.dxDxccIgnoreItem.visible = feed;
+  }
+  if (watcherType.value === (feed ? "Calling" : "Spotter"))
+  {
+    watcherTypeChanged("Callsign");
+  }
   clearRosterOnBandChangeDiv.style.display = feed ? "none" : "";
   minDbDiv.style.display = feed ? "none" : "";
   maxDTDiv.style.display = feed ? "none" : "";
@@ -1499,7 +1584,7 @@ function updateRosterTabControls()
   moreExceptionsButton.style.display = feed ? "none" : "";
   wantRRCQDiv.style.display = feed ? "none" : "";
 
-  if (!feed && CR.ignoreType === "Spotter")
+  if ((!feed && (CR.ignoreType === "Spotter" || CR.ignoreType === "DEDXCC")) || (feed && CR.ignoreType === "CQ"))
   {
     ignoreTypeSelect.value = "Callsign";
     ignoreTypeChanged("Callsign");
@@ -1532,10 +1617,6 @@ function renderFeedsTab()
   feedAlertScriptEnable.checked = feeds.alertScript;
   feedNotificationsEnable.checked = feeds.notifications;
 
-  feedModeDigital.checked = !("Digital" in feeds.hiddenModes);
-  feedModePhone.checked = !("Phone" in feeds.hiddenModes);
-  feedModeCW.checked = !("CW" in feeds.hiddenModes);
-
   feedBands.innerHTML = window.opener.feedBandPlan().map(band =>
     `<label class='feedBand' style='color:#${GT.bandColors[band]};'>` +
     `<input type='checkbox' ${band in feeds.hiddenBands ? "" : "checked"} onchange='feedBandChanged(this, "${band}")' />${band}</label>`
@@ -1552,20 +1633,6 @@ function feedBandChanged(checkbox, band)
   else
   {
     hidden[band] = true;
-  }
-  viewRoster();
-}
-
-function feedModeChanged(checkbox, type)
-{
-  const hidden = feedSettings().hiddenModes;
-  if (checkbox.checked)
-  {
-    delete hidden[type];
-  }
-  else
-  {
-    hidden[type] = true;
   }
   viewRoster();
 }
@@ -1592,7 +1659,7 @@ function renderIgnoresTab()
     html.push("</table></div>");
   }
 
-  if (Object.keys(CR.ignoredCQ).length > 0)
+  if (!isFeedRoster() && Object.keys(CR.ignoredCQ).length > 0)
   {
     clearString = "<th style='cursor:pointer;' onclick='clearAllCQIgnores()'>Clear All</th>";
     html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>CQ</th>${clearString}</tr>`);
@@ -1609,10 +1676,21 @@ function renderIgnoresTab()
   if (Object.keys(CR.ignoredDxcc).length > 0)
   {
     clearString = "<th style='cursor:pointer;' onclick='clearAllDxccIgnores()'>Clear All</th>";
-    html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>DXCC</th>${clearString}</tr>`);
+    html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${isFeedRoster() ? I18N("rosterColumns.DXCC.feedHeader") : "DXCC"}</th>${clearString}</tr>`);
     Object.keys(CR.ignoredDxcc).sort().forEach(function (key)
     {
       html.push(`<tr><td align='left' style='color:#FFA500;'>${GT.dxccToAltName[key]} (${GT.dxccInfo[key].pp})</td><td style='cursor:pointer;' onclick='deleteDxccIgnore("${key}")'><img src='img/trash_24x48.png' style='height:17px;margin:-1px;margin-bottom:-3px;padding:0px'></td></tr>`);
+    });
+    html.push("</table></div>");
+  }
+
+  if (isFeedRoster() && Object.keys(CR.ignoredDeDxcc).length > 0)
+  {
+    clearString = "<th style='cursor:pointer;' onclick='clearAllDeDxccIgnores()'>Clear All</th>";
+    html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${I18N("rosterColumns.DEDXCC.header")}</th>${clearString}</tr>`);
+    Object.keys(CR.ignoredDeDxcc).sort().forEach(function (key)
+    {
+      html.push(`<tr><td align='left' style='color:#5caeff;'>${GT.dxccToAltName[key]} (${GT.dxccInfo[key].pp})</td><td style='cursor:pointer;' onclick='deleteDeDxccIgnore("${key}")'><img src='img/trash_24x48.png' style='height:17px;margin:-1px;margin-bottom:-3px;padding:0px'></td></tr>`);
     });
     html.push("</table></div>");
   }
@@ -1842,6 +1920,9 @@ function applyActiveRoster()
   cqOnly.checked = CR.activeExceptions.cqOnly;
   noMyDxcc.checked = CR.activeExceptions.noMyDxcc;
   onlyMyDxcc.checked = CR.activeExceptions.onlyMyDxcc;
+  noMyDeDxcc.checked = CR.activeExceptions.noMyDeDxcc === true;
+  onlyMyDeDxcc.checked = CR.activeExceptions.onlyMyDeDxcc === true;
+  hideSelfSpots.checked = CR.activeExceptions.hideSelfSpots === true;
 
   usesLoTW.checked = CR.activeExceptions.usesLoTW;
   useseQSL.checked = CR.activeExceptions.useseQSL;
@@ -1964,6 +2045,9 @@ function setRosterTop()
 
 function setRosterTimeView()
 {
+  // Roster Max Age goes up to 1 hour in the Feed Roster (spots stay longer than decodes), 5 minutes in the Call Roster.
+  // The limit is set first, so the value isn't clipped to the other roster's limit
+  rosterTime.max = isFeedRoster() ? 3600 : 300;
   rosterTime.value = CR.rosterSettings.rosterTime;
   rosterTimeTd.innerHTML = toDHMS(Number(rosterTime.value));
 }
@@ -2021,7 +2105,7 @@ function handleContextMenu(ev)
         CR.GridMenu.popup();
       }
     }
-    else if (name === "CQ")
+    else if (name === "CQ" && !isFeedRoster())
     {
       if (CR.callRoster[parent.id].DXcall !== "CQ")
       {
@@ -2045,6 +2129,11 @@ function handleContextMenu(ev)
       let dxcc = parseInt(dxcca[1]);
       CR.targetDxcc = dxcc;
       CR.dxccMenu.popup();
+    }
+    else if (name === "DEDXCC" && CR.callRoster[parent.id] && CR.callRoster[parent.id].callObj.spotterDxcc > 0)
+    {
+      CR.targetDxcc = CR.callRoster[parent.id].callObj.spotterDxcc;
+      CR.deDxccMenu.popup();
     }
     else
     {
@@ -3306,6 +3395,10 @@ function watcherTypeChanged(value)
   {
     watcherTextTh.innerHTML = I18N("alerts.QRZ.speech");
   }
+  if (value === "Spotter")
+  {
+    watcherTextTh.innerHTML = I18N("rosterColumns.Spotter.header");
+  }
   if (value === "Grid")
   {
     watcherTextTh.innerHTML = I18N("roster.controls.hunting.grid");
@@ -3337,6 +3430,11 @@ function watcherOnText()
     {
       testCallsign = true;
       watcherText.value = watcherText.value.toUpperCase().replace(CALLING_CLEAN_REGEX, "");
+    }
+    else if (watcherType.value === "Spotter")
+    {
+      testCallsign = true;
+      watcherText.value = watcherText.value.toUpperCase().replace(SPOTTER_CLEAN_REGEX, "");
     }
     else if (watcherType.value === "Grid")
     {
@@ -3856,7 +3954,7 @@ function createRestOfMenus()
   CR.spotterMenu.append(new MenuItem({
     type: "normal",
     label: I18N("roster.add.watcher.label"),
-    click: function () { addWatcher(spotterBaseCallsign(CR.targetHash), "Callsign"); }
+    click: function () { addWatcher(spotterBaseCallsign(CR.targetHash), "Spotter"); }
   }));
 
   CR.spotterMenu.append(new MenuItem({
@@ -3933,14 +4031,39 @@ function createRestOfMenus()
     click: function () { openIgnores(); }
   }));
 
+  // The Feed Roster's DXCC is the spotted station's ("DX DXCC"); updateRosterTabControls() shows the matching item
   CR.dxccMenu = new Menu();
-  CR.dxccMenu.append(new MenuItem({
+  CR.dxccIgnoreItem = new MenuItem({
     type: "normal",
     label: I18N("roster.menu.IgnoreDXCC"),
+    visible: !isFeedRoster(),
     click: function () { ignoreDxcc(CR.targetDxcc); }
-  }));
+  });
+  CR.dxccMenu.append(CR.dxccIgnoreItem);
+  CR.dxDxccIgnoreItem = new MenuItem({
+    type: "normal",
+    label: I18N("roster.menu.IgnoreDXDXCC"),
+    visible: isFeedRoster(),
+    click: function () { ignoreDxcc(CR.targetDxcc); }
+  });
+  CR.dxccMenu.append(CR.dxDxccIgnoreItem);
 
   CR.dxccMenu.append(new MenuItem({
+    type: "normal",
+    label: I18N("roster.menu.EditIgnores"),
+    enabled: true,
+    click: function () { openIgnores(); }
+  }));
+
+  // Feed Roster: the spotter's DXCC ("DE DXCC" column)
+  CR.deDxccMenu = new Menu();
+  CR.deDxccMenu.append(new MenuItem({
+    type: "normal",
+    label: I18N("roster.menu.IgnoreDEDXCC"),
+    click: function () { ignoreDeDxcc(CR.targetDxcc); }
+  }));
+
+  CR.deDxccMenu.append(new MenuItem({
     type: "normal",
     label: I18N("roster.menu.EditIgnores"),
     enabled: true,

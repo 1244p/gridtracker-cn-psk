@@ -626,7 +626,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div id="gtFlagButton" onclick="toggleGtMap();" class="iconButton" title="Toggle View GridTracker Spotters">
           <img id="gtFlagImg" src="" class="buttonImg" />
         </div>
-        <div id="dxcwFeedButton" onclick="toggleDxcwFeed();" class="iconButton" style="display:none;" title="Toggle DX Cluster / CW Skimmer Feed" data-i18n="settings.map.dxcwFeed.hover">
+        <div id="dxcwFeedButton" onclick="toggleDxcwFeed();" class="iconButton" style="display:none;" title="Toggle DX Feeds" data-i18n="settings.map.dxcwFeed.hover">
           <img id="dxcwFeedImg" src="img/feed_menu.png" class="buttonImg" />
         </div>
       </div>
@@ -773,8 +773,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           onclick="openSettingsTab(event, 'mapSettingsDiv')">Map</button>
         <button data-i18n="settings.Grids.label" class="settingsTablinks"
           onclick="openSettingsTab(event, 'gridSettingsDiv')">Grids</button>
-        <button data-i18n="settings.BandColors.label" class="settingsTablinks"
-          onclick="openSettingsTab(event, 'bandColorsSettingsDiv')">Band Colors</button>
+        <button data-i18n="settings.Colors.label" class="settingsTablinks"
+          onclick="openSettingsTab(event, 'bandColorsSettingsDiv')">Colors</button>
+        <button data-i18n="settings.Feeds.label" id="feedsSettingsButton" class="settingsTablinks" style="display:none;"
+          onclick="openSettingsTab(event, 'feedsSettingsDiv')">Feeds</button>
         <button data-i18n="settings.Logging.label" class="settingsTablinks"
           onclick="openSettingsTab(event, 'logSettingsDiv')">Logging</button>
         <button data-i18n="settings.alerts.AudioAlert.label" id="audioalertbut" class="settingsTablinks"
@@ -1228,16 +1230,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <input  type="checkbox" id="oamsBandActivityNeighbors" onclick="setOamsBandActivityNeighbors(this);" />
             </td>
           </tr>
-          <tr id="feedDxClusterTr">
-            <td data-i18n="settings.feeds.dxCluster.label" for="feedDxCluster">DX Cluster Feed</td>
+          <tr id="dxFeedsTr">
+            <td data-i18n="settings.feeds.dxFeeds.label" for="dxFeedsEnable">DX Feeds</td>
             <td>
-              <input title="Show DX Cluster spots in the Call Roster" type="checkbox" id="feedDxCluster" onclick="setFeedSettings();" />
-            </td>
-          </tr>
-          <tr id="feedCwSkimmerTr">
-            <td data-i18n="settings.feeds.cwSkimmer.label" for="feedCwSkimmer">CW Skimmer Feed</td>
-            <td>
-              <input title="Show CW Skimmer spots in the Call Roster" type="checkbox" id="feedCwSkimmer" onclick="setFeedSettings();" />
+              <input data-i18n="settings.feeds.dxFeeds.hover" title="DX Cluster and CW Skimmer spots in the Feed Roster and on the map" type="checkbox" id="dxFeedsEnable" onclick="setFeedSettings();" />
             </td>
           </tr>
           </table>
@@ -1692,6 +1688,77 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       </div>
     </div>
     <div id="gridSettingsDiv" class="settingsTabcontent">
+
+      <div class="mapItem">
+        <table align="center">
+          <tr>
+            <td data-i18n="settings.grids.opacity.label" align="center">Grid Opacity</td>
+            <td align="left" id="showOpacityTd">10%</td>
+          </tr>
+          <tr align="center">
+            <td colspan="2">
+              <input type="range" min="16" max="255" value="136" step="1" class="slider" id="opacityValue"
+                oninput="changeGridOpacity()" onkeyup="redrawGrids()" onmouseup="redrawGrids()" />
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="mapItem">
+        <table align="center">
+          <tr>
+            <td data-i18n="settings.grids.splitQSL.label" align="center">Split QSL Grids</td>
+          </tr>
+          <tr align="center">
+            <td title="Toggle Split QSL Grids with Live Grids">
+              <input type="checkbox" id="splitQSLValue" onclick="changeSplitQSL()" />
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="mapItem">
+        <table align="center">
+          <tr>
+            <td data-i18n="settings.grids.AutoMouseOver.label" align="center">Auto Mouseover Grids</td>
+          </tr>
+          <tr align="center">
+            <td title="Toggle Auto Mouseover Grid Tables">
+              <input type="checkbox" id="mouseOverValue" onclick="changeMouseOverValue()" />
+            </td>
+          </tr>
+        </table>
+      </div>
+      <br />
+      <div class="mapItem" id="decayRateDiv">
+        <table align="center">
+          <tr align="center">
+            <td data-i18n="settings.grids.liveDecay.label" align="center">Live Grid Decay</td>
+          </tr>
+          <tr>
+            <td align="center" id="decayRateTd">10m</td>
+          </tr>
+          <tr align="center">
+            <td colspan="2">
+              <input type="range" min="0" max="86400" value="600" step="60" class="slider" id="gridDecay"
+                oninput="changeGridDecay()" onkeyup="redrawGrids()" onmouseup="redrawGrids()" />
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="mapItem">
+        <table align="center">
+          <tr>
+            <td align="center">'All Grid Overlay' Opacity</td>
+            <td align="left" id="allGridOpacityTd">100%</td>
+          </tr>
+          <tr align="center">
+            <td colspan="2">
+              <input type="range" min="0.01" max="1" value="1" step="0.01" class="slider" id="allGridOpacityValue" oninput="setAllGridOpacity();" />
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div id="bandColorsSettingsDiv" class="settingsTabcontent">
       <div class="mapItem" style="padding:10px;">
         <div class="mapItem" style="height:49px;">
           <table align="center">
@@ -1796,78 +1863,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
       </div>
       <br />
-
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.grids.opacity.label" align="center">Grid Opacity</td>
-            <td align="left" id="showOpacityTd">10%</td>
-          </tr>
-          <tr align="center">
-            <td colspan="2">
-              <input type="range" min="16" max="255" value="136" step="1" class="slider" id="opacityValue"
-                oninput="changeGridOpacity()" onkeyup="redrawGrids()" onmouseup="redrawGrids()" />
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.grids.splitQSL.label" align="center">Split QSL Grids</td>
-          </tr>
-          <tr align="center">
-            <td title="Toggle Split QSL Grids with Live Grids">
-              <input type="checkbox" id="splitQSLValue" onclick="changeSplitQSL()" />
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.grids.AutoMouseOver.label" align="center">Auto Mouseover Grids</td>
-          </tr>
-          <tr align="center">
-            <td title="Toggle Auto Mouseover Grid Tables">
-              <input type="checkbox" id="mouseOverValue" onclick="changeMouseOverValue()" />
-            </td>
-          </tr>
-        </table>
-      </div>
-      <br />
-      <div class="mapItem" id="decayRateDiv">
-        <table align="center">
-          <tr align="center">
-            <td data-i18n="settings.grids.liveDecay.label" align="center">Live Grid Decay</td>
-          </tr>
-          <tr>
-            <td align="center" id="decayRateTd">10m</td>
-          </tr>
-          <tr align="center">
-            <td colspan="2">
-              <input type="range" min="0" max="86400" value="600" step="60" class="slider" id="gridDecay"
-                oninput="changeGridDecay()" onkeyup="redrawGrids()" onmouseup="redrawGrids()" />
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td align="center">'All Grid Overlay' Opacity</td>
-            <td align="left" id="allGridOpacityTd">100%</td>
-          </tr>
-          <tr align="center">
-            <td colspan="2">
-              <input type="range" min="0.01" max="1" value="1" step="0.01" class="slider" id="allGridOpacityValue" oninput="setAllGridOpacity();" />
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-    <div id="bandColorsSettingsDiv" class="settingsTabcontent">
-      <div class="mapItem" style="padding:10px;">
+      <div class="mapItem" id="bandColorsBox" style="padding:10px;">
         <div class="mapItem" style="height:49px;">
           <table align="center">
             <tr align="center">
@@ -1881,6 +1877,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           </table>
         </div>
         <div id="bandColorsDiv" class="bandColorsGrid"></div>
+      </div>
+    </div>
+    <div id="feedsSettingsDiv" class="settingsTabcontent">
+      <div class="mapItem" style="padding:10px;">
+        <div class="mapItem feedGroups">
+          <div data-i18n="roster.feeds.modes.label">Modes</div>
+          <label class="feedGroup"><span data-i18n="roster.feeds.modes.CW">CW</span><input type="checkbox" id="feedCWEnable" onchange="changeFeedGroups()" /></label>
+          <label class="feedGroup"><span data-i18n="roster.feeds.modes.Digital">Digital</span><input type="checkbox" id="feedDigitalEnable" onchange="changeFeedGroups()" /></label>
+          <label class="feedGroup"><span data-i18n="roster.feeds.modes.Phone">Phone</span><input type="checkbox" id="feedPhoneEnable" onchange="changeFeedGroups()" /></label>
+        </div>
+        <div class="mapItem feedGroups" id="feedMaxAgeDiv">
+          <div data-i18n="settings.feeds.maxAge.label">Feed Spot Max Age</div>
+          <input type="range" min="60" max="3600" value="300" step="60" class="slider" id="feedMaxAge"
+            data-i18n="settings.feeds.maxAge.hover" title="How long a feed spot is kept on the map after it was last spotted"
+            oninput="changeFeedMaxAge()" onkeyup="redrawDxcwSpots()" onmouseup="redrawDxcwSpots()" />
+          <div id="feedMaxAgeTd">5m</div>
+        </div>
+        <div class="mapItem feedGroups" id="feedsClearDiv">
+          <div data-i18n="settings.feeds.clear.label" class="button" title="Clears all feed data received" onclick="clearFeedCallsigns()">Clear All Feeds</div>
+        </div>
       </div>
     </div>
     <div id="mapSettingsDiv" class="settingsTabcontent" style="background-color: #00000044; text-shadow: 0 0 5px #000000ff">
@@ -1990,13 +2006,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <label data-i18n="settings.map.RXSpotPath.width.label" >Spot Path Width</label>
           <input type="range" min="0" max="5" value="1.5" step="0.05" class="slider" id="spotWidthValue" oninput="spotPathChange();" onkeyup="redrawSpots();" onmouseup="redrawSpots();" />
           <label id="spotWidthTd">1.5</label>
-        </div>
-        <div class="flexItem" id="feedMaxAgeDiv">
-          <label data-i18n="settings.feeds.maxAge.label">Feed Spot Max Age</label>
-          <input type="range" min="60" max="3600" value="300" step="60" class="slider" id="feedMaxAge"
-            data-i18n="settings.feeds.maxAge.hover" title="How long a feed spot is kept on the map after it was last spotted"
-            oninput="changeFeedMaxAge()" onkeyup="redrawDxcwSpots()" onmouseup="redrawDxcwSpots()" />
-          <label id="feedMaxAgeTd">5m</label>
         </div>
         <div class="flexItem" id="equatorColorDiv">
           <label data-i18n="settings.map.equator.color.label" for="equatorColorValue">Meridians and Parallels Color</label>
@@ -2662,12 +2671,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               </div>
               <div>
                 <input type="checkbox" id="noMyDxcc" onchange="onlyMyDxcc.checked=false; huntingValueChanged(onlyMyDxcc); huntingValueChanged(this);" />
-                <label data-i18n="roster.secondary.exceptions.noMyDXCC" for="noMyDxcc">Not My DXCC</label>
+                <label id="noMyDxccLabel" data-i18n="roster.secondary.exceptions.noMyDXCC" for="noMyDxcc">Not My DXCC</label>
               </div>
               <div>
                 <input type="checkbox" id="onlyMyDxcc" onchange="noMyDxcc.checked=false; huntingValueChanged(noMyDxcc); huntingValueChanged(this);" />
-                <label data-i18n="roster.secondary.exceptions.onlyMyDXCC" for="onlyMyDxcc">Only My DXCC</label>
-              </div>   
+                <label id="onlyMyDxccLabel" data-i18n="roster.secondary.exceptions.onlyMyDXCC" for="onlyMyDxcc">Only My DXCC</label>
+              </div>
+              <div id="noMyDeDxccDiv">
+                <input type="checkbox" id="noMyDeDxcc" onchange="onlyMyDeDxcc.checked=false; huntingValueChanged(onlyMyDeDxcc); huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.noMyDEDXCC" for="noMyDeDxcc">Not My DE DXCC</label>
+              </div>
+              <div id="onlyMyDeDxccDiv">
+                <input type="checkbox" id="onlyMyDeDxcc" onchange="noMyDeDxcc.checked=false; huntingValueChanged(noMyDeDxcc); huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.onlyMyDEDXCC" for="onlyMyDeDxcc">Only My DE DXCC</label>
+              </div>
+              <div id="hideSelfSpotsDiv">
+                <input type="checkbox" id="hideSelfSpots" onchange="huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.hideSelfSpots" for="hideSelfSpots">Hide Self-Spotters</label>
+              </div>
               <div id="onlySpotDiv">
                 <input type="checkbox" id="onlySpot" onchange="huntingValueChanged(this);" />
                 <label data-i18n="roster.secondary.exceptions.spottedMe" for="onlySpot">Spotted Me</label>

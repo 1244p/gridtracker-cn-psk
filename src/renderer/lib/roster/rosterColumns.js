@@ -1,7 +1,7 @@
 const DEFAULT_COLUMN_ORDER = [
-  "Callsign", "Band", "Mode", "Calling", "Spotter", "Rig", "Wanted", "Grid", "Msg",
-  "POTA", "DXCC", "Flag", "DXM", "State", "County", "Cont",
-  "dB", "Freq", "DT", "Dist", "Azim", 
+  "Callsign", "Band", "Mode", "Calling", "Spotter", "CQ", "Rig", "Wanted", "Grid", "Msg",
+  "POTA", "DXCC", "DEDXCC", "Flag", "DXM", "State", "County", "Cont",
+  "dB", "Freq", "DT", "Dist", "Azim",
   "CQz", "ITUz", "PX",
   "LoTW", "eQSL", "OQRS",
   "Life", "Spot",  "Age", "UTC"
@@ -126,6 +126,16 @@ const ROSTER_COLUMNS = {
     })
   },
 
+  // Feed Roster (in place of Calling): ✔ when the spot's comment says the station is calling CQ
+  CQ: {
+    compare: callObjSimpleComparer("CQ"),
+    tableData: (callObj) => ({
+      style: "color: #0F0;",
+      align: "center",
+      html: callObj.CQ ? "&#10004;" : "&nbsp;"
+    })
+  },
+
   // Station that reported a DX Cluster / CW Skimmer spot; blank for WSJT-X decodes
   Spotter: {
     label: () => I18N("rosterColumns.Spotter.header"),
@@ -134,7 +144,7 @@ const ROSTER_COLUMNS = {
     tableData: (callObj) => ({
       name: "Spotter",
       style: "color: #5caeff;",
-      html: callObj.spotter ? formatCallsign(callObj.spotter) : "&nbsp;"
+      html: callObj.spotter ? formatCallsign(callObj.spotterHTML || callObj.spotter) : "&nbsp;"
     })
   },
 
@@ -146,8 +156,11 @@ const ROSTER_COLUMNS = {
     })
   },
 
+  // The Feed Roster calls it "DX DXCC", next to its "DE DXCC" (the spotter's)
   DXCC: {
+    label: () => isFeedRoster() ? I18N("rosterColumns.DXCC.feedHeader") : "DXCC",
     compare: (a, b) => window.opener.myDxccCompare(a.callObj, b.callObj),
+    tableHeader: () => ({ html: isFeedRoster() ? I18N("rosterColumns.DXCC.feedHeader") : "DXCC" }),
     tableData: (callObj) => ({
       title: GT.dxccInfo[callObj.dxcc].pp,
       name: `DXCC (${callObj.dxcc})`,
@@ -155,6 +168,19 @@ const ROSTER_COLUMNS = {
       // Like Grid: click centers the map on the entity and dazzles it (not in compact mode, where the tile click starts a QSO)
       onClick: CR.rosterSettings.compact ? null : `centerOnDxcc(${callObj.dxcc})`,
       html: GT.dxccToAltName[callObj.dxcc]
+    })
+  },
+
+  // Feed Roster: DXCC entity of the station that reported the spot
+  DEDXCC: {
+    label: () => I18N("rosterColumns.DEDXCC.header"),
+    compare: getterSimpleComparer((elem) => elem.callObj.spotterDxcc > 0 ? GT.dxccToAltName[elem.callObj.spotterDxcc] : null),
+    tableHeader: () => ({ html: I18N("rosterColumns.DEDXCC.header"), title: I18N("rosterColumns.DEDXCC.title") }),
+    tableData: (callObj) => ({
+      title: callObj.spotterDxcc > 0 ? GT.dxccInfo[callObj.spotterDxcc].pp : "",
+      name: "DEDXCC",
+      style: "color: #5caeff;",
+      html: callObj.spotterDxcc > 0 ? GT.dxccToAltName[callObj.spotterDxcc] : "&nbsp;"
     })
   },
 

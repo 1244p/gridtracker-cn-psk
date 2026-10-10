@@ -385,9 +385,11 @@ function createFeedTipTable(toolElement)
   if (!callObj) return 0;
 
   const now = timeNowSec();
-  const LL = squareToCenter(callObj.fullGrid);
-  const bearing = parseInt(MyCircle.bearing(GT.myLat, GT.myLon, LL.a, LL.o));
-  const dist = parseInt(MyCircle.distance(GT.myLat, GT.myLon, LL.a, LL.o) * MyCircle.validateRadius(distanceUnit.value));
+  // No grid: placed at its DXCC entity's center, so distance and azimuth are to there
+  const hasGrid = callObj.fullGrid.length >= 4;
+  const LL = hasGrid ? squareToCenter(callObj.fullGrid) : dxccCenter(callObj.dxcc);
+  const bearing = LL ? parseInt(MyCircle.bearing(GT.myLat, GT.myLon, LL.a, LL.o)) : 0;
+  const dist = LL ? parseInt(MyCircle.distance(GT.myLat, GT.myLon, LL.a, LL.o) * MyCircle.validateRadius(distanceUnit.value)) : 0;
   const freq = callObj.freq > 0 ? formatMhz(callObj.freq / 1000) + " " : "";
 
   myTooltip.innerHTML = `
@@ -397,11 +399,11 @@ function createFeedTipTable(toolElement)
       <tr><td>${I18N("rosterColumns.Spotter.header")}</td><td style='color:#5caeff'>${formatCallsign(callObj.spotter)}</td></tr>
       <tr><td>${I18N("gt.feedSpot.age")}</td><td>${toDHMS(now - callObj.age)}</td></tr>
       ${callObj.dxcc > 0 ? `<tr><td>${I18N("gt.newCallList.DXCC")}</td><td style='color:orange;'>${GT.dxccToAltName[callObj.dxcc]} <font color='lightgreen'>(${GT.dxccInfo[callObj.dxcc].pp})</font></td></tr>` : ""}
-      <tr><td>${I18N("gt.callsignBox.Grid")}</td><td style='${lookupGridCellStyle(callObj.grid, callObj.band, callObj.mode)}'>${callObj.fullGrid}</td></tr>
+      ${hasGrid ? `<tr><td>${I18N("gt.callsignBox.Grid")}</td><td style='${lookupGridCellStyle(callObj.grid, callObj.band, callObj.mode)}'>${callObj.fullGrid}</td></tr>` : ""}
       <tr><td>${I18N("gt.newCallList.Freq")}</td><td style='color:lightgreen'>${freq}<font color='yellow'>(${callObj.band})</font></td></tr>
       <tr><td>${I18N("gt.newCallList.Mode")}</td><td style='color:orange'>${callObj.mode}</td></tr>
-      <tr><td>${I18N("gt.feedSpot.dist")}</td><td style='color:cyan'>${dist}${distanceUnit.value.toLowerCase()}</td></tr>
-      <tr><td>${I18N("gt.feedSpot.azim")}</td><td style='color:yellow'>${bearing}&deg;</td></tr>
+      ${LL ? `<tr><td>${I18N("gt.feedSpot.dist")}</td><td style='color:cyan'>${dist}${distanceUnit.value.toLowerCase()}</td></tr>
+      <tr><td>${I18N("gt.feedSpot.azim")}</td><td style='color:yellow'>${bearing}&deg;</td></tr>` : ""}
       <tr><td>${I18N("gt.newCallList.Time")}</td><td>${userTimeString(callObj.time * 1000)}</td></tr>
       <tr><td>${I18N("gt.newCallList.LastMsg")}</td><td>${htmlEntities(callObj.msg)}</td></tr>
     </table>`;

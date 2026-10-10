@@ -272,7 +272,8 @@
             <td>
               <select id="watcherType" onchange="watcherTypeChanged(this.value)">
                 <option value="Callsign" data-i18n="roster.controls.hunting.callsign">Callsign</option>
-                <option value="Calling" data-i18n="alerts.QRZ.speech">Calling</option>
+                <option value="Calling" id="watcherCallingOption" data-i18n="alerts.QRZ.speech">Calling</option>
+                <option value="Spotter" id="watcherSpotterOption" data-i18n="rosterColumns.Spotter.header">Spotter</option>
                 <option value="Grid" data-i18n="roster.controls.hunting.grid">Grid</option>
                 <option value="Message" data-i18n="gt.WSJTMessage.Message">Message</option>
               </select>
@@ -391,12 +392,13 @@
           Entity&nbsp;
           <select id="ignoreTypeSelect" onchange="ignoreTypeChanged(this.value);">
             <option value="Callsign" selected="true">Callsign</option>
-            <option value="CQ">CQ</option>
-            <option value="DXCC">DXCC</option>
+            <option value="CQ" id="ignoreCqOption">CQ</option>
+            <option value="DXCC" id="ignoreDxccOption">DXCC</option>
+            <option value="DEDXCC" id="ignoreDeDxccOption" data-i18n="rosterColumns.DEDXCC.header">DE DXCC</option>
             <option value="Grid">Grid</option>
             <option value="CQz">CQ Zone</option>
             <option value="ITUz">ITU Zone</option>
-            <option value="Spotter" id="ignoreSpotterOption" data-i18n="roster.ignores.spotters">Spotters</option>
+            <option value="Spotter" id="ignoreSpotterOption" data-i18n="roster.ignores.spotters">Spotter</option>
           </select>
           <input id="ignoreCallsignValue" type="text" class="inputTextValue" size="10" style="text-transform: uppercase;" />
           <input id="ignoreGridValue" type="text" class="inputTextValue"  oninput="gridInputValidate(this)" size="10"/>
@@ -431,15 +433,6 @@
               </td>
             </tr>
           </table>
-        </div>
-        <br />
-        <div class="mapItem" align="center">
-          <div data-i18n="roster.feeds.modes.label">Modes</div>
-          <div class="feedBands feedModes">
-            <label class="feedBand"><input type="checkbox" id="feedModeDigital" onchange="feedModeChanged(this, 'Digital')" /><span data-i18n="roster.feeds.modes.Digital">Digital</span></label>
-            <label class="feedBand"><input type="checkbox" id="feedModePhone" onchange="feedModeChanged(this, 'Phone')" /><span data-i18n="roster.feeds.modes.Phone">Phone</span></label>
-            <label class="feedBand"><input type="checkbox" id="feedModeCW" onchange="feedModeChanged(this, 'CW')" /><span data-i18n="roster.feeds.modes.CW">CW</span></label>
-          </div>
         </div>
         <br />
         <div class="mapItem" align="center">
@@ -620,12 +613,24 @@
             </div>
               <div>
                 <input type="checkbox" id="noMyDxcc" onchange="onlyMyDxcc.checked=false; huntingValueChanged(onlyMyDxcc); huntingValueChanged(this);" />
-                <label data-i18n="roster.secondary.exceptions.noMyDXCC" for="noMyDxcc">Not My DXCC</label>
+                <label id="noMyDxccLabel" data-i18n="roster.secondary.exceptions.noMyDXCC" for="noMyDxcc">Not My DXCC</label>
               </div>
               <div>
                 <input type="checkbox" id="onlyMyDxcc" onchange="noMyDxcc.checked=false; huntingValueChanged(noMyDxcc); huntingValueChanged(this);" />
-                <label data-i18n="roster.secondary.exceptions.onlyMyDXCC" for="onlyMyDxcc">Only My DXCC</label>
-              </div>   
+                <label id="onlyMyDxccLabel" data-i18n="roster.secondary.exceptions.onlyMyDXCC" for="onlyMyDxcc">Only My DXCC</label>
+              </div>
+              <div id="noMyDeDxccDiv">
+                <input type="checkbox" id="noMyDeDxcc" onchange="onlyMyDeDxcc.checked=false; huntingValueChanged(onlyMyDeDxcc); huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.noMyDEDXCC" for="noMyDeDxcc">Not My DE DXCC</label>
+              </div>
+              <div id="onlyMyDeDxccDiv">
+                <input type="checkbox" id="onlyMyDeDxcc" onchange="noMyDeDxcc.checked=false; huntingValueChanged(noMyDeDxcc); huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.onlyMyDEDXCC" for="onlyMyDeDxcc">Only My DE DXCC</label>
+              </div>
+              <div id="hideSelfSpotsDiv">
+                <input type="checkbox" id="hideSelfSpots" onchange="huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.hideSelfSpots" for="hideSelfSpots">Hide Self-Spotters</label>
+              </div>
 
              <div id="onlySpotDiv">
               <input type="checkbox" id="onlySpot" onchange="huntingValueChanged(this);" />

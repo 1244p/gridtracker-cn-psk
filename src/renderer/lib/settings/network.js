@@ -43,18 +43,24 @@ function updateOffAirServicesViews()
 function updateFeedViews()
 {
   const show = GT.settings.app.offAirServicesEnable == true && GT.settings.map.offlineMode == false;
-  feedDxClusterTr.style.display = feedCwSkimmerTr.style.display = show ? "" : "none";
-  feedDxCluster.checked = GT.settings.app.feedDxCluster;
-  feedCwSkimmer.checked = GT.settings.app.feedCwSkimmer;
+  dxFeedsTr.style.display = show ? "" : "none";
+  dxFeedsEnable.checked = GT.settings.app.dxFeeds;
 
-  // Feed Spot Age slider: only while a feed is on
-  feedMaxAgeDiv.style.display = (show && (GT.settings.app.feedDxCluster || GT.settings.app.feedCwSkimmer)) ? "" : "none";
+  // Settings -> Feeds tab: only while DX Feeds is on (if it's the open tab when it goes, General opens instead)
+  const active = feedsActive();
+  feedsSettingsButton.style.display = active ? "" : "none";
+  if (!active && feedsSettingsDiv.style.display === "block")
+  {
+    openSettingsTab(generalbut, "generalSettingsDiv");
+  }
+  feedCWEnable.checked = GT.settings.app.feedCW;
+  feedDigitalEnable.checked = GT.settings.app.feedDigital;
+  feedPhoneEnable.checked = GT.settings.app.feedPhone;
   feedMaxAge.value = GT.settings.app.feedMaxAge;
   feedMaxAgeTd.innerHTML = toDHMS(GT.settings.app.feedMaxAge);
 
-  // Main button panel: shown while either feed is on, grey when the map option is off
-  const active = feedsActive();
-  dxcwFeedButton.style.display = (active.dx || active.cw) ? "" : "none";
+  // Main button panel: shown while DX Feeds is on, grey when the map option is off
+  dxcwFeedButton.style.display = active ? "" : "none";
   dxcwFeedImg.style.filter = GT.settings.map.dxcwFeed ? "" : "grayscale(1)";
 
   redrawDxcwSpots();
@@ -63,14 +69,23 @@ function updateFeedViews()
 
 function setFeedSettings()
 {
-  GT.settings.app.feedDxCluster = feedDxCluster.checked;
-  GT.settings.app.feedCwSkimmer = feedCwSkimmer.checked;
-  if (!GT.settings.app.feedDxCluster && !GT.settings.app.feedCwSkimmer)
+  GT.settings.app.dxFeeds = dxFeedsEnable.checked;
+  if (!GT.settings.app.dxFeeds)
   {
     clearFeedCallsigns();
   }
   gtChatSendFeeds();
   updateFeedViews();
+}
+
+// Settings -> Feeds: CW / Digital / Phone, the mode groups asked of the RTSN server
+function changeFeedGroups()
+{
+  GT.settings.app.feedCW = feedCWEnable.checked;
+  GT.settings.app.feedDigital = feedDigitalEnable.checked;
+  GT.settings.app.feedPhone = feedPhoneEnable.checked;
+  gtChatSendFeeds();
+  dropUnwantedFeedGroups();
 }
 
 function changeFeedMaxAge()

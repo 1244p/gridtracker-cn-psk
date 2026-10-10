@@ -760,8 +760,7 @@ function applyAudioAlertsMedia()
 
 function showAudioAlertsRoster(name)
 {
-  const active = feedsActive();
-  if (name == "feed" && !(active.dx || active.cw)) name = "call";
+  if (name == "feed" && !feedsActive()) name = "call";
   GT.audioAlertsRoster = name;
   applyAudioAlertsRoster();
   setVisualAudioAlerts();
@@ -800,11 +799,10 @@ function showAudioAlertCounts()
   }
 }
 
-// The sub-tabs exist only while a feed is on; otherwise Audio Alerts is the Call Roster's
+// The sub-tabs exist only while DX Feeds is on; otherwise Audio Alerts is the Call Roster's
 function updateAudioAlertsRosterTabs()
 {
-  const active = feedsActive();
-  const anyActive = active.dx || active.cw;
+  const anyActive = feedsActive();
   audioAlertsRosterTabs.style.display = anyActive ? "" : "none";
   if (!anyActive && audioAlertsIsFeed())
   {
@@ -1013,6 +1011,10 @@ function setVisualAudioAlerts()
   audioAlertRulesDiv.style.display = feed ? "none" : "";
   wantRRCQDiv.style.display = feed ? "none" : "";
   moreExceptionsButton.style.display = feed ? "none" : "";
+  // DXCC exceptions: the Feed Roster has the spotted station's (DX) and the spotter's (DE)
+  noMyDeDxccDiv.style.display = onlyMyDeDxccDiv.style.display = hideSelfSpotsDiv.style.display = feed ? "" : "none";
+  setI18nText(noMyDxccLabel, feed ? "roster.secondary.exceptions.noMyDXDXCC" : "roster.secondary.exceptions.noMyDXCC");
+  setI18nText(onlyMyDxccLabel, feed ? "roster.secondary.exceptions.onlyMyDXDXCC" : "roster.secondary.exceptions.onlyMyDXCC");
 
   if (roster.logbook.referenceNeed == LOGBOOK_AWARD_TRACKER)
   {
@@ -1079,6 +1081,9 @@ function applyExceptions()
   cqOnly.checked = exceptions.cqOnly;
   noMyDxcc.checked = exceptions.noMyDxcc;
   onlyMyDxcc.checked = exceptions.onlyMyDxcc;
+  noMyDeDxcc.checked = exceptions.noMyDeDxcc === true;
+  onlyMyDeDxcc.checked = exceptions.onlyMyDeDxcc === true;
+  hideSelfSpots.checked = exceptions.hideSelfSpots === true;
   useseQSL.checked = exceptions.useseQSL;
   onlySpot.checked = exceptions.onlySpot;
   usesOQRS.checked = exceptions.usesOQRS;

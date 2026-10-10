@@ -148,7 +148,7 @@ function pruneRosterEntries(roster, maxAge, now)
 function goProcessRoster() {
     const now = timeNowSec();
     pruneRosterEntries(GT.callRoster, 300, now);
-    pruneRosterEntries(GT.feedRoster, GT.settings.app.feedMaxAge, now);
+    pruneRosterEntries(GT.feedRoster, FEED_KEEP_SECONDS, now);
 
     if (GT.callRosterWindowInitialized) {
         try {
@@ -171,7 +171,7 @@ function scheduleFeedRosterUpdate()
 function goProcessFeedRoster()
 {
     GT.feedRosterUpdateTimer = null;
-    pruneRosterEntries(GT.feedRoster, GT.settings.app.feedMaxAge, timeNowSec());
+    pruneRosterEntries(GT.feedRoster, FEED_KEEP_SECONDS, timeNowSec());
 
     if (GT.callRosterWindowInitialized) {
         try {

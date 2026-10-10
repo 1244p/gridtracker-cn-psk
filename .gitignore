@@ -12,3 +12,4 @@ mac-signing-certificate.p12
 .claude/
 resources/media/desktop.ini
 src/main/map_keys.json
+temp

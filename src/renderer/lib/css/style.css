@@ -586,9 +586,36 @@ a {
   color: yellow;
 }
 
-/* Settings -> Band Colors: as many 70px columns as fit, adding rows as the window narrows */
-#bandColorsSettingsDiv > .mapItem {
+/* Settings -> Colors, Band Colors: as many 70px columns as fit, adding rows as the window narrows */
+#bandColorsBox {
   display: block;
+}
+
+/* Settings -> Feeds: the mode group selectors and Feed Spot Max Age */
+.feedGroups {
+  padding: 6px;
+}
+
+/* Settings -> Feeds: the boxes share one height, and Clear All Feeds is centered in its box */
+#feedsSettingsDiv > .mapItem {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 3px;
+}
+
+#feedsClearDiv {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Each mode: its name with the checkbox centered under it */
+.feedGroups label.feedGroup {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2px 8px 0px 8px;
+  cursor: pointer;
 }
 
 /* Settings -> Audio Alerts: Call Roster | Feed Roster sub-tabs (shown when a feed is enabled);

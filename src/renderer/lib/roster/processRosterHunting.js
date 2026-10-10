@@ -120,6 +120,7 @@ function processRosterHunting(callRoster, rosterSettings)
     callObj.DXcallHTML = null;
     callObj.msgHTML = null;
     callObj.gridHTML = null;
+    callObj.spotterHTML = null;
 
     // Baseline Style Configurations
     let callPointer = callObj.CQ ? "cursor:pointer" : "";
@@ -800,9 +801,10 @@ function buildWatcher(watcher, key)
 {
   try
   {
-    CR.watchersTest[key] = watcher.regex 
+    // A plain Spotter watcher, like a spotter ignore, also covers the spotter's skimmer suffixes (W3LPL: W3LPL-# and W3LPL-2)
+    CR.watchersTest[key] = watcher.regex
       ? new RegExp(watcher.text, "gi")
-      : new RegExp("^" + watcher.text + "$", "gi");
+      : new RegExp("^" + watcher.text + (watcher.type === "Spotter" ? "(-[A-Z0-9#]+)?" : "") + "$", "gi");
   }
   catch (e)
   {
@@ -821,6 +823,11 @@ function buildWatcher(watcher, key)
   {
     watcher.source = "DXcall";
     watcher.html = "DXcallHTML";
+  }
+  else if (watcher.type === "Spotter")
+  {
+    watcher.source = "spotter";
+    watcher.html = "spotterHTML";
   }
   else if (watcher.type === "Grid")
   {

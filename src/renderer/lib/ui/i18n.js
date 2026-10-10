@@ -66,6 +66,17 @@ function I18N(key)
   }
 }
 
+// Switches an element to another translation key and shows it (renderI18n then keeps using that key);
+// before the translations are loaded, renderI18n shows it once they are
+function setI18nText(element, key)
+{
+  element.setAttribute("data-i18n", key);
+  if (GT.i18n && key in GT.i18n)
+  {
+    element.innerHTML = GT.i18n[key];
+  }
+}
+
 function changeLocale()
 {
   GT.settings.app.locale = languageLocale.value;

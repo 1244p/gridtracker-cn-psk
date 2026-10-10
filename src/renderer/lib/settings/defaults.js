@@ -79,8 +79,11 @@ const def_settings = {
 
     offAirServicesEnable: true,
     spottingEnable: true,
-    feedDxCluster: false,
-    feedCwSkimmer: false,
+    // DX Feeds (DX Cluster / CW Skimmer spots), and the mode groups wanted from it (Settings -> Feeds)
+    dxFeeds: false,
+    feedCW: true,
+    feedDigital: true,
+    feedPhone: true,
     // Seconds a feed spot is kept (shown on the map) after it was last spotted
     feedMaxAge: 300,
     loadAdifAtStartup: false,
@@ -615,8 +618,14 @@ const def_settings = {
       minDb: -25,
       minFreq: 0,
       maxFreq: 3500,
+      // DX DXCC (the spotted station's)
       noMyDxcc: false,
       onlyMyDxcc: false,
+      // DE DXCC (the spotter's)
+      noMyDeDxcc: false,
+      onlyMyDeDxcc: false,
+      // Spots where the station spotted itself
+      hideSelfSpots: false,
       cqOnly: false,
       usesLoTW: false,
       maxLoTW: 27,
@@ -647,12 +656,13 @@ const def_settings = {
       Callsign: true,
       Band: true,
       Mode: true,
-      Calling: true,
+      CQ: true,
       Spotter: true,
       Wanted: false,
       Grid: true,
       Msg: false,
       DXCC: true,
+      DEDXCC: false,
       Flag: true,
       State: true,
       County: false,
@@ -673,8 +683,8 @@ const def_settings = {
       UTC: false
     },
     columnOrder: [
-      "Callsign", "Calling", "Spotter", "Band", "Mode", "Wanted", "Grid", "Msg",
-      "POTA", "DXCC", "Flag", "DXM", "State", "County", "Cont",
+      "Callsign", "Spotter", "CQ", "Grid", "DXCC", "Flag", "State", "County", "Band", "Mode", "Wanted", "Msg",
+      "POTA", "DEDXCC", "DXM", "Cont",
       "Freq", "Dist", "Azim",
       "CQz", "ITUz", "PX",
       "LoTW", "eQSL", "OQRS",
@@ -694,9 +704,19 @@ const def_settings = {
       notifications: false,
       // Bands the user unticked; anything not listed is shown
       hiddenBands: {},
-      // Mode groups (Digital, Phone, CW) the user unticked; anything not listed is shown
-      hiddenModes: {}
-    }
+      // Every mode seen in feed spots (mode: shown), for the Feed Roster's Mode selector; false = unticked.
+      // It only grows
+      modes: {}
+    },
+    // Feed Roster ignores, independent of the Call Roster's (the top-level ignored* keys), no CQ ignores;
+    // spotter ignores are feed-only already and stay in the top-level ignoredSpotters
+    ignoredCalls: {},
+    ignoredGrid: {},
+    ignoredDxcc: {},
+    // DE DXCC: spots from spotters in these DXCC entities
+    ignoredDeDxcc: {},
+    ignoredCQz: {},
+    ignoredITUz: {}
   },
   // Feed Roster audio alerts: which wanted types alert, and their own sounds and speech
   // (media defaults to the same as audioAlerts.media, set below)
