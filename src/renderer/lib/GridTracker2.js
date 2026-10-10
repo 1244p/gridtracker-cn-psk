@@ -116,20 +116,6 @@ function loadAllSettings()
     GT.settings.roster.columnOrder.splice(indexOfOAMS, 1);
   }
 
-  // Saved column orders predate the Spotter column; place it after Calling
-  if (GT.settings.roster.columnOrder.indexOf("Spotter") == -1)
-  {
-    let indexOfCalling = GT.settings.roster.columnOrder.indexOf("Calling");
-    if (indexOfCalling > -1)
-    {
-      GT.settings.roster.columnOrder.splice(indexOfCalling + 1, 0, "Spotter");
-    }
-    else
-    {
-      GT.settings.roster.columnOrder.push("Spotter");
-    }
-  }
-
   // Deprecated single app log path
   if (GT.settings.app.wsjtLogPath)
   {

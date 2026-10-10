@@ -34,8 +34,8 @@ function processRosterHunting(callRoster, rosterSettings)
   const zYearStr = "z" + currentYear;
   
   const potaFeatureEnabled = (GT.settings.app.potaFeatureEnabled && GT.settings.map.offlineMode === false);
-  const isAwardTracker = (GT.activeRoster.logbook.referenceNeed === LOGBOOK_AWARD_TRACKER);
-  const AAW = GT.activeAudioAlerts.wanted;
+  const isAwardTracker = (CR.activeRoster.logbook.referenceNeed === LOGBOOK_AWARD_TRACKER);
+  const AAW = CR.activeAudioAlerts.wanted;
 
   // Cache deep lookups ONCE outside the loop
   const trackerWorked = GT.tracker.worked;
@@ -47,12 +47,17 @@ function processRosterHunting(callRoster, rosterSettings)
   
   const dayAsStr = CR.dayAsString;
   const myCall = GT.settings.app.myCall;
-  const wantRRCQ = GT.activeExceptions.wantRRCQ;
-  const cqOnly = GT.activeExceptions.cqOnly;
+  const wantRRCQ = CR.activeExceptions.wantRRCQ;
+  const cqOnly = CR.activeExceptions.cqOnly;
   const ulsUseEnable = GT.settings.callsignLookups.ulsUseEnable;
   
   // Cache time once for the Watchers lookup to avoid syscalls inside the loop
-  const now = Date.now(); 
+  const now = Date.now();
+
+  // The Feed Roster swaps the callsign (yellow) and grid (cyan) colors, like its window colors
+  const feedColors = isFeedRoster();
+  const baseCallColor = feedColors ? "#00FFFF" : "#FFFF00";
+  const baseGridColor = feedColors ? "#FFFF00" : "#00FFFF";
 
   for (const callHash in callRoster)
   {
@@ -82,7 +87,7 @@ function processRosterHunting(callRoster, rosterSettings)
     let shouldRosterAlert = false;
 
     // Evaluate Wanted Tracking dynamically
-    let rwActive = GT.activeRoster.wanted;
+    let rwActive = CR.activeRoster.wanted;
     if (isAwardTracker)
     {
       rwActive = { huntCallsign: false, huntGrid: false, huntDXCC: false, huntCQz: false, huntDXM: false, huntState: false, huntCounty: false, huntPOTA: false, huntITUz: false, huntPX: false, huntCont: false, huntWatcher: false };
@@ -96,11 +101,11 @@ function processRosterHunting(callRoster, rosterSettings)
     if (layeredMode)
     {
       workHashSuffix = hashMaker(callObj, layeredMode);
-      layeredHashSuffix = hashMaker(callObj, GT.activeRoster.logbook.referenceNeed);
+      layeredHashSuffix = hashMaker(callObj, CR.activeRoster.logbook.referenceNeed);
     }
     else
     {
-      workHashSuffix = hashMaker(callObj, GT.activeRoster.logbook.referenceNeed);
+      workHashSuffix = hashMaker(callObj, CR.activeRoster.logbook.referenceNeed);
       layeredHashSuffix = false;
     }
 
@@ -120,7 +125,7 @@ function processRosterHunting(callRoster, rosterSettings)
     let callPointer = callObj.CQ ? "cursor:pointer" : "";
     let cntyPointer = (callObj.cnty && !callObj.cntyQual) ? "cursor: pointer;" : "";
     
-    let callColor = "#FFFF00", gridColor = "#00FFFF", callingColor = "#90EE90", dxccColor = "#FFA500",
+    let callColor = baseCallColor, gridColor = baseGridColor, callingColor = "#90EE90", dxccColor = "#FFA500",
         stateColor = "#90EE90", cntyColor = "#CCDD00", contColor = "#00DDDD", potaColor = "#fbb6fc",
         cqzColor = "#DDDDDD", ituzColor = "#DDDDDD", wpxColor = "#FFFF00", dxmColor = "#7398FF";
 
@@ -146,7 +151,7 @@ function processRosterHunting(callRoster, rosterSettings)
     }
 
     // Skip when "only new calls"
-    if (allOnlyNew.checked && didWork && !callObj.qrz)
+    if (CR.activeExceptions.allOnlyNew && didWork && !callObj.qrz)
     {
       if (potaFeatureEnabled && callObj.pota && (rwActive.huntPOTA || AAW.huntPOTA))
       {

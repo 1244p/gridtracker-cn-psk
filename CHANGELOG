@@ -355,23 +355,36 @@ Off-Air Services:
     Beacon spots (BEACON / NCDXF) are ignored
     New Settings -> Map "Feed Spot Max Age" slider (shown when a feed is enabled): how long feed spots stay on the map, 1 to 60 minutes (default 5 minutes)
 Call Roster:
-  Feed spots now appear in the Call Roster alongside WSJT-X/JTDX decodes
-    ▼ before the callsign: a rig is on the spot's band and mode, left-click sets the DX call and grid on that rig
-    ▲ before the callsign: no rig is on that band and mode (read-only), hover shows how to work it
-    "Gen Msgs" works on any feed spot, using a rig on the spot's band and mode, otherwise the active rig
-    A WSJT-X/JTDX decode of the same station, band and mode takes the place of the feed spot
-    Freq column shows the spot's frequency, Rig column shows "Feed", Calling column shows "CQ" for CQ spots
-    US feed spots get the same state and county lookups as decodes
-  New "Feeds" tab in Call Roster Settings (shown when a feed is enabled):
-    Allow Alerting (Audio, Alert Script) for feed spots
+  New "Call Roster | Feed Roster" tabs at the top of the roster window (shown when a feed is enabled)
+    The Call Roster shows WSJT-X/JTDX decodes only; feed spots are in the Feed Roster
+    The settings pane is titled "Call Roster Settings" or "Feed Roster Settings", and opens below the tabs:
+    click a tab to switch rosters without closing settings
+    New "Reset Columns To Default" in each roster's Settings -> General: resets that roster's columns and order only
+    The Feed Roster swaps the Call Roster's yellow and cyan (callsigns, grids, active tabs, Settings button) to tell them apart
+  Settings -> Audio Alerts: new "Call Roster | Feed Roster" sub-tabs (shown when a feed is enabled)
+    Each roster has its own alert choices, sounds and speech (Type, On Single, On Multiple), Reference and Exceptions,
+    kept in step with that roster's own controls; Rules are Call Roster only
+    The 🔔 next to a roster's Wanted choices opens its own Audio Alerts sub-tab
+New Feed Roster (DX Cluster / CW Skimmer spots):
+  Its own Logbook, Hunting, Wanted, Exceptions, Watchers, columns, sorting, compact mode and Roster Max Age
+    One set of settings for all bands and modes (Band/Mode Memory applies to the Call Roster only)
+    Callsign, DXCC, Grid, CQ, CQ Zone and ITU Zone ignores are shared with the Call Roster
+  ▲ before the callsign: a rig is on the spot's band and mode, left-click sets the DX call and grid on that rig
+  Otherwise the spot is read-only, hover shows how to work it
+  "Gen Msgs" works on any feed spot, using a rig on the spot's band and mode, otherwise the active rig
+  Freq column shows the spot's frequency, Calling column shows "CQ" for CQ spots
+  US feed spots get the same state and county lookups as decodes
+  "Feeds" tab in the Feed Roster's Settings:
+    Allow Alert Script for feed spots (audio alerts are set in Settings -> Audio Alerts -> Feed Roster)
     Allow Notifications (Pushover, Simplepush) for feed spots
     Feed spots never trigger Custom Alerts
-    Modes: choose which feed spots appear in the Call Roster by Digital, Phone or CW (all on by default)
-    Bands: choose which bands' feed spots appear in the Call Roster, based on a US or non-US band plan (all bands on by default)
-  New "Spotter" column (off by default): the station that reported a feed spot
+    Modes: choose which feed spots appear by Digital, Phone or CW (all on by default)
+    Bands: choose which bands' feed spots appear, based on a US or non-US band plan (all bands on by default)
+  "Spotter" column: the station that reported a feed spot
     Right-click a spotter for Lookup, Add Watcher, Copy, Ignore Spotter or Edit Ignores
-  New "Spotters" category in Call Roster Settings -> Ignores, for spotters sending false or too many questionable spots
-    An ignored spotter's spots are dropped from the Call Roster and the map (W3LPL also covers W3LPL-# and W3LPL-2)
+  "Spotters" category in the Feed Roster's Settings -> Ignores, for spotters sending false or too many questionable spots
+    An ignored spotter's spots are dropped from the Feed Roster and the map (W3LPL also covers W3LPL-# and W3LPL-2)
+Call Roster:
   Mode column: CW, SSB and RTTY now have their own colors, other unlisted modes show in white
   DXCC column: click to center the map on the entity and highlight (dazzle) its outline, like clicking a Grid
   Fixed dragging the Band or Mode column when it is shown for multiple bands or modes but not enabled

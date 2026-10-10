@@ -2473,6 +2473,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </table>
     </div>
     <div id="audioAlertsDiv" class="settingsTabcontent">
+      <div id="audioAlertsRosterTabs" style="display:none;">
+        <button id="callAudioAlertsTab" class="audioAlertsRosterTab active" onclick="showAudioAlertsRoster('call')" data-i18n="roster.tabs.call">Call Roster</button>
+        <button id="feedAudioAlertsTab" class="audioAlertsRosterTab" onclick="showAudioAlertsRoster('feed')" data-i18n="roster.tabs.feed">Feed Roster</button>
+      </div>
       <div id="alertMatrixDiv">
         <div id="SecondaryAudioAlertControls">
            <div id="huntingMatrixDiv" class="secondaryControlGroup">
@@ -2644,7 +2648,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <input type="checkbox" id="cqOnly" onchange="huntingValueChanged(this);" />
                 <label data-i18n="roster.secondary.exceptions.cqOnly" for="cqOnly">CQ Only</label>
               </div>
-              <div>
+              <div id="wantRRCQDiv">
                 <input type="checkbox" id="wantRRCQ" onchange="huntingValueChanged(this);" />
                 <label data-i18n="roster.secondary.exceptions.wantRRCQ" for="wantRRCQ">RR73 as CQ</label>
               </div>
@@ -2676,7 +2680,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <input type="checkbox" id="usesOQRS" onchange="huntingValueChanged(this);" />
                 <label data-i18n="roster.secondary.exceptions.usesOQRS" for="usesOQRS">Uses OQRS</label>
               </div>
-              <div class="flexButton"  style="margin-left: 18px;font-weight: bolder;" onclick="openExceptions()">&nbsp;. . .&nbsp;</div>
+              <div class="flexButton" id="moreExceptionsButton" style="margin-left: 18px;font-weight: bolder;" onclick="openExceptions()">&nbsp;. . .&nbsp;</div>
             </div>
           </div>
           <div id="audioAlertRulesDiv" class="secondaryControlGroup">

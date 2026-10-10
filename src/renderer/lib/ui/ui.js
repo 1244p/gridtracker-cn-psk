@@ -475,11 +475,13 @@ function updateByBandMode()
   }
 
 
-  for (const key in GT.activeAudioAlerts.wanted)
+  // Audio Alerts shows the Call Roster's or the Feed Roster's (fixed) wanted alerts
+  const audioWanted = audioAlertsWanted();
+  for (const key in audioWanted)
   {
     if (key in window)
     {
-      window[key].checked = GT.activeAudioAlerts.wanted[key];
+      window[key].checked = audioWanted[key];
     }
   }
 

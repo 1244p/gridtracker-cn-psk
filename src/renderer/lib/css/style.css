@@ -591,6 +591,35 @@ a {
   display: block;
 }
 
+/* Settings -> Audio Alerts: Call Roster | Feed Roster sub-tabs (shown when a feed is enabled);
+   the Feed Roster's active tab is yellow, like its roster tab */
+#audioAlertsRosterTabs {
+  margin: 4px 0px 6px 0px;
+  border-bottom: 1px solid lightblue;
+}
+
+.audioAlertsRosterTab {
+  padding: 2px 10px;
+  margin-right: 3px;
+  border: 1px solid lightblue;
+  border-bottom: none;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  background-color: black;
+  color: #eee;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.audioAlertsRosterTab.active {
+  background-color: cyan;
+  color: black;
+}
+
+#audioAlertsDiv.feedAudioAlerts .audioAlertsRosterTab.active {
+  background-color: yellow;
+}
+
 .bandColorsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, 70px);

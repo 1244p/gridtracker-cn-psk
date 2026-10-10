@@ -31,9 +31,10 @@ function renderRoster(callRoster, rosterSettings)
     countParts.push(`${huntedCount} wanted`);
   }
 
-  window.document.title = `Call Roster: ${countParts.join(" • ")}`;
+  const feedRoster = isFeedRoster();
+  window.document.title = `${feedRoster ? "Feed Roster" : "Call Roster"}: ${countParts.join(" • ")}`;
   let multiInstance = false;
-  if (listShortInstances().length > 0)
+  if (!feedRoster && listShortInstances().length > 0)
   {
     window.document.title += " | " + listShortInstances().join(" • ");
     multiInstance = true;
@@ -59,12 +60,15 @@ function renderRoster(callRoster, rosterSettings)
 
   // Feed spots can only be worked from a rig already on their band and mode
   const workableFeeds = {};
-  for (const id in GT.instances)
+  if (feedRoster)
   {
-    const instance = GT.instances[id];
-    if (instance.valid && instance.open && instance.status)
+    for (const id in GT.instances)
     {
-      workableFeeds[instance.status.Band + "|" + instance.status.MO] = true;
+      const instance = GT.instances[id];
+      if (instance.valid && instance.open && instance.status)
+      {
+        workableFeeds[instance.status.Band + "|" + instance.status.MO] = true;
+      }
     }
   }
 
@@ -80,7 +84,7 @@ function renderRoster(callRoster, rosterSettings)
     let rowClass = "";
     let rowTitle = "";
 
-    if (callObj.instance === GT.feedInstance)
+    if (feedRoster)
     {
       callObj.readOnly = !((callObj.band + "|" + callObj.mode) in workableFeeds);
       if (!callObj.readOnly)

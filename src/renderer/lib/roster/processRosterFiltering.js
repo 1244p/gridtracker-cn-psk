@@ -4,9 +4,9 @@ const GRID_REGEXP = /^[A-Z]{2}[0-9]{2}$/;
 function processRosterFiltering(callRoster, rosterSettings)
 {
   const rs = CR.rosterSettings;
-  const rse = GT.activeExceptions;
+  const rse = CR.activeExceptions;
   const cl = GT.settings.callsignLookups;
-  const instances = GT.instances;
+  const profileFilter = CR.profile.filter;
   const winOpener = window.opener; // Cache cross-context reference
   const now = rosterSettings.now;
   const viewHistoryTimeSec = GT.settings.reception.viewHistoryTimeSec;
@@ -36,23 +36,8 @@ function processRosterFiltering(callRoster, rosterSettings)
       continue;
     }
 
-    const isFeed = callObj.instance === GT.feedInstance;
-
-    // Missing requirements & disabled instances
-    if (!callObj.dxcc || (!isFeed && !(callObj.instance in instances)))
-    {
-      entry.tx = false;
-      continue;
-    }
-
-    // Feed spots on bands or modes the user unticked in the roster's Feeds tab
-    if (isFeed && !(winOpener.feedBandAllowed(callObj) && winOpener.feedModeAllowed(callObj)))
-    {
-      entry.tx = false;
-      continue;
-    }
-
-    if (!isFeed && GT.instanceCount > 1 && instances[callObj.instance].crEnable === false)
+    // Missing requirements, and the roster's own source filter (Call Roster: instances, Feed Roster: bands, modes, spotters)
+    if (!callObj.dxcc || !profileFilter(callObj))
     {
       entry.tx = false;
       continue;
@@ -240,7 +225,7 @@ function processRosterFiltering(callRoster, rosterSettings)
             callObj.awardType = awardData.rule.type;
             callObj.shouldRosterAlert = true;
 
-            if (GT.activeAudioAlerts.wanted.huntAward)
+            if (CR.activeAudioAlerts.wanted.huntAward)
             {
               callObj.AH = { huntAward: 1 };
             }

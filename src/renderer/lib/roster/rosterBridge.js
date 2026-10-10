@@ -93,8 +93,10 @@ function updateRosterWorked()
   }
 }
 
+// Feed settings changed: the Feed Roster tabs (roster window and Settings -> Audio Alerts) come and go with them
 function updateRosterFeeds()
 {
+  if (GT.activeRoster) setVisualAudioAlerts();
   if (GT.callRosterWindowInitialized)
   {
     try
@@ -123,25 +125,30 @@ function updateRosterInstances()
   }
 }
 
-function goProcessRoster() {
-    const now = timeNowSec();
+function pruneRosterEntries(roster, maxAge, now)
+{
+    for (const call in roster) {
+        const callObj = roster[call].callObj;
 
-    for (const call in GT.callRoster) {
-        const entry = GT.callRoster[call];
-        const callObj = entry.callObj;
-
-        if (now - callObj.age > 300) {
-            // callObj is passed by reference from elsewhere, 
+        if (now - callObj.age > maxAge) {
+            // callObj is passed by reference from elsewhere,
             // so we safely reset its flags before pruning the roster entry.
             callObj.rosterAlerted = false;
             callObj.shouldRosterAlert = false;
             callObj.audioAlerted = false;
             callObj.shouldAudioAlert = false;
-            
+
             // Delete from the roster map
-            delete GT.callRoster[call];
+            delete roster[call];
         }
     }
+}
+
+// Reprocesses both rosters (Call Roster and Feed Roster): worked status, settings and instances affect both
+function goProcessRoster() {
+    const now = timeNowSec();
+    pruneRosterEntries(GT.callRoster, 300, now);
+    pruneRosterEntries(GT.feedRoster, GT.settings.app.feedMaxAge, now);
 
     if (GT.callRosterWindowInitialized) {
         try {
@@ -150,6 +157,36 @@ function goProcessRoster() {
             console.log("[goProcessRoster] IPC Error:", e);
         }
     }
+}
+
+// New DX Cluster / CW Skimmer spots: only the Feed Roster needs reprocessing
+function scheduleFeedRosterUpdate()
+{
+  if (GT.feedRosterUpdateTimer == null)
+  {
+    GT.feedRosterUpdateTimer = nodeTimers.setTimeout(goProcessFeedRoster, 150);
+  }
+}
+
+function goProcessFeedRoster()
+{
+    GT.feedRosterUpdateTimer = null;
+    pruneRosterEntries(GT.feedRoster, GT.settings.app.feedMaxAge, timeNowSec());
+
+    if (GT.callRosterWindowInitialized) {
+        try {
+            GT.callRosterWindowHandle.window.processFeedRoster();
+        } catch (e) {
+            console.log("[goProcessFeedRoster] IPC Error:", e);
+        }
+    }
+}
+
+// Roster window "Reset Columns to Default": fresh copies of one roster's ("call" / "feed") default columns and order
+function defaultRosterColumns(rosterName)
+{
+  const def = def_rosterColumns[rosterName];
+  return { columns: { ...def.columns }, columnOrder: def.columnOrder.slice() };
 }
 
 function setRosterSpot(enabled)

@@ -21,7 +21,7 @@ function renderCompactRosterRow(callObj, showBand, rowClass = "", rowTitle = "")
   let wholeClick = (CR.isCompactCounty ? "" : onClick);
   let callsignClick = (CR.isCompactCounty ? onClick : "");
   let html = ["<div class='compact" + (rowClass ? " " + rowClass : "") + "' " + wholeClick + " >"];
-  html.push("<div class='compactCallsign' " + callsignClick + " name='Callsign' " + callObj.style.call + " >" + markFeedCallsign(callObj, formatCallsign(callObj.DEcallHTML || callObj.DEcall)) + bandView + "</div>");
+  html.push("<div class='compactCallsign' " + callsignClick + " name='Callsign' " + callObj.style.call + " >" + markWorkableFeed(callObj, formatCallsign(callObj.DEcallHTML || callObj.DEcall)) + bandView + "</div>");
   html.push("<div class='compactData'>");
   html.push(renderEntryForColumn(CR.rosterSettings.compactEntity, callObj, "div"));
   html.push("</div></div>");

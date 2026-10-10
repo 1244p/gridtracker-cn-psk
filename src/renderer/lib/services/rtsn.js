@@ -41,6 +41,8 @@ GT.gtChatSocket = null;
 GT.rtsnPins = {};
 GT.rtsnCallsigns = {};
 GT.feedCallsigns = {};
+// Feed Roster entries (same shape as GT.callRoster entries), separate from the Call Roster's WSJT-X decodes
+GT.feedRoster = {};
 GT.feedInstance = "Feed";
 GT.lastFeedPrune = 0;
 GT.wsStatusTimer = null;
@@ -334,12 +336,12 @@ function handleFeed(jsmesg)
 
   if (added)
   {
-    scheduleRosterUpdate();
+    scheduleFeedRosterUpdate();
     if (GT.settings.map.dxcwFeed) scheduleDxcwRedraw();
   }
 }
 
-// Bands offered in the roster's Feeds tab; spots on bands outside the user's plan are hidden
+// Bands offered in the Feed Roster's Feeds tab; spots on bands outside the user's plan are hidden
 const FEED_BANDS_US = ["2200m", "630m", "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", "2m", "1.25m", "70cm", "33cm", "23cm"];
 const FEED_BANDS_OTHER = ["2200m", "630m", "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", "4m", "2m", "70cm", "23cm"];
 
@@ -439,24 +441,22 @@ function leftClickFeedSpot(hash)
 
 function feedBandAllowed(callObj)
 {
-  return feedBandPlan().includes(callObj.band) && !(callObj.band in GT.settings.roster.feeds.hiddenBands);
+  return feedBandPlan().includes(callObj.band) && !(callObj.band in GT.settings.feedRoster.feeds.hiddenBands);
 }
 
-// Roster-only, like the band list; a mode in neither mode list is always shown
+// Feed Roster only, like the band list; a mode in neither mode list is always shown
 function feedModeAllowed(callObj)
 {
   let type = "";
   if (callObj.mode == "CW") type = "CW";
   else if (GT.modes[callObj.mode]) type = "Digital";
   else if (GT.modes_phone[callObj.mode]) type = "Phone";
-  return !(type in GT.settings.roster.feeds.hiddenModes);
+  return !(type in GT.settings.feedRoster.feeds.hiddenModes);
 }
 
-// Feed spots share the roster with WSJT-X decodes; a local decode of the same call/band/mode wins
 function addFeedToRoster(hash, callObj, now)
 {
-  const entry = GT.callRoster[hash];
-  if (entry && entry.callObj.instance !== GT.feedInstance) return;
+  const entry = GT.feedRoster[hash];
 
   if (callObj.reset)
   {
@@ -466,7 +466,7 @@ function addFeedToRoster(hash, callObj, now)
 
   if (!entry)
   {
-    GT.callRoster[hash] = { message: FEED_MESSAGE, callObj: callObj, DXcall: callObj.DXcall, DEcall: callObj.DEcall };
+    GT.feedRoster[hash] = { message: FEED_MESSAGE, callObj: callObj, DXcall: callObj.DXcall, DEcall: callObj.DEcall };
   }
   else
   {
@@ -477,21 +477,14 @@ function addFeedToRoster(hash, callObj, now)
 
 function clearFeedCallsigns()
 {
-  let removed = false;
-  for (const hash in GT.callRoster)
-  {
-    if (GT.callRoster[hash].callObj.instance === GT.feedInstance)
-    {
-      delete GT.callRoster[hash];
-      removed = true;
-    }
-  }
+  const removed = Object.keys(GT.feedRoster).length > 0;
+  GT.feedRoster = {};
   GT.feedCallsigns = {};
-  if (removed) goProcessRoster();
+  if (removed) goProcessFeedRoster();
   redrawDxcwSpots();
 }
 
-// Called when the user ignores a spotter: drop the spots they currently own from the roster and map
+// Called when the user ignores a spotter: drop the spots they currently own from the Feed Roster and map
 function dropFeedSpotter(base)
 {
   for (const hash in GT.feedCallsigns)
@@ -499,10 +492,7 @@ function dropFeedSpotter(base)
     if (GT.feedCallsigns[hash].spotter.split("-")[0] === base)
     {
       delete GT.feedCallsigns[hash];
-      if (hash in GT.callRoster && GT.callRoster[hash].callObj.instance === GT.feedInstance)
-      {
-        delete GT.callRoster[hash];
-      }
+      delete GT.feedRoster[hash];
     }
   }
   redrawDxcwSpots();
@@ -524,8 +514,8 @@ function feedSpotInstance(callObj)
 
 function workFeedSpot(hash)
 {
-  const entry = GT.callRoster[hash];
-  if (!entry || entry.callObj.instance !== GT.feedInstance) return;
+  const entry = GT.feedRoster[hash];
+  if (!entry) return;
 
   const instance = feedSpotInstance(entry.callObj);
   if (instance == null) return;
@@ -540,8 +530,8 @@ function workFeedSpot(hash)
 // Gen Msgs on a feed spot: a rig on the spot's band and mode if there is one, otherwise the active rig
 function genFeedMessages(hash)
 {
-  const entry = GT.callRoster[hash];
-  if (!entry || entry.callObj.instance !== GT.feedInstance) return;
+  const entry = GT.feedRoster[hash];
+  if (!entry) return;
 
   setCallAndGrid(entry.DEcall, entry.callObj.grid, feedSpotInstance(entry.callObj));
 }
@@ -568,7 +558,7 @@ function addFeedSpot(parts, now)
   let grid = parts[3].trim().toUpperCase();
 
   if (!CALLSIGN_REGEXP.test(DEcall) || !FEED_MODE_REGEXP.test(mode) || !FEED_SPOTTER_REGEXP.test(spotter)) return false;
-  // Spotters the user ignored in the roster (by base callsign, so W3LPL covers W3LPL-#)
+  // Spotters the user ignored in the Feed Roster (by base callsign, so W3LPL covers W3LPL-#)
   if (spotter.split("-")[0] in GT.settings.ignoredSpotters) return false;
   if (band == "OOB" || !Object.prototype.hasOwnProperty.call(GT.bandColors, band)) return false;
   // The roster works in 4-character grids; the map places spots with the full 4 or 6
@@ -660,7 +650,7 @@ function addFeedSpot(parts, now)
     callObj.state = "CA-" + GT.cacCallsigns[callObj.DEcall];
   }
 
-  // Feed spots never trigger custom alerts; audio alerts come from the roster (Feeds tab "Allow Alerting")
+  // Feed spots never trigger custom alerts; audio alerts come from the Feed Roster (Settings -> Audio Alerts -> Feed Roster)
   addFeedToRoster(hash, callObj, now);
   return true;
 }

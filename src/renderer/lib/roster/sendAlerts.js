@@ -1,9 +1,12 @@
+// Runs for one roster profile (see withProfile): its visible entries alert through its own settings
 function sendAlerts()
 {
-  CR.alertTimer = null;
+  CR.profile.alertTimer = null;
   const callRoster = CR.callRoster;
+  const feedRoster = isFeedRoster();
   let scriptPath = GT.scriptPath;
-  let everyDecode = GT.settings.audioAlerts.rules.everyDecode;
+  // The Feed Roster has no Rules
+  let everyDecode = !feedRoster && GT.settings.audioAlerts.rules.everyDecode;
   let dirPath = path.dirname(scriptPath);
   let scriptExists = false;
   let pushAlerts = 0;
@@ -12,25 +15,18 @@ function sendAlerts()
   let audioAlertCounts = createEmptyAudioAlerts();
   let pushReport = {};
   let scriptReport = {};
-  const feedSettings = CR.rosterSettings.feeds;
+  // Feed Roster, per its Feeds tab: "Allow Alert Script" and "Allow Notifications" (Pushover, Simplepush);
+  // its audio alerts come from Settings -> Audio Alerts -> Feed Roster, like the Call Roster's
+  const allowScript = !feedRoster || CR.rosterSettings.feeds.alertScript;
+  const allowPush = !feedRoster || CR.rosterSettings.feeds.notifications;
 
   for (const entry in callRoster)
   {
     const callObj = callRoster[entry].callObj;
 
-    // if it's not visible in the roster, we don't want to send a report with it, 
+    // if it's not visible in the roster, we don't want to send a report with it,
     // otherwise the entire roster will be sent out, including all the ones that were filtered by exceptions
     if (callRoster[entry].tx == false) continue;
-
-    // Feed spots, per the roster's Feeds tab: "Allow Alerting" covers audio and the alert script,
-    // "Allow Notifications" covers Pushover and Simplepush
-    const isFeed = callObj.instance === GT.feedInstance;
-    const allowScript = !isFeed || feedSettings.alerts;
-    const allowPush = !isFeed || feedSettings.notifications;
-    if (isFeed && !feedSettings.alerts)
-    {
-      callObj.shouldAudioAlert = false;
-    }
 
     if (allowScript || allowPush)
     {
@@ -88,7 +84,7 @@ function sendAlerts()
       }
     }
     audioAlertCounts.huntMultiple = multi;
-    window.opener.processAudioAlertsFromRoster(audioAlertCounts);
+    window.opener.processAudioAlertsFromRoster(audioAlertCounts, CR.profile.name);
   }
 
   if (pushAlerts > 0)

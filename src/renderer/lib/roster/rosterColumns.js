@@ -7,11 +7,10 @@ const DEFAULT_COLUMN_ORDER = [
   "Life", "Spot",  "Age", "UTC"
 ]
 
-// Feed spots show ▲ before the callsign when read-only, ▼ when a rig on their band and mode can work them
-function markFeedCallsign(callObj, html)
+// Feed Roster: ▲ before the callsign when a rig on the spot's band and mode can work it
+function markWorkableFeed(callObj, html)
 {
-  if (callObj.instance !== GT.feedInstance) return html;
-  return (callObj.readOnly ? "&#9650;" : "&#9660;") + html;
+  return (isFeedRoster() && !callObj.readOnly) ? "&#9650;" + html : html;
 }
 
 const getterSimpleComparer = (getter) => (a, b) =>
@@ -39,13 +38,13 @@ const callObjLocaleComparerWithRR73 = (attr) => (a, b) =>
 {
   let valA = a.callObj[attr];
   if (a.callObj.CQ) valA = "0" + valA;
-  if (GT.activeExceptions.wantRRCQ && a.callObj.RR73) {
+  if (CR.activeExceptions.wantRRCQ && a.callObj.RR73) {
     valA = "0CQ" + a.callObj.RR73;
   }
 
   let valB = b.callObj[attr];
   if (b.callObj.CQ) valB = "0" + valB;
-  if (GT.activeExceptions.wantRRCQ && b.callObj.RR73) {
+  if (CR.activeExceptions.wantRRCQ && b.callObj.RR73) {
     valB = "0CQ" + b.callObj.RR73;
   }
 
@@ -68,7 +67,7 @@ const ROSTER_COLUMNS = {
         align: "left",
         onClick: `initiateQso("${callObj.hash}")`,
         rawAttrs: callObj.style.call,
-        html: markFeedCallsign(callObj, formatCallsign((callObj.DEcallHTML || callObj.DEcall)))
+        html: markWorkableFeed(callObj, formatCallsign((callObj.DEcallHTML || callObj.DEcall)))
       }
 
       let acks = GT.acknowledgedCalls || {};
@@ -123,7 +122,7 @@ const ROSTER_COLUMNS = {
     tableData: (callObj) => ({
       rawAttrs: callObj.style.calling,
       name: callObj.CQ ? "CQ" : "Calling",
-      html: (GT.activeExceptions.wantRRCQ && callObj.RR73) ? callObj.RR73 : formatCallsign(callObj.DXcallHTML || callObj.DXcall)
+      html: (CR.activeExceptions.wantRRCQ && callObj.RR73) ? callObj.RR73 : formatCallsign(callObj.DXcallHTML || callObj.DXcall)
     })
   },
 
@@ -290,10 +289,10 @@ const ROSTER_COLUMNS = {
     {
       if (callObj.DEcall in GT.lotwCallsigns)
       {
-        if (GT.activeExceptions.maxLoTW < 27)
+        if (CR.activeExceptions.maxLoTW < 27)
         {
           let months = (CR.day - GT.lotwCallsigns[callObj.DEcall]) / 30;
-          if (months > GT.activeExceptions.maxLoTW)
+          if (months > CR.activeExceptions.maxLoTW)
           {
             return {
               style: "color: yellow;",

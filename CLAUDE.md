@@ -11,7 +11,9 @@ Electron app (no bundler, no build step for dev). Main process: [src/main/index.
   - macOS/Linux: `env -u ELECTRON_RUN_AS_NODE npm run dev`
   - Windows PowerShell: `Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; npm run dev`
 - The app holds a single-instance lock shared with the **installed** GridTracker2. If the installed app (or a previous dev instance) is still running, the dev build exits immediately with code 0 and no output. Ask the user to quit the installed app rather than killing it. After killing a dev instance, wait until its process is gone before relaunching.
-- **Never reload a window in place** (`location.reload()`, DevTools reload). It crashes the app. HTML/JS changes need a full quit and relaunch; CSS-only changes can be hot-swapped (below).
+- **Never reload the main window in place** (`location.reload()`, DevTools reload). It crashes the app; main-window HTML/JS changes need a full quit and relaunch. CSS-only changes can be hot-swapped (below).
+- Sub-windows (roster, stats, lookup, …) can be reloaded in place with `location.reload()` to pick up their HTML/JS changes. The main window keeps its handle (e.g. `GT.callRosterWindowHandle`); check it's still live afterwards (`goProcessRoster()` re-renders the roster).
+- Translation edits (`resources/i18n/*.json`): the main window loads `GT.i18n` once through a cached `require`, and sub-windows read their text from it, so reloading a sub-window alone still shows the old text. In the main window run `delete window.require.cache[path.resolve(resourcesPath, GT.languages[GT.settings.app.locale])]; readLocaleFile(GT.settings.app.locale)`, then reload the sub-window. Main-window text still needs a full relaunch.
 
 ## Verifying UI changes yourself
 
@@ -54,6 +56,9 @@ ws.close();
 - **macOS window identification** (`browser-window-created` in [src/main/index.js](src/main/index.js)): on macOS windows are matched to `allowedWindows` by `tabbingIdentifier`, on Windows by `title`. Frameless windows (Band Activity) have no `tabbingIdentifier` *and* an empty `title` at creation, so the `frameName` captured in `setWindowOpenHandler` (`pendingWindowFrameName`) is the fallback.
 - **Settings panel layout**: `#rootSettingsDiv` is shown with `display: inline-flex` (set in [panel.js](src/renderer/lib/settings/panel.js); the toggle compares against that string). It's a column capped at the window size: the tab bar (`.settingstab`) wraps and floats the red X close button on its right, and the active `.settingsTabcontent` shrinks into the remaining height and scrolls. Tab buttons are styled via `.settingstab button.settingsTablinks` so the X keeps its `.Xbutton` look. Avoid fixed-width content in tabs; the Band Colors grid uses `repeat(auto-fill, 70px)` so it wraps.
 - `body` is `overflow: hidden` and `white-space: nowrap`: content that overflows the window is simply cut off unless its own container scrolls.
+- **New top-level settings keys** must be added to `validSettings` in [defaults.js](src/renderer/lib/settings/defaults.js) (as well as the default object there), or startup deletes them as "unknown setting" ([GridTracker2.js](src/renderer/lib/GridTracker2.js)). Nested keys under an existing top-level key don't need this.
+- **New map layers**: `createGlobalMapLayer("name")` in [mapCore.js](src/renderer/lib/map/mapCore.js) only creates the layer; it must also be listed in the `layers: [...]` array of the `new ol.Map({...})` call below it, or nothing on it is ever drawn.
+- **No BOM**: no `.js` file in the project starts with a UTF-8 BOM; keep it that way (Windows PowerShell 5.1 file writes can add one, so do bulk rewrites with a Node script).
 
 ## Releases / changelog
 

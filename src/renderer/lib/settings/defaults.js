@@ -25,6 +25,8 @@ const validSettings = [
   "msg",
   "reception",
   "roster",
+  "feedRoster",
+  "feedAudioAlerts",
   "customAlerts",
   "startupLogs",
   "trustedQsl",
@@ -488,7 +490,7 @@ const def_settings = {
   ignoredITUz: {},
   // Band colors the user changed (band -> 6-digit hex); bands not listed use the built-in GT.bandColors table
   bandColors: {},
-  // DX Cluster / CW Skimmer spotters (base callsign) whose spots are dropped
+  // Feed Roster: DX Cluster / CW Skimmer spotters (base callsign) whose spots are dropped
   ignoredSpotters: {},
   roster: {
     exceptions: {
@@ -536,7 +538,6 @@ const def_settings = {
       Band: false,
       Mode: false,
       Calling: true,
-      Spotter: false,
       Rig: false,
       Wanted: false,
       Grid: true,
@@ -565,13 +566,16 @@ const def_settings = {
       UTC: false
     },
     columnOrder: [
-      "Callsign", "Band", "Mode", "Calling", "Spotter", "Rig", "Wanted", "Grid", "Msg",
+      "Callsign", "Band", "Mode", "Calling", "Rig", "Wanted", "Grid", "Msg",
       "POTA", "DXCC", "Flag", "DXM", "State", "County", "Cont",
-      "dB", "Freq", "DT", "Dist", "Azim", 
+      "dB", "Freq", "DT", "Dist", "Azim",
       "CQz", "ITUz", "PX",
       "LoTW", "eQSL", "OQRS",
       "Life", "Spot", "Age", "UTC"
     ],
+    // Window-wide (both roster tabs): displayFilters, realtime, controls, controlsExtended,
+    // clearRosterOnBandChange, rosterAlwaysOnTop, rosterDelayOnFocus, rosterDelayTime, activeTab
+    activeTab: "call",
     displayFilters: {
       brightness: 100,
       contrast: 100,
@@ -594,14 +598,124 @@ const def_settings = {
     rosterDelayTime: 1500,
     rosterTime: 120,
     compactEntity: "DXCC",
+    watchers: {}
+  },
+  // Feed Roster (DX Cluster / CW Skimmer spots): its own copy of the Call Roster's per-roster settings,
+  // one fixed profile (no Band/Mode Memory). Window-wide settings stay in roster
+  feedRoster: {
+    exceptions: {
+      onlyHits: false,
+      requireGrid: false,
+      wantMaxDT: false,
+      wantMinDB: false,
+      wantMinFreq: false,
+      wantMaxFreq: false,
+      wantRRCQ: false,
+      maxDT: 0.5,
+      minDb: -25,
+      minFreq: 0,
+      maxFreq: 3500,
+      noMyDxcc: false,
+      onlyMyDxcc: false,
+      cqOnly: false,
+      usesLoTW: false,
+      maxLoTW: 27,
+      useseQSL: false,
+      usesOQRS: false,
+      onlySpot: false,
+      allOnlyNew: false,
+    },
+    logbook: {
+      huntNeed: "confirmed",
+      referenceNeed: "0",
+    },
+    wanted: {
+      huntCallsign: false,
+      huntGrid: true,
+      huntDXCC: true,
+      huntCQz: false,
+      huntITUz: false,
+      huntState: true,
+      huntCounty: false,
+      huntCont: false,
+      huntPX: false,
+      huntPOTA: false,
+      huntWatcher: false,
+      huntDXM: false,
+    },
+    columns: {
+      Callsign: true,
+      Band: true,
+      Mode: true,
+      Calling: true,
+      Spotter: true,
+      Wanted: false,
+      Grid: true,
+      Msg: false,
+      DXCC: true,
+      Flag: true,
+      State: true,
+      County: false,
+      POTA: false,
+      Cont: false,
+      Freq: true,
+      Dist: false,
+      Azim: false,
+      DXM: false,
+      CQz: false,
+      ITUz: false,
+      PX: false,
+      LoTW: false,
+      eQSL: false,
+      OQRS: false,
+      Life: false,
+      Age: true,
+      UTC: false
+    },
+    columnOrder: [
+      "Callsign", "Calling", "Spotter", "Band", "Mode", "Wanted", "Grid", "Msg",
+      "POTA", "DXCC", "Flag", "DXM", "State", "County", "Cont",
+      "Freq", "Dist", "Azim",
+      "CQz", "ITUz", "PX",
+      "LoTW", "eQSL", "OQRS",
+      "Life", "Age", "UTC"
+    ],
+    compact: false,
+    compactEntity: "DXCC",
+    sortColumn: "Age",
+    sortReverse: true,
+    watcherSortColumn: "name",
+    watcherSortReverse: false,
+    rosterTime: 300,
     watchers: {},
     feeds: {
-      alerts: false,
+      // Feed Roster audio alerts come from Settings -> Audio Alerts -> Feed Roster; these cover the script and push
+      alertScript: false,
       notifications: false,
       // Bands the user unticked; anything not listed is shown
       hiddenBands: {},
       // Mode groups (Digital, Phone, CW) the user unticked; anything not listed is shown
       hiddenModes: {}
+    }
+  },
+  // Feed Roster audio alerts: which wanted types alert, and their own sounds and speech
+  // (media defaults to the same as audioAlerts.media, set below)
+  feedAudioAlerts: {
+    wanted: {
+      huntCallsign: false,
+      huntGrid: false,
+      huntDXCC: false,
+      huntCQz: false,
+      huntDXM: false,
+      huntITUz: false,
+      huntState: false,
+      huntCounty: false,
+      huntCont: false,
+      huntPX: false,
+      huntPOTA: false,
+      huntWatcher: false,
+      huntAward: false,
+      huntMultiple: false,
     }
   },
   ByBandMode: {
@@ -611,6 +725,15 @@ const def_settings = {
     customAlerts: {}
   },
 };
+
+def_settings.feedAudioAlerts.media = { ...def_settings.audioAlerts.media };
+
+// Each roster's default columns, copied before anything can change them (new users' settings start as
+// these very objects): for the roster windows' "Reset Columns to Default"
+const def_rosterColumns = JSON.parse(JSON.stringify({
+  call: { columns: def_settings.roster.columns, columnOrder: def_settings.roster.columnOrder },
+  feed: { columns: def_settings.feedRoster.columns, columnOrder: def_settings.feedRoster.columnOrder }
+}));
 
 const def_mapMemory = {
   zoom: -1,

@@ -40,6 +40,7 @@
       <div style="top: 1px; right: 1px; position: absolute">
         <button class="Xbutton" onclick="closeSettings()">X</button>
       </div>
+      <div id="rosterSettingsTitle">Call Roster Settings</div>
       <div class="infotab">
         <button data-i18n="settings.General.label" id="generalbox" class="infoTablinks active" onclick="openInfoTab(event, 'generalSettingsDiv')">
           General
@@ -58,6 +59,7 @@
         </button>
       </div>
       <div id="generalSettingsDiv" class="infoTabcontent">
+        <div id="generalSettingsBoxes">
         <div class="mapItem"  align="center">
           <table >
             <tr align="center" >
@@ -86,8 +88,7 @@
             </tr>
           </table>
         </div>
-        <br>
-        <div class="mapItem"  align="center">
+        <div class="mapItem"  align="center" id="clearRosterOnBandChangeDiv">
           <table>
             <tr align="center">
               <td>Clear Roster on Band change</td>
@@ -123,11 +124,14 @@
         <div class="mapItem">
           <div class="button" style="margin: 5px; font:larger; padding:5px;" id="compactModeDiv" onclick="compactModeChanged()">Compact Mode</div>
         </div>
+        <div class="mapItem" id="resetRosterColumnsDiv">
+          <div class="button" style="margin: 5px; font:larger; padding:5px;" onclick="resetRosterColumns()" data-i18n="roster.settings.resetColumns">Reset Columns To Default</div>
+        </div>
         <div class="mapItem" id="compactEnityDiv">
           Compact Mode Entity<br />
           <select id="compactEntitySelect" onchange="compactEntityChanged()"></select>
         </div>
-        <br />
+        </div>
         <div class="mapItem">
           <table align="center">
             <tr align="center">
@@ -303,7 +307,7 @@
       </div>
       <div id="exceptionsBoxDiv" class="infoTabcontent">
         <div class="exceptionTab">
-        <div>
+        <div id="minDbDiv">
           <input type="checkbox" id="wantMinDB" onchange="huntingValueChanged(this);" />
           <label data-i18n="roster.secondary.exceptions.minDB" for="wantMinDB">Min dB</label>
           <span id="minDbView" class="roundBorderValue">-24</span>
@@ -318,7 +322,7 @@
             oninput="huntingValueChanged(this);"
           />
         </div>
-        <div>
+        <div id="maxDTDiv">
           <input type="checkbox" id="wantMaxDT" onchange="huntingValueChanged(this);" />
           <label data-i18n="roster.secondary.exceptions.maxDT" for="wantMaxDT">Max DT</label>
           <span id="maxDTView" class="roundBorderValue">.5</span>
@@ -333,7 +337,7 @@
             oninput="huntingValueChanged(this);"
           />
         </div>
-        <div>
+        <div id="minFreqDiv">
           <input type="checkbox" id="wantMinFreq" onchange="huntingValueChanged(this);" />
           <label data-i18n="roster.secondary.exceptions.minFreq" for="wantMinFreq">Min freq</label>
           <span id="minFreqView" class="roundBorderValue">400</span>
@@ -348,7 +352,7 @@
             oninput="huntingValueChanged(this);"
           />
         </div>
-        <div>
+        <div id="maxFreqDiv">
           <input type="checkbox" id="wantMaxFreq" onchange="huntingValueChanged(this);" />
           <label data-i18n="roster.secondary.exceptions.maxFreq" for="wantMaxFreq">Max freq</label>
           <span id="maxFreqView" class="roundBorderValue">3500</span>
@@ -392,7 +396,7 @@
             <option value="Grid">Grid</option>
             <option value="CQz">CQ Zone</option>
             <option value="ITUz">ITU Zone</option>
-            <option value="Spotter" data-i18n="roster.ignores.spotters">Spotters</option>
+            <option value="Spotter" id="ignoreSpotterOption" data-i18n="roster.ignores.spotters">Spotters</option>
           </select>
           <input id="ignoreCallsignValue" type="text" class="inputTextValue" size="10" style="text-transform: uppercase;" />
           <input id="ignoreGridValue" type="text" class="inputTextValue"  oninput="gridInputValidate(this)" size="10"/>
@@ -416,8 +420,8 @@
           <table>
             <tr>
               <td align="left">
-                <input type="checkbox" id="feedAlertsEnable" onchange="feedsSettingChanged()" />
-                <label data-i18n="roster.feeds.alerts.label" for="feedAlertsEnable">Allow Alerting (Audio, Alert Script)</label>
+                <input type="checkbox" id="feedAlertScriptEnable" onchange="feedsSettingChanged()" />
+                <label data-i18n="roster.feeds.alertScript.label" for="feedAlertScriptEnable">Allow Alert Script</label>
               </td>
             </tr>
             <tr>
@@ -445,13 +449,17 @@
       </div>
     </div>
     <div id="MainCallRoster" style="display:block;">
+      <div id="rosterTabs" style="display:none;">
+        <button id="callRosterTab" class="rosterTab active" onclick="showRosterTab('call')" data-i18n="roster.tabs.call">Call Roster</button>
+        <button id="feedRosterTab" class="rosterTab" onclick="showRosterTab('feed')" data-i18n="roster.tabs.feed">Feed Roster</button>
+      </div>
       <header id="RosterControls">
         <div id="TransmitControls">
           <div id="txrxdec" style="background-color: Green; border-style: outset; border-color: yellow; padding-top:2px;" class="roundBorder">
           Waiting…
           </div>
           <div class="button" style="margin: 3px;" onclick="window.opener.haltAllTx(true);" data-i18n="roster.haltTX">Halt Tx</div>
-          <div class="button" style="margin: 3px;color:cyan;" onclick="openSettings();" data-i18n="roster.menu.Settings"></div>
+          <div class="button" style="margin: 3px;" id="rosterSettingsButton" onclick="openSettings();" data-i18n="roster.menu.Settings"></div>
         </div>
 
         <div id="MoreControls">
@@ -598,7 +606,7 @@
                 <input type="checkbox" id="cqOnly" onchange="huntingValueChanged(this);" />
               <label data-i18n="roster.secondary.exceptions.cqOnly" for="cqOnly">CQ Only</label>
               </div>
-              <div>
+              <div id="wantRRCQDiv">
                 <input type="checkbox" id="wantRRCQ" onchange="huntingValueChanged(this);" />
                 <label data-i18n="roster.secondary.exceptions.wantRRCQ" for="wantRRCQ">RR73 as CQ</label>
               </div>
@@ -631,7 +639,7 @@
               <input type="checkbox" id="usesOQRS" onchange="huntingValueChanged(this);" />
               <label data-i18n="roster.secondary.exceptions.usesOQRS" for="usesOQRS">Uses OQRS</label>
             </div>
-            <div class="flexButton" style="margin-left: 18px;font-weight: bolder;" onclick="openExceptions()">&nbsp;. . .&nbsp;</div>           
+            <div class="flexButton" id="moreExceptionsButton" style="margin-left: 18px;font-weight: bolder;" onclick="openExceptions()">&nbsp;. . .&nbsp;</div>
        
          </div>
 

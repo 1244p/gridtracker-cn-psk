@@ -6,7 +6,6 @@
 Object.assign(CR,
 {
   developerMode: false,
-  callRoster: {},
   ignoredCalls: {},
   ignoredCQ: {},
   ignoredDxcc: {},
@@ -16,7 +15,6 @@ Object.assign(CR,
   ignoredSpotters: {},
   modes: {},
   modes_phone: {},
-  rosterSettings: GT.settings.roster,
   day: 0,
   dayAsString: "0",
   menuHide: null,
@@ -66,8 +64,6 @@ Object.assign(CR,
   rosterTimeout: null,
   rosterFocus: false,
   lastTime: 0,
-  watchers: {},
-  watchersTest: {},
   def_displayFilters: {
     brightness: 100,
     contrast: 100,
@@ -77,6 +73,75 @@ Object.assign(CR,
     huerotate: 0
   }
 });
+
+// A roster profile is everything one roster works from: its entries and its settings.
+// The roster code reads them through CR.callRoster, CR.rosterSettings, CR.activeRoster, CR.activeExceptions,
+// CR.activeAudioAlerts, CR.watchers and CR.watchersTest, which follow CR.profile.
+// CR.profile is the visible tab's profile, except while withProfile() processes the other one in the background
+CR.profiles = {
+  // WSJT-X decodes
+  call: {
+    name: "call",
+    entries: () => GT.callRoster,
+    settings: () => GT.settings.roster,
+    roster: () => GT.activeRoster,
+    exceptions: () => GT.activeExceptions,
+    audioAlerts: () => GT.activeAudioAlerts,
+    // Entries from instances that are gone, or unticked in a multi-instance roster, are hidden
+    filter: (callObj) => (callObj.instance in GT.instances) && !(GT.instanceCount > 1 && GT.instances[callObj.instance].crEnable === false),
+    excludedColumns: { Spotter: true },
+    watchersTest: {},
+    alertTimer: null
+  },
+  // DX Cluster / CW Skimmer spots: one fixed profile, no Band/Mode Memory
+  feed: {
+    name: "feed",
+    entries: () => GT.feedRoster,
+    settings: () => GT.settings.feedRoster,
+    roster: () => GT.settings.feedRoster,
+    exceptions: () => GT.settings.feedRoster.exceptions,
+    audioAlerts: () => GT.settings.feedAudioAlerts,
+    // Bands and modes unticked in the Feeds tab, and ignored spotters, are hidden
+    filter: (callObj) => window.opener.feedBandAllowed(callObj) && window.opener.feedModeAllowed(callObj) && !(callObj.spotter.split("-")[0] in CR.ignoredSpotters),
+    excludedColumns: { Rig: true, dB: true, DT: true, Spot: true },
+    watchersTest: {},
+    alertTimer: null
+  }
+};
+CR.profile = CR.profiles.call;
+CR.visibleProfile = CR.profiles.call;
+
+Object.defineProperties(CR, {
+  callRoster: { get: () => CR.profile.entries() },
+  rosterSettings: { get: () => CR.profile.settings() },
+  activeRoster: { get: () => CR.profile.roster() },
+  activeExceptions: { get: () => CR.profile.exceptions() },
+  activeAudioAlerts: { get: () => CR.profile.audioAlerts() },
+  watchers: { get: () => CR.profile.settings().watchers },
+  watchersTest: { get: () => CR.profile.watchersTest },
+  // Settings for the roster window itself, shared by both tabs (filters, controls, always on top, focus delay)
+  windowSettings: { get: () => GT.settings.roster }
+});
+
+function isFeedRoster()
+{
+  return CR.profile === CR.profiles.feed;
+}
+
+// Runs fn with profile as the current one, then restores the visible tab's profile
+function withProfile(profile, fn)
+{
+  const previous = CR.profile;
+  CR.profile = profile;
+  try
+  {
+    return fn();
+  }
+  finally
+  {
+    CR.profile = previous;
+  }
+}
 
 const LOGBOOK_LIVE_BAND_LIVE_MODE = "0";
 const LOGBOOK_LIVE_BAND_MIX_MODE = "1";
@@ -147,6 +212,14 @@ function storeAwardTracker()
 
 function loadSettings()
 {
+  for (const profile of Object.values(CR.profiles))
+  {
+    withProfile(profile, loadWatcherSettings);
+  }
+}
+
+function loadWatcherSettings()
+{
   for (let key in CR.rosterSettings.watchers)
   {
     let watcher = CR.rosterSettings.watchers[key];
@@ -174,14 +247,10 @@ function loadSettings()
     if (!watcher.start) watcher.startTime = 0;
     if (!watcher.end) watcher.endTime = 0;
   }
-
-  // Code reducer
-  CR.watchers = CR.rosterSettings.watchers;
 }
 
 function writeRosterSettings()
 {
-  GT.settings.roster = CR.rosterSettings;
   storeAwardTracker();
   storeBlocks();
 }
@@ -240,7 +309,7 @@ function hashMaker(callObj, reference)
 
 function rosterInFocus()
 {
-  if (CR.rosterSettings.rosterDelayOnFocus)
+  if (CR.windowSettings.rosterDelayOnFocus)
   {
     CR.rosterFocus = true;
   }
@@ -257,9 +326,28 @@ function rosterNoFocus()
   }
 }
 
+// From the main window: both rosters (decodes, worked status and settings changes affect both)
 function processRoster()
 {
-  CR.callRoster = GT.callRoster;
+  processProfile(CR.profiles.call);
+  processProfile(CR.profiles.feed);
+}
+
+// From the main window: new DX Cluster / CW Skimmer spots
+function processFeedRoster()
+{
+  processProfile(CR.profiles.feed);
+}
+
+// The visible tab is rendered (after the focus delay, if on); the other is processed for its alerts only
+function processProfile(profile)
+{
+  if (profile !== CR.visibleProfile)
+  {
+    withProfile(profile, () => runRoster(false));
+    return;
+  }
+
   if (CR.rosterTimeout !== null)
   {
     nodeTimers.clearTimeout(CR.rosterTimeout);
@@ -268,7 +356,7 @@ function processRoster()
 
   if (CR.rosterFocus)
   {
-    CR.rosterTimeout = nodeTimers.setTimeout(viewRoster, CR.rosterSettings.rosterDelayTime);
+    CR.rosterTimeout = nodeTimers.setTimeout(viewRoster, CR.windowSettings.rosterDelayTime);
     rosterDelayDiv.style.display = "inline-block";
   }
   else
@@ -277,22 +365,32 @@ function processRoster()
   }
 }
 
+// Processes and renders the visible tab
 function viewRoster()
 {
   CR.rosterTimeout = null;
   rosterDelayDiv.style.display = "none";
+  runRoster(true);
+}
+
+function runRoster(render)
+{
   let rosterSettings = prepareRosterSettings();
   processRosterFiltering(CR.callRoster, rosterSettings);
   processRosterHunting(CR.callRoster, rosterSettings);
-  renderRoster(CR.callRoster, rosterSettings);
-
-  if (CR.alertTimer !== null)
+  if (render)
   {
-    nodeTimers.clearTimeout(CR.alertTimer);
-    CR.alertTimer = null;
+    renderRoster(CR.callRoster, rosterSettings);
   }
 
-  CR.alertTimer = nodeTimers.setTimeout(sendAlerts, 250);
+  const profile = CR.profile;
+  if (profile.alertTimer !== null)
+  {
+    nodeTimers.clearTimeout(profile.alertTimer);
+    profile.alertTimer = null;
+  }
+
+  profile.alertTimer = nodeTimers.setTimeout(() => withProfile(profile, sendAlerts), 250);
 }
 
 function realtimeRoster()
@@ -301,7 +399,7 @@ function realtimeRoster()
   CR.day = Math.trunc(now / 86400);
   CR.dayAsString = String(CR.day);
 
-  if (!CR.rosterSettings.realtime) return;
+  if (!CR.windowSettings.realtime) return;
 
   for (const timeCol of document.getElementsByClassName("timeCol"))
   {
@@ -347,7 +445,7 @@ function getSpotString(callObj)
 
 function isFeedEntry(thisHash)
 {
-  return thisHash in CR.callRoster && CR.callRoster[thisHash].callObj.instance === GT.feedInstance;
+  return isFeedRoster() && thisHash in CR.callRoster;
 }
 
 function initiateQso(thisHash)
@@ -739,18 +837,18 @@ function closeAwardPopup()
 
 function toggleMoreControls()
 {
-  CR.rosterSettings.controlsExtended = !CR.rosterSettings.controlsExtended;
+  CR.windowSettings.controlsExtended = !CR.windowSettings.controlsExtended;
   setVisual();
 }
 
 function setVisual()
 {
-  referenceNeed.value = GT.activeRoster.logbook.referenceNeed;
-  huntNeed.value = GT.activeRoster.logbook.huntNeed;
+  referenceNeed.value = CR.activeRoster.logbook.referenceNeed;
+  huntNeed.value = CR.activeRoster.logbook.huntNeed;
 
-  if (CR.rosterSettings.controls)
+  if (CR.windowSettings.controls)
   {
-    if (CR.rosterSettings.controlsExtended)
+    if (CR.windowSettings.controlsExtended)
     {
       RosterControls.className = "extended";
       instancesWrapper.style.display = "";
@@ -768,7 +866,7 @@ function setVisual()
   }
 
   // Award Hunter
-  if (GT.activeRoster.logbook.referenceNeed === LOGBOOK_AWARD_TRACKER)
+  if (CR.activeRoster.logbook.referenceNeed === LOGBOOK_AWARD_TRACKER)
   {
     huntNeed.style.display = "none";
     onlyHitsDiv.style.display = "none";
@@ -781,14 +879,14 @@ function setVisual()
   }
   else
   {
-    for (const key in GT.activeRoster.wanted)
+    for (const key in CR.activeRoster.wanted)
     {
       if (key in window)
       {
-        window[key].checked = GT.activeRoster.wanted[key];
-        if (GT.activeAudioAlerts.wanted[key] === true)
+        window[key].checked = CR.activeRoster.wanted[key];
+        if (CR.activeAudioAlerts.wanted[key] === true)
         {
-          window[key].nextElementSibling.nextElementSibling.innerHTML = "<font style='font-size:smaller;' onclick='window.opener.openAudioAlertSettings()'>&#128276;</font>";
+          window[key].nextElementSibling.nextElementSibling.innerHTML = "<font style='font-size:smaller;' onclick='window.opener.openAudioAlertSettings(\"" + CR.profile.name + "\")'>&#128276;</font>";
         }
         else
         {
@@ -819,7 +917,7 @@ function setVisual()
 
 function wantedChanged(element)
 {
-  GT.activeRoster.wanted[element.id] = element.checked;
+  CR.activeRoster.wanted[element.id] = element.checked;
 
   if (element.checked)
   {
@@ -840,24 +938,39 @@ function wantedChanged(element)
   viewRoster();
 }
 
-function wantedValuesChangedFromAudioAlerts()
+// Main window Audio Alerts; rosterName is the roster its sub-tab shows ("call" / "feed")
+function wantedValuesChangedFromAudioAlerts(rosterName = "call")
 {
-  resetAlertReporting(false, true);
+  withProfile(CR.profiles[rosterName], () => resetAlertReporting(false, true));
   setVisual();
   viewRoster();
 }
 
-function huntingValueChangedFromAudioAlerts(id, value)
+// Main window Audio Alerts exceptions; when that roster isn't the visible tab, the controls here belong
+// to the other roster, so only its setting changes
+function huntingValueChangedFromAudioAlerts(id, value, rosterName = "call")
 {
+  const profile = CR.profiles[rosterName];
+  if (profile !== CR.visibleProfile)
+  {
+    if (id in window)
+    {
+      profile.exceptions()[id] = value;
+      withProfile(profile, () => resetAlertReporting(true, true));
+      processProfile(profile);
+    }
+    return;
+  }
+
   if (id in window)
   {
     if (window[id].type === "checkbox")
     {
-      GT.activeExceptions[id] = window[id].checked = value;
+      CR.activeExceptions[id] = window[id].checked = value;
     }
     else
     {
-      GT.activeExceptions[id] = window[id].value = value;
+      CR.activeExceptions[id] = window[id].value = value;
     }
     resetAlertReporting(true, true);
     setVisual();
@@ -867,8 +980,8 @@ function huntingValueChangedFromAudioAlerts(id, value)
 
 function logbookValuesChanged()
 {
-  GT.activeRoster.logbook.referenceNeed = referenceNeed.value;
-  GT.activeRoster.logbook.huntNeed = huntNeed.value;
+  CR.activeRoster.logbook.referenceNeed = referenceNeed.value;
+  CR.activeRoster.logbook.huntNeed = huntNeed.value;
   setVisual();
   window.opener.setVisualAudioAlerts();
 }
@@ -877,26 +990,27 @@ function huntingValueChanged(element)
 {
   let id = element.id;
   
-  if (id in GT.activeExceptions)
+  if (id in CR.activeExceptions)
   {
     let value;
     if (element.type === "checkbox")
     {
-      value = GT.activeExceptions[id] = element.checked;
+      value = CR.activeExceptions[id] = element.checked;
     }
     else
     {
-      value = GT.activeExceptions[id] = element.value;
+      value = CR.activeExceptions[id] = element.value;
       let view = id + "View";
       if (view in window)
       {
         window[view].innerHTML = element.value;
       }
     }
-    window.opener.huntingValueChangedFromCallRoster(id, value);
+    // Main window Audio Alerts mirrors each roster's exceptions
+    window.opener.huntingValueChangedFromCallRoster(id, value, CR.profile.name);
   }
 
-  maxLoTWView.innerHTML = GT.activeExceptions.maxLoTW < 27 ? toYM(Number(GT.activeExceptions.maxLoTW)) : "<b>&infin;</b>";
+  maxLoTWView.innerHTML = CR.activeExceptions.maxLoTW < 27 ? toYM(Number(CR.activeExceptions.maxLoTW)) : "<b>&infin;</b>";
 
   resetAlertReporting(true, true);
   setVisual();
@@ -905,23 +1019,24 @@ function huntingValueChanged(element)
 
 function resetAlertReporting(clearRoster, clearAudio)
 {
-  for (const callHash in CR.callRoster)
+  const callRoster = CR.callRoster;
+  for (const callHash in callRoster)
   {
-    if (clearRoster) GT.callRoster[callHash].callObj.rosterAlerted = false;
-    if (clearAudio) GT.callRoster[callHash].callObj.audioAlerted = false;
+    if (clearRoster) callRoster[callHash].callObj.rosterAlerted = false;
+    if (clearAudio) callRoster[callHash].callObj.audioAlerted = false;
   }
 }
 
 function loadFilterSettings()
 {
   let filters = "";
-  for (const filter in CR.rosterSettings.displayFilters)
+  for (const filter in CR.windowSettings.displayFilters)
   {
     let slider = document.getElementById("filter" + filter + "Slider");
 
     if (slider)
     {
-      slider.value = CR.rosterSettings.displayFilters[filter];
+      slider.value = CR.windowSettings.displayFilters[filter];
       let td = document.getElementById("filter" + filter + "Td");
 
       if (filter === "invert")
@@ -947,17 +1062,17 @@ function loadFilterSettings()
 
 function filtersChanged()
 {
-  for (const filter in CR.rosterSettings.displayFilters)
+  for (const filter in CR.windowSettings.displayFilters)
   {
     let slider = document.getElementById("filter" + filter + "Slider");
 
     if (slider)
     {
-      CR.rosterSettings.displayFilters[filter] = slider.value;
+      CR.windowSettings.displayFilters[filter] = slider.value;
     }
     else
     {
-      delete CR.rosterSettings.displayFilters[filter];
+      delete CR.windowSettings.displayFilters[filter];
     }
   }
   loadFilterSettings();
@@ -965,9 +1080,9 @@ function filtersChanged()
 
 function resetFilters()
 {
-  for (const filter in CR.rosterSettings.displayFilters)
+  for (const filter in CR.windowSettings.displayFilters)
   {
-    CR.rosterSettings.displayFilters[filter] = CR.def_displayFilters[filter];
+    CR.windowSettings.displayFilters[filter] = CR.def_displayFilters[filter];
   }
   loadFilterSettings();
 }
@@ -1284,28 +1399,29 @@ function clearAllITUzIgnores()
   viewRoster();
 }
 
+// The pane is shown before the tab renders, so the Ignores and Watcher tabs can measure where they start
 function openSettings()
 {
-  openInfoTab("generalbox", "generalSettingsDiv");
   settingsDiv.style.display = "inline-block";
+  openInfoTab("generalbox", "generalSettingsDiv");
 }
 
 function openWatcher()
 {
-  openInfoTab("watcherbox", "watcherBoxDiv", openWatchersTab);
   settingsDiv.style.display = "inline-block";
+  openInfoTab("watcherbox", "watcherBoxDiv", openWatchersTab);
 }
 
 function openExceptions()
 {
-  openInfoTab("exceptionsbox", "exceptionsBoxDiv");
   settingsDiv.style.display = "inline-block";
+  openInfoTab("exceptionsbox", "exceptionsBoxDiv");
 }
 
 function openIgnores()
 {
-  openInfoTab("ingoresbox", "ignoresBoxDiv", renderIgnoresTab);
   settingsDiv.style.display = "inline-block";
+  openInfoTab("ingoresbox", "ignoresBoxDiv", renderIgnoresTab);
 }
 
 function closeSettings()
@@ -1313,25 +1429,107 @@ function closeSettings()
   settingsDiv.style.display = "none";
 }
 
-// Feeds tab: only shown while at least one feed is enabled in the main settings
-function updateFeedsTab()
+function feedsActive()
 {
   const active = window.opener.feedsActive();
-  const anyActive = active.dx || active.cw;
+  return active.dx || active.cw;
+}
 
-  feedsbox.style.display = anyActive ? "" : "none";
-  if (!anyActive && feedsBoxDiv.style.display === "block")
+// From the main window when feed settings change: the Feed Roster tab exists only while a feed is on
+function updateFeedsTab()
+{
+  const anyActive = feedsActive();
+
+  rosterTabs.style.display = anyActive ? "" : "none";
+  rosterBody.classList.toggle("rosterTabsShown", anyActive);
+
+  if (!anyActive && CR.visibleProfile === CR.profiles.feed)
   {
-    openInfoTab("generalbox", "generalSettingsDiv");
+    showRosterTab("call");
+  }
+  else
+  {
+    updateRosterTabControls();
   }
   renderFeedsTab();
 }
 
+// Call Roster | Feed Roster tabs: the controls, settings panel and table all switch to the chosen roster
+function showRosterTab(name, render = true)
+{
+  if (name === "feed" && !feedsActive()) name = "call";
+  if (!(name in CR.profiles)) name = "call";
+
+  CR.windowSettings.activeTab = name;
+  CR.visibleProfile = CR.profile = CR.profiles[name];
+
+  callRosterTab.classList.toggle("active", name === "call");
+  feedRosterTab.classList.toggle("active", name === "feed");
+  rosterBody.classList.toggle("feedRosterShown", name === "feed");
+  rosterSettingsTitle.textContent = I18N(name === "feed" ? "roster.settings.feed" : "roster.settings.call");
+
+  createColumnMenu();
+  applyActiveRoster();
+  setCompactView();
+  setRosterTimeView();
+  compactEntitySelect.value = CR.rosterSettings.compactEntity;
+  updateRosterTabControls();
+  if (render)
+  {
+    setVisual();
+    viewRoster();
+  }
+}
+
+// Settings that only one roster has: Feeds tab, Spotter ignores and Spotter column for the Feed Roster;
+// dB / DT / Freq exceptions and Clear Roster on Band change for the Call Roster
+function updateRosterTabControls()
+{
+  const feed = isFeedRoster();
+
+  feedsbox.style.display = feed ? "" : "none";
+  ignoreSpotterOption.style.display = feed ? "" : "none";
+  clearRosterOnBandChangeDiv.style.display = feed ? "none" : "";
+  minDbDiv.style.display = feed ? "none" : "";
+  maxDTDiv.style.display = feed ? "none" : "";
+  minFreqDiv.style.display = feed ? "none" : "";
+  maxFreqDiv.style.display = feed ? "none" : "";
+  // The Feed Roster has no Exceptions settings tab (and so no "..." to it), and no RR73
+  exceptionsbox.style.display = feed ? "none" : "";
+  moreExceptionsButton.style.display = feed ? "none" : "";
+  wantRRCQDiv.style.display = feed ? "none" : "";
+
+  if (!feed && CR.ignoreType === "Spotter")
+  {
+    ignoreTypeSelect.value = "Callsign";
+    ignoreTypeChanged("Callsign");
+  }
+
+  // An open settings tab redraws for the roster now showing
+  if ((feedsBoxDiv.style.display === "block" && !feed) || (exceptionsBoxDiv.style.display === "block" && feed))
+  {
+    openInfoTab("generalbox", "generalSettingsDiv");
+  }
+  else if (ignoresBoxDiv.style.display === "block")
+  {
+    renderIgnoresTab();
+  }
+  else if (watcherBoxDiv.style.display === "block")
+  {
+    openWatchersTab();
+  }
+}
+
+function feedSettings()
+{
+  return CR.profiles.feed.settings().feeds;
+}
+
 function renderFeedsTab()
 {
-  const feeds = CR.rosterSettings.feeds;
+  const feeds = feedSettings();
 
-  feedAlertsEnable.checked = feeds.alerts;
+  feedAlertScriptEnable.checked = feeds.alertScript;
   feedNotificationsEnable.checked = feeds.notifications;
 
   feedModeDigital.checked = !("Digital" in feeds.hiddenModes);
@@ -1346,7 +1544,7 @@ function renderFeedsTab()
 
 function feedBandChanged(checkbox, band)
 {
-  const hidden = CR.rosterSettings.feeds.hiddenBands;
+  const hidden = feedSettings().hiddenBands;
   if (checkbox.checked)
   {
     delete hidden[band];
@@ -1360,7 +1558,7 @@ function feedBandChanged(checkbox, band)
 
 function feedModeChanged(checkbox, type)
 {
-  const hidden = CR.rosterSettings.feeds.hiddenModes;
+  const hidden = feedSettings().hiddenModes;
   if (checkbox.checked)
   {
     delete hidden[type];
@@ -1374,8 +1572,8 @@ function feedModeChanged(checkbox, type)
 
 function feedsSettingChanged()
 {
-  CR.rosterSettings.feeds.alerts = feedAlertsEnable.checked;
-  CR.rosterSettings.feeds.notifications = feedNotificationsEnable.checked;
+  feedSettings().alertScript = feedAlertScriptEnable.checked;
+  feedSettings().notifications = feedNotificationsEnable.checked;
 }
 
 function renderIgnoresTab()
@@ -1452,7 +1650,7 @@ function renderIgnoresTab()
     html.push("</table></div>");
   }
 
-  if (Object.keys(CR.ignoredSpotters).length > 0)
+  if (isFeedRoster() && Object.keys(CR.ignoredSpotters).length > 0)
   {
     clearString = "<th style='cursor:pointer;' onclick='clearAllSpotterIgnores()'>Clear All</th>";
     html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${I18N("roster.ignores.spotters")}</th>${clearString}</tr>`);
@@ -1464,12 +1662,15 @@ function renderIgnoresTab()
   }
 
   ignoresEditView.innerHTML = html.join("");
-  ignoresBoxDiv.style.height = (window.innerHeight - 50) + "px";
+  // Fit to the window from where the tab actually starts (the pane's title and the roster tabs move it down);
+  // 27px is where it started before either existed, for when it isn't showing yet
+  const boxTop = ignoresBoxDiv.offsetParent ? ignoresBoxDiv.getBoundingClientRect().top : 27;
+  ignoresBoxDiv.style.height = (window.innerHeight - boxTop - 23) + "px";
 
   let elems = document.getElementsByClassName("ignoresTables");
   for (const elem of elems)
   {
-    let height = 110;
+    let height = 110 + (boxTop - 27);
     if (elem.offsetHeight > window.innerHeight - height)
     {
       elem.style.height = (window.innerHeight - height) + "px";
@@ -1558,7 +1759,7 @@ function init()
 
 function toggleShowControls()
 {
-  CR.rosterSettings.controls = !CR.rosterSettings.controls;
+  CR.windowSettings.controls = !CR.windowSettings.controls;
   setVisual();
 }
 
@@ -1591,16 +1792,17 @@ function addControls()
   createCompactMenuShow();
   createRestOfMenus();
 
-  clearRosterOnBandChange.checked = CR.rosterSettings.clearRosterOnBandChange;
-  rosterAlwaysOnTop.checked = CR.rosterSettings.rosterAlwaysOnTop;
-  rosterDelayOnFocus.checked = CR.rosterSettings.rosterDelayOnFocus;
+  clearRosterOnBandChange.checked = CR.windowSettings.clearRosterOnBandChange;
+  rosterAlwaysOnTop.checked = CR.windowSettings.rosterAlwaysOnTop;
+  rosterDelayOnFocus.checked = CR.windowSettings.rosterDelayOnFocus;
   displayDelayOnFocus();
-  rosterDelayTime.value = CR.rosterSettings.rosterDelayTime;
+  rosterDelayTime.value = CR.windowSettings.rosterDelayTime;
   rosterDelayTimeTd.innerHTML = rosterDelayTime.value + "ms";
   setRosterTimeView();
   setCompactView();
   initSelectors();
   updateFeedsTab();
+  showRosterTab(CR.windowSettings.activeTab, false);
   setVisual();
   document.addEventListener("keydown", onMyKeyDown, false);
   CR.timerInterval = nodeTimers.setInterval(realtimeRoster, 1000);
@@ -1609,49 +1811,50 @@ function addControls()
 
 function applyActiveRoster()
 {
-  for (const key in GT.activeRoster.wanted)
+  for (const key in CR.activeRoster.wanted)
   {
     if (key in window)
     { 
-      window[key].checked = GT.activeRoster.wanted[key]; 
+      window[key].checked = CR.activeRoster.wanted[key]; 
     }
   }
 
-  referenceNeed.value = GT.activeRoster.logbook.referenceNeed;
-  huntNeed.value = GT.activeRoster.logbook.huntNeed;
+  referenceNeed.value = CR.activeRoster.logbook.referenceNeed;
+  huntNeed.value = CR.activeRoster.logbook.huntNeed;
 
-  requireGrid.checked = GT.activeExceptions.requireGrid;
+  requireGrid.checked = CR.activeExceptions.requireGrid;
 
-  wantMaxDT.checked = GT.activeExceptions.wantMaxDT;
-  wantMinDB.checked = GT.activeExceptions.wantMinDB;
-  wantMinFreq.checked = GT.activeExceptions.wantMinFreq;
-  wantMaxFreq.checked = GT.activeExceptions.wantMaxFreq;
-  wantRRCQ.checked = GT.activeExceptions.wantRRCQ;
+  wantMaxDT.checked = CR.activeExceptions.wantMaxDT;
+  wantMinDB.checked = CR.activeExceptions.wantMinDB;
+  wantMinFreq.checked = CR.activeExceptions.wantMinFreq;
+  wantMaxFreq.checked = CR.activeExceptions.wantMaxFreq;
+  wantRRCQ.checked = CR.activeExceptions.wantRRCQ;
 
-  maxDTView.innerHTML = maxDT.value = GT.activeExceptions.maxDT;
-  minDbView.innerHTML = minDb.value = GT.activeExceptions.minDb;
-  minFreqView.innerHTML = minFreq.value = GT.activeExceptions.minFreq;
-  maxFreqView.innerHTML = maxFreq.value = GT.activeExceptions.maxFreq;
+  maxDTView.innerHTML = maxDT.value = CR.activeExceptions.maxDT;
+  minDbView.innerHTML = minDb.value = CR.activeExceptions.minDb;
+  minFreqView.innerHTML = minFreq.value = CR.activeExceptions.minFreq;
+  maxFreqView.innerHTML = maxFreq.value = CR.activeExceptions.maxFreq;
 
-  maxLoTW.value = GT.activeExceptions.maxLoTW;
+  maxLoTW.value = CR.activeExceptions.maxLoTW;
   maxLoTWView.innerHTML = maxLoTW.value < 27 ? toYM(Number(maxLoTW.value)) : "<b>&infin;</b>";
 
-  onlyHits.checked = GT.activeExceptions.onlyHits;
-  cqOnly.checked = GT.activeExceptions.cqOnly;
-  noMyDxcc.checked = GT.activeExceptions.noMyDxcc;
-  onlyMyDxcc.checked = GT.activeExceptions.onlyMyDxcc;
+  onlyHits.checked = CR.activeExceptions.onlyHits;
+  cqOnly.checked = CR.activeExceptions.cqOnly;
+  noMyDxcc.checked = CR.activeExceptions.noMyDxcc;
+  onlyMyDxcc.checked = CR.activeExceptions.onlyMyDxcc;
 
-  usesLoTW.checked = GT.activeExceptions.usesLoTW;
-  useseQSL.checked = GT.activeExceptions.useseQSL;
-  onlySpot.checked = GT.activeExceptions.onlySpot;
-  usesOQRS.checked = GT.activeExceptions.usesOQRS;
+  usesLoTW.checked = CR.activeExceptions.usesLoTW;
+  useseQSL.checked = CR.activeExceptions.useseQSL;
+  onlySpot.checked = CR.activeExceptions.onlySpot;
+  usesOQRS.checked = CR.activeExceptions.usesOQRS;
 
-  allOnlyNew.checked = GT.activeExceptions.allOnlyNew;
+  allOnlyNew.checked = CR.activeExceptions.allOnlyNew;
 
   let wantedHeader = document.querySelector('h3[data-i18n="roster.secondary.wanted.label"]');
   let exceptionsHeader = document.querySelector('h3[data-i18n="roster.exceptions.label"]');
 
-  if (GT.settings.app.wantedByBandMode == true && GT.instanceCount == 1) {
+  // Band/Mode Memory applies to the Call Roster only
+  if (!isFeedRoster() && GT.settings.app.wantedByBandMode == true && GT.instanceCount == 1) {
     if (wantedHeader && !document.getElementById('wanted_mode_indicator')) {
       wantedHeader.insertAdjacentHTML('beforeend', ' <span id="wanted_mode_indicator" class="band-mode-indicator">M</span>');
       wanted_mode_indicator.title = I18N("settings.Features.BandMemory");
@@ -1678,12 +1881,29 @@ function setCompactView()
 {
   compactModeDiv.innerHTML = CR.rosterSettings.compact ? I18N("roster.menu.RosterMode") : I18N("roster.menu.CompactMode");
   compactEnityDiv.style.display = CR.rosterSettings.compact ? "" : "none";
+  // Compact mode has no columns to reset
+  resetRosterColumnsDiv.style.display = CR.rosterSettings.compact ? "none" : "";
 }
 
 function compactModeChanged()
 {
   CR.rosterSettings.compact = !CR.rosterSettings.compact;
   setCompactView();
+  viewRoster();
+}
+
+// General tab "Reset Columns to Default": the visible roster's columns and their order only
+function resetRosterColumns()
+{
+  const def = window.opener.defaultRosterColumns(CR.profile.name);
+  CR.rosterSettings.columns = def.columns;
+  CR.rosterSettings.columnOrder = validateRosterColumnOrder(def.columnOrder);
+  createColumnMenu();
+  if (!isFeedRoster())
+  {
+    window.opener.setRosterSpot(CR.rosterSettings.columns.Spot);
+  }
+  setVisual();
   viewRoster();
 }
 
@@ -1695,18 +1915,18 @@ function compactEntityChanged()
 
 function clearRosterOnBandChangeValueChanged(what)
 {
-  CR.rosterSettings.clearRosterOnBandChange = clearRosterOnBandChange.checked;
+  CR.windowSettings.clearRosterOnBandChange = clearRosterOnBandChange.checked;
 }
 
 function rosterDelayOnFocusValueChanged(what)
 {
-  CR.rosterSettings.rosterDelayOnFocus = rosterDelayOnFocus.checked;
+  CR.windowSettings.rosterDelayOnFocus = rosterDelayOnFocus.checked;
   displayDelayOnFocus();
 }
 
 function displayDelayOnFocus()
 {
-  if (CR.rosterSettings.rosterDelayOnFocus)
+  if (CR.windowSettings.rosterDelayOnFocus)
   {
     rosterDelayTimeTd.style.display = "block";
     rosterDelayTime.style.display = "block";
@@ -1720,7 +1940,7 @@ function displayDelayOnFocus()
 
 function changeRosterDelayTime()
 {
-  CR.rosterSettings.rosterDelayTime = rosterDelayTime.value;
+  CR.windowSettings.rosterDelayTime = rosterDelayTime.value;
   rosterDelayTimeTd.innerHTML = rosterDelayTime.value + "ms";
 }
 
@@ -1733,13 +1953,13 @@ function changeRosterTime()
 
 function changeRosterTop(butt)
 {
-  CR.rosterSettings.rosterAlwaysOnTop = butt.checked;
+  CR.windowSettings.rosterAlwaysOnTop = butt.checked;
   setRosterTop();
 }
 
 function setRosterTop()
 {
-  electron.ipcRenderer.send("setAlwaysOnTop", "gt_roster", CR.rosterSettings.rosterAlwaysOnTop);
+  electron.ipcRenderer.send("setAlwaysOnTop", "gt_roster", CR.windowSettings.rosterAlwaysOnTop);
 }
 
 function setRosterTimeView()
@@ -1830,7 +2050,7 @@ function handleContextMenu(ev)
     {
       if (CR.rosterSettings.compact)
       {
-        CR.rosterSettings.controls ? CR.compactMenuHide.popup() : CR.compactMenuShow.popup();
+        CR.windowSettings.controls ? CR.compactMenuHide.popup() : CR.compactMenuShow.popup();
       }
       else
       {
@@ -1841,7 +2061,7 @@ function handleContextMenu(ev)
         }
         else
         {
-          CR.rosterSettings.controls ? CR.menuHide.popup() : CR.menuShow.popup();
+          CR.windowSettings.controls ? CR.menuHide.popup() : CR.menuShow.popup();
         }
       }
     }
@@ -3269,7 +3489,7 @@ function addWatcher(value, type)
     entry.name = value;
     CR.watchers[value] = entry;
     CR.watchersTest[value] = null;
-    GT.activeRoster.wanted.huntWatcher = huntWatcher.checked = true;
+    CR.activeRoster.wanted.huntWatcher = huntWatcher.checked = true;
     window.opener.goProcessRoster();
     wantRenderWatchersTab();
   }
@@ -3433,7 +3653,9 @@ function renderWatchersTab()
     html.push("</table></div>");
     
     watcherEditView.innerHTML = html.join("");
-    let height = 40;
+    // Fit to the window from where the tab actually starts (27px before the pane's title and roster tabs existed)
+    const boxTop = watcherBoxDiv.offsetParent ? watcherBoxDiv.getBoundingClientRect().top : 27;
+    let height = 40 + (boxTop - 27);
     if (watcherBoxDiv.offsetHeight >= window.innerHeight - height)
     {
       watcherBoxDiv.style.height = (window.innerHeight - height) + "px";
@@ -3478,10 +3700,10 @@ function createMenuHide()
   CR.menuHide.append(new MenuItem({
     type: "checkbox",
     label: I18N("roster.menu.Realtime"),
-    checked: CR.rosterSettings.realtime,
+    checked: CR.windowSettings.realtime,
     click: function (item)
     {
-      CR.rosterSettings.realtime = item.checked;
+      CR.windowSettings.realtime = item.checked;
       CR.menuShow.items[2].checked = item.checked;
       viewRoster();
     }
@@ -3502,10 +3724,10 @@ function createMenuShow()
   CR.menuShow.append(new MenuItem({
     type: "checkbox",
     label: I18N("roster.menu.Realtime"),
-    checked: CR.rosterSettings.realtime,
+    checked: CR.windowSettings.realtime,
     click: function (item)
     {
-      CR.rosterSettings.realtime = item.checked;
+      CR.windowSettings.realtime = item.checked;
       CR.menuHide.items[2].checked = item.checked;
       viewRoster();
     }
@@ -3655,27 +3877,7 @@ function createRestOfMenus()
     click: function () { openIgnores(); }
   }));
 
-  CR.columnMenu = new Menu();
-
-  for (const key of CR.rosterSettings.columnOrder)
-  {
-    if (key !== "Callsign")
-    {
-      const column = ROSTER_COLUMNS[key];
-      let itemx = new MenuItem({
-        type: "checkbox",
-        label: (column && column.label) ? column.label() : key,
-        checked: CR.rosterSettings.columns[key],
-        click: function (item)
-        {
-          toggleColumn(item, key);
-          logbookValuesChanged();
-        }
-      });
-      CR.columnMenu.append(itemx);
-      CR.columnMembers[key] = itemx;
-    }
-  }
+  createColumnMenu();
 
   CR.MsgMenu = new Menu();
   CR.MsgMenu.append(new MenuItem({
@@ -3764,6 +3966,33 @@ function createRestOfMenus()
     enabled: true,
     click: function () { openIgnores(); }
   }));
+}
+
+// Column header menu for the visible tab's columns; rebuilt when the tab changes
+function createColumnMenu()
+{
+  CR.columnMenu = new Menu();
+  CR.columnMembers = {};
+
+  for (const key of CR.rosterSettings.columnOrder)
+  {
+    if (key !== "Callsign" && !CR.profile.excludedColumns[key])
+    {
+      const column = ROSTER_COLUMNS[key];
+      let itemx = new MenuItem({
+        type: "checkbox",
+        label: (column && column.label) ? column.label() : key,
+        checked: CR.rosterSettings.columns[key],
+        click: function (item)
+        {
+          toggleColumn(item, key);
+          logbookValuesChanged();
+        }
+      });
+      CR.columnMenu.append(itemx);
+      CR.columnMembers[key] = itemx;
+    }
+  }
 }
 
 function setPstrotatorEnable(enabled)

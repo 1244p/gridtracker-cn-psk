@@ -89,8 +89,10 @@ function openLogbookSettings()
   rootSettingsDiv.style.display = "inline-flex";
 }
 
-function openAudioAlertSettings()
+// rosterName: which roster's Audio Alerts to show ("call" / "feed"), from the roster window's 🔔
+function openAudioAlertSettings(rosterName = null)
 {
+  if (rosterName) showAudioAlertsRoster(rosterName);
   openSettingsTab(audioalertbut, 'audioAlertsDiv');
   helpDiv.style.display = "none";
   GT.helpShow = false;

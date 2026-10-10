@@ -694,48 +694,176 @@ function displayCustomAlerts()
   alertListDiv.innerHTML = html.join("");;
 }
 
+// Settings -> Audio Alerts shows the Call Roster's or the Feed Roster's alerts, sounds and speech,
+// reference and exceptions ("call" / "feed") with one set of controls
+GT.audioAlertsRoster = "call";
+GT.audioAlertCounts = { call: {}, feed: {} };
+
+function audioAlertsIsFeed()
+{
+  return GT.audioAlertsRoster == "feed";
+}
+
+function audioAlertsRoster()
+{
+  return audioAlertsIsFeed() ? GT.settings.feedRoster : GT.activeRoster;
+}
+
+function audioAlertsExceptions()
+{
+  return audioAlertsIsFeed() ? GT.settings.feedRoster.exceptions : GT.activeExceptions;
+}
+
+function audioAlertsWanted()
+{
+  return audioAlertsIsFeed() ? GT.settings.feedAudioAlerts.wanted : GT.activeAudioAlerts.wanted;
+}
+
+// Type, On Single and On Multiple: rosterName defaults to the sub-tab showing
+function audioAlertsMedia(rosterName = GT.audioAlertsRoster)
+{
+  return rosterName == "feed" ? GT.settings.feedAudioAlerts.media : GT.settings.audioAlerts.media;
+}
+
+// Sets the Type / On Single / On Multiple controls from the sub-tab's sounds and speech
+function applyAudioAlertsMedia()
+{
+  const media = audioAlertsMedia();
+  for (const key in GT.settings.audioAlerts.wanted)
+  {
+    const typeSelect = document.getElementById(key + "Type");
+    if (!typeSelect) continue;
+
+    const type = media[key + "Type"];
+    typeSelect.value = type;
+    for (const suffix of ["FileSingle", "FileMulti"])
+    {
+      const select = document.getElementById(key + suffix);
+      if (select)
+      {
+        select.value = media[key + suffix];
+        select.style.display = (type == "tts") ? "none" : "";
+      }
+    }
+    for (const suffix of ["SpeechSingle", "SpeechMulti"])
+    {
+      const input = document.getElementById(key + suffix);
+      if (input)
+      {
+        input.value = media[key + suffix];
+        ValidateText(input);
+        input.style.display = (type == "media") ? "none" : "";
+      }
+    }
+  }
+}
+
+function showAudioAlertsRoster(name)
+{
+  const active = feedsActive();
+  if (name == "feed" && !(active.dx || active.cw)) name = "call";
+  GT.audioAlertsRoster = name;
+  applyAudioAlertsRoster();
+  setVisualAudioAlerts();
+}
+
+// Sub-tab buttons, the wanted checkboxes, exceptions and counts for the roster now showing
+function applyAudioAlertsRoster()
+{
+  const feed = audioAlertsIsFeed();
+  callAudioAlertsTab.classList.toggle("active", !feed);
+  feedAudioAlertsTab.classList.toggle("active", feed);
+  audioAlertsDiv.classList.toggle("feedAudioAlerts", feed);
+
+  const wanted = audioAlertsWanted();
+  for (const key in wanted)
+  {
+    if (key in window)
+    {
+      window[key].checked = wanted[key];
+    }
+  }
+  applyExceptions();
+  applyAudioAlertsMedia();
+  showAudioAlertCounts();
+}
+
+function showAudioAlertCounts()
+{
+  const counts = GT.audioAlertCounts[GT.audioAlertsRoster];
+  for (const key in GT.settings.audioAlerts.wanted)
+  {
+    if ((key + "Count") in window)
+    {
+      window[key + "Count"].innerHTML = counts[key] || 0;
+    }
+  }
+}
+
+// The sub-tabs exist only while a feed is on; otherwise Audio Alerts is the Call Roster's
+function updateAudioAlertsRosterTabs()
+{
+  const active = feedsActive();
+  const anyActive = active.dx || active.cw;
+  audioAlertsRosterTabs.style.display = anyActive ? "" : "none";
+  if (!anyActive && audioAlertsIsFeed())
+  {
+    GT.audioAlertsRoster = "call";
+    applyAudioAlertsRoster();
+  }
+}
+
 function wantedChanged(what)
 {
-  if (what.id in GT.activeAudioAlerts.wanted)
+  const wanted = audioAlertsWanted();
+  if (what.id in wanted)
   {
     if (GT.speechAvailable) window.speechSynthesis.cancel();
-    GT.activeAudioAlerts.wanted[what.id] = what.checked;
-    if (GT.activeAudioAlerts.wanted[what.id] == false)
+    wanted[what.id] = what.checked;
+    if (wanted[what.id] == false)
     {
+      GT.audioAlertCounts[GT.audioAlertsRoster][what.id] = 0;
+      GT.audioAlertCounts[GT.audioAlertsRoster].huntMultiple = 0;
       window[what.id + "Count"].innerHTML = 0;
       window.huntMultipleCount.innerHTML = 0;
     }
     if (GT.callRosterWindowInitialized)
     {
-      GT.callRosterWindowHandle.window.wantedValuesChangedFromAudioAlerts();
+      GT.callRosterWindowHandle.window.wantedValuesChangedFromAudioAlerts(GT.audioAlertsRoster);
     }
   }
-  else if (what.id in GT.settings.audioAlerts.media)
+  else if (what.id in audioAlertsMedia())
   {
-    GT.settings.audioAlerts.media[what.id] = what.value;
+    audioAlertsMedia()[what.id] = what.value;
   }
 }
 
-function processAudioAlertsFromRoster(wantedAlerts)
+// rosterName: "call" or "feed"; each has its own sounds, speech and counts
+function processAudioAlertsFromRoster(wantedAlerts, rosterName = "call")
 {
-  for (const key in wantedAlerts)
+  const media = audioAlertsMedia(rosterName);
+  GT.audioAlertCounts[rosterName] = { ...wantedAlerts };
+  if (rosterName == GT.audioAlertsRoster)
   {
-    if (key in window)
+    for (const key in wantedAlerts)
     {
-      window[key + "Count"].innerHTML = wantedAlerts[key];
+      if (key in window)
+      {
+        window[key + "Count"].innerHTML = wantedAlerts[key];
+      }
     }
   }
   if (wantedAlerts.huntMultiple > 1)
   {
-    if (GT.settings.audioAlerts.media.huntMultipleType == "tts")
+    if (media.huntMultipleType == "tts")
     {
-      speakAlertString(GT.settings.audioAlerts.media.huntMultipleSpeechMulti);
+      speakAlertString(media.huntMultipleSpeechMulti);
     }
     else
     {
-      if (GT.settings.audioAlerts.media.huntMultipleFileMulti != "none")
+      if (media.huntMultipleFileMulti != "none")
       {
-        playAlertMediaFile(GT.settings.audioAlerts.media.huntMultipleFileMulti);
+        playAlertMediaFile(media.huntMultipleFileMulti);
       }
     }
   }
@@ -749,26 +877,26 @@ function processAudioAlertsFromRoster(wantedAlerts)
         let type = key + "Type";
         if (wantedAlerts[key] == 1)
         {
-          if (GT.settings.audioAlerts.media[type] == "tts")
+          if (media[type] == "tts")
           {
-            speakAlertString(GT.settings.audioAlerts.media[key + "SpeechSingle"]);
+            speakAlertString(media[key + "SpeechSingle"]);
           }
           else
           {
-            playAlertMediaFile(GT.settings.audioAlerts.media[key + "FileSingle"]);
+            playAlertMediaFile(media[key + "FileSingle"]);
           }
         }
         else if (wantedAlerts[key] > 1)
         {
-          if (GT.settings.audioAlerts.media[type] == "tts")
+          if (media[type] == "tts")
           {
-            speakAlertString(GT.settings.audioAlerts.media[key + "SpeechMulti"]);
+            speakAlertString(media[key + "SpeechMulti"]);
           }
           else
           {
-            if (GT.settings.audioAlerts.media[key + "FileMulti"] != "none")
+            if (media[key + "FileMulti"] != "none")
             {
-              playAlertMediaFile(GT.settings.audioAlerts.media[key + "FileMulti"]);
+              playAlertMediaFile(media[key + "FileMulti"]);
             }
           }
         }
@@ -805,8 +933,9 @@ function setVisualHunting()
 
 function logbookValuesChanged()
 {
-  GT.activeRoster.logbook.referenceNeed = referenceNeed.value;
-  GT.activeRoster.logbook.huntNeed = huntNeed.value;
+  const roster = audioAlertsRoster();
+  roster.logbook.referenceNeed = referenceNeed.value;
+  roster.logbook.huntNeed = huntNeed.value;
   setVisualHunting();
 }
 
@@ -817,7 +946,7 @@ function huntingValueChanged(element)
   {
     if (GT.speechAvailable) window.speechSynthesis.cancel();
     let value = (element.type == "checkbox") ? element.checked : element.value;
-    GT.callRosterWindowHandle.window.huntingValueChangedFromAudioAlerts(element.id, value);
+    GT.callRosterWindowHandle.window.huntingValueChangedFromAudioAlerts(element.id, value, GT.audioAlertsRoster);
     setVisualAudioAlerts();
   }
   else
@@ -835,9 +964,10 @@ function alertRulesValueChanged(element)
     setVisualAudioAlerts();
 }
 
-function huntingValueChangedFromCallRoster(id, value)
+// rosterName: which roster's exception changed; the controls show it only when that roster's sub-tab is showing
+function huntingValueChangedFromCallRoster(id, value, rosterName = "call")
 {
-  if (id in window)
+  if (rosterName == GT.audioAlertsRoster && id in window)
   {
     if (window[id].type == "checkbox")
     {
@@ -860,6 +990,8 @@ function openExceptions()
 {
   if (GT.callRosterWindowInitialized)
   {
+    // The roster window shows the same roster as Audio Alerts
+    GT.callRosterWindowHandle.window.showRosterTab(GT.audioAlertsRoster);
     GT.callRosterWindowHandle.window.openExceptions();
     electron.ipcRenderer.send("showWin", "gt_roster");
   }
@@ -871,10 +1003,18 @@ function openExceptions()
 
 function setVisualAudioAlerts()
 {
-  referenceNeed.value = GT.activeRoster.logbook.referenceNeed;
-  huntNeed.value = GT.activeRoster.logbook.huntNeed;
+  updateAudioAlertsRosterTabs();
+  const feed = audioAlertsIsFeed();
+  const roster = audioAlertsRoster();
+  referenceNeed.value = roster.logbook.referenceNeed;
+  huntNeed.value = roster.logbook.huntNeed;
 
-  if (GT.activeRoster.logbook.referenceNeed == LOGBOOK_AWARD_TRACKER)
+  // The Feed Roster has no Rules, no Spot column, no RR73, no Exceptions settings tab ("...") and no Band/Mode Memory
+  audioAlertRulesDiv.style.display = feed ? "none" : "";
+  wantRRCQDiv.style.display = feed ? "none" : "";
+  moreExceptionsButton.style.display = feed ? "none" : "";
+
+  if (roster.logbook.referenceNeed == LOGBOOK_AWARD_TRACKER)
   {
     audioAlertsAwardTable.style.display = "";
     audioAlertsWantedTable.style.display = "none";
@@ -889,10 +1029,10 @@ function setVisualAudioAlerts()
 
   useseQSLDiv.style.display = (GT.settings.callsignLookups.eqslUseEnable) ? "" : "none";
   usesOQRSDiv.style.display = (GT.settings.callsignLookups.oqrsUseEnable) ? "" : "none";
-  onlySpotDiv.style.display = (GT.settings.roster.columns.Spot) ? "" : "none";
+  onlySpotDiv.style.display = (!feed && GT.settings.roster.columns.Spot) ? "" : "none";
   huntingMatrixPotaRow.style.display = (GT.settings.app.potaFeatureEnabled && GT.settings.map.offlineMode == false) ? "" : "none";
-  
-  if (GT.settings.app.wantedByBandMode == true && GT.instanceCount == 1) {
+
+  if (!feed && GT.settings.app.wantedByBandMode == true && GT.instanceCount == 1) {
      let audioAlertsHeader = document.querySelector('h3[data-i18n="settings.alerts.AudioAlert.label"]');
     let exceptionsHeader = document.querySelector('h3[data-i18n="roster.exceptions.label"]');
     let customAlertsHeader = document.querySelector('th[data-i18n="settings.alerts.CustomAlerts.label"]');
@@ -933,21 +1073,22 @@ function setVisualAudioAlerts()
 
 function applyExceptions()
 {
-  requireGrid.checked = GT.activeExceptions.requireGrid;
-  wantRRCQ.checked = GT.activeExceptions.wantRRCQ;
-  cqOnly.checked = GT.activeExceptions.cqOnly;
-  noMyDxcc.checked = GT.activeExceptions.noMyDxcc;
-  onlyMyDxcc.checked = GT.activeExceptions.onlyMyDxcc;
-  useseQSL.checked = GT.activeExceptions.useseQSL;
-  onlySpot.checked = GT.activeExceptions.onlySpot;
-  usesOQRS.checked = GT.activeExceptions.usesOQRS;
-  allOnlyNew.checked = GT.activeExceptions.allOnlyNew;
+  const exceptions = audioAlertsExceptions();
+  requireGrid.checked = exceptions.requireGrid;
+  wantRRCQ.checked = exceptions.wantRRCQ;
+  cqOnly.checked = exceptions.cqOnly;
+  noMyDxcc.checked = exceptions.noMyDxcc;
+  onlyMyDxcc.checked = exceptions.onlyMyDxcc;
+  useseQSL.checked = exceptions.useseQSL;
+  onlySpot.checked = exceptions.onlySpot;
+  usesOQRS.checked = exceptions.usesOQRS;
+  allOnlyNew.checked = exceptions.allOnlyNew;
 }
 
 function loadAudioAlertSettings()
 {
-  referenceNeed.value = GT.activeRoster.logbook.referenceNeed;
-  huntNeed.value = GT.activeRoster.logbook.huntNeed;
+  referenceNeed.value = audioAlertsRoster().logbook.referenceNeed;
+  huntNeed.value = audioAlertsRoster().logbook.huntNeed;
 
   applyExceptions();
 
@@ -966,11 +1107,12 @@ function loadAudioAlertSettings()
     }
   }
 
-  for (const key in GT.activeAudioAlerts.wanted)
+  const wanted = audioAlertsWanted();
+  for (const key in wanted)
   {
     if (key in window)
     {
-      window[key].checked = GT.activeAudioAlerts.wanted[key];
+      window[key].checked = wanted[key];
     }
   }
 
@@ -992,7 +1134,7 @@ function loadAudioAlertSettings()
 
       let select = document.createElement("select");
       id = key + "Type";
-      let value = GT.settings.audioAlerts.media[id];
+      let value = audioAlertsMedia()[id];
       let mediaType = value;
       select.id = id;
       select.addEventListener("change", wantedChanged.bind(null, select), false);
@@ -1012,7 +1154,7 @@ function loadAudioAlertSettings()
       select = null;
       select = document.createElement("select");
       id = key + "FileSingle";
-      value = GT.settings.audioAlerts.media[id];
+      value = audioAlertsMedia()[id];
       select.id = id;
       select.appendChild(newOption("none", I18N("alerts.addNew.SelectFile")), value == "none");
 
@@ -1032,7 +1174,7 @@ function loadAudioAlertSettings()
       input.id = id = key + "SpeechSingle";
       input.type = "text";
       input.size = 16;
-      input.value = GT.settings.audioAlerts.media[id];
+      input.value = audioAlertsMedia()[id];
       input.className = "inputTextValue";
       parent.appendChild(input);
       input.addEventListener("change", wantedMediaSpeechChanged, false);
@@ -1047,7 +1189,7 @@ function loadAudioAlertSettings()
       select = null;
       select = document.createElement("select");
       
-      value = GT.settings.audioAlerts.media[id];
+      value = audioAlertsMedia()[id];
       select.id = id;
       select.appendChild(newOption("none", I18N("alerts.addNew.SelectFile")), value == "none");
 
@@ -1066,7 +1208,7 @@ function loadAudioAlertSettings()
       input.id = id = key + "SpeechMulti";
       input.type = "text";
       input.size = 16;
-      input.value = GT.settings.audioAlerts.media[id];
+      input.value = audioAlertsMedia()[id];
       input.className = "inputTextValue";
       parent.appendChild(input);
       input.addEventListener("change", wantedMediaSpeechChanged, false);
@@ -1081,7 +1223,7 @@ function loadAudioAlertSettings()
 function wantedMediaTypeChanged(event)
 {
   let element = event.target;
-  GT.settings.audioAlerts.media[element.id] = element.value;
+  audioAlertsMedia()[element.id] = element.value;
   let rootName = element.id.replace("Type", "");
   if (element.value == "tts")
   {
@@ -1103,7 +1245,7 @@ function wantedMediaTypeChanged(event)
       window[rootName + "FileMulti"].style.display = "";
     }
   }
-  GT.settings.audioAlerts.media[element.id] = element.value;
+  audioAlertsMedia()[element.id] = element.value;
 }
 
 function wantedMediaFileChanged(event)
@@ -1113,7 +1255,7 @@ function wantedMediaFileChanged(event)
   {
     playAlertMediaFile(element.value);
   }
-  GT.settings.audioAlerts.media[element.id] = element.value;
+  audioAlertsMedia()[element.id] = element.value;
 }
 
 function wantedMediaSpeechChanged(event)
@@ -1125,7 +1267,7 @@ function wantedMediaSpeechChanged(event)
   {
     speakAlertString(element.value);
   }
-  GT.settings.audioAlerts.media[element.id] = element.value;
+  audioAlertsMedia()[element.id] = element.value;
 }
 
 function openWatcher()
@@ -1134,6 +1276,7 @@ function openWatcher()
   {
     try
     {
+      GT.callRosterWindowHandle.window.showRosterTab(GT.audioAlertsRoster);
       GT.callRosterWindowHandle.window.openWatcher();
       electron.ipcRenderer.send("showWin", "gt_roster");
     }

@@ -129,6 +129,77 @@ body.roster {
 }
 
 
+/* Call Roster | Feed Roster tabs, shown while a DX Cluster / CW Skimmer feed is on.
+   The header's absolutely placed controls move down below them */
+#rosterTabs {
+  height: 22px;
+  padding-left: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  border-bottom: 1px solid lightblue;
+}
+
+.rosterTab {
+  height: 22px;
+  padding: 1px 10px;
+  margin-right: 3px;
+  border: 1px solid lightblue;
+  border-bottom: none;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  background-color: black;
+  color: #eee;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.rosterTab.active {
+  background-color: cyan;
+  color: black;
+}
+
+#rosterSettingsButton {
+  color: cyan;
+}
+
+/* Settings pane title: which roster these settings belong to */
+#rosterSettingsTitle {
+  margin: 2px 30px 4px 30px;
+  font-weight: bold;
+  font-size: larger;
+  color: cyan;
+}
+
+body.feedRosterShown #rosterSettingsTitle {
+  color: yellow;
+}
+
+/* Feed Roster tab: the window's yellow / cyan swap, so the two rosters are easy to tell apart
+   (callsign and grid colors swap too, in processRosterHunting) */
+body.feedRosterShown .rosterTab.active,
+body.feedRosterShown .infotab button.active {
+  background-color: yellow;
+}
+
+body.feedRosterShown #rosterSettingsButton {
+  color: yellow;
+}
+
+body.rosterTabsShown #TransmitControls,
+body.rosterTabsShown #RosterControls.normal #MainRosterControls {
+  top: 26px;
+}
+
+body.rosterTabsShown #LessControls,
+body.rosterTabsShown #MoreControls {
+  top: 30px;
+}
+
+/* The settings pane starts on the tab bar's bottom line, so the roster tabs stay clickable while it's open */
+body.rosterTabsShown #settingsDiv {
+  top: 22px;
+}
+
 #RosterControls.normal #ShowFewerControlsLink {
   display: none;
 }
@@ -287,6 +358,12 @@ body.roster {
   color: #099;
   border-bottom: 2px solid #066;
   margin-bottom: 3px;
+}
+
+/* Feed Roster: the same dark shade in yellow, like its other cyan / yellow swaps */
+body.feedRosterShown #huntingMatrixDiv h3 {
+  color: #990;
+  border-bottom-color: #660;
 }
 
 #exceptionDiv h3 {
@@ -503,6 +580,26 @@ table.rosterTable td:last-child {
 
 .compact.feedReadOnly:active {
   border-style: outset;
+}
+
+/* Settings -> General: the boxes above Window Filters, three per row like the filters, all the same size,
+   partial rows centered (Call Roster 3 + 3, Feed Roster 3 + 2) */
+#generalSettingsBoxes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  max-width: 510px;
+  margin: 0 auto;
+}
+
+#generalSettingsBoxes > .mapItem {
+  width: 164px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 #feedsBoxDiv .mapItem {
@@ -751,6 +848,8 @@ p {
   z-index: 600;
   border: 1px solid lightblue;
   border-radius: 4px;
+  /* Opaque, so the roster tabs underneath don't show through the title */
+  background-color: black;
 }
 
 

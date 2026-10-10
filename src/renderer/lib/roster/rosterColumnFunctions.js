@@ -1,8 +1,9 @@
 function rosterColumnList(settings = {}, overrides = {})
 {
+  const excluded = CR.profile.excludedColumns;
   return CR.rosterSettings.columnOrder.filter(column =>
   {
-    return column && (settings[column] || overrides[column]) && overrides[column] !== false;
+    return column && !excluded[column] && (settings[column] || overrides[column]) && overrides[column] !== false;
   });
 }
 
@@ -161,11 +162,12 @@ const multiColumnComparer = (comparers) => (a, b) =>
 function validateRosterColumnOrder(columns)
 {
   let sourceOrder = columns || DEFAULT_COLUMN_ORDER;
-  
-  // Performance: Single-pass iteration to prevent allocating 5 intermediate arrays 
+
+  // Performance: Single-pass iteration to prevent allocating 5 intermediate arrays
   // via .slice(), .filter(), and .unshift(). O(1) object map for lookups.
   let finalOrder = ["Callsign"];
-  let added = { Callsign: true };
+  // Columns this roster doesn't have (Spotter in the Call Roster, Rig/dB/DT/Spot in the Feed Roster) are left out
+  let added = { Callsign: true, ...CR.profile.excludedColumns };
 
   // Append validated columns requested
   for (const col of sourceOrder)
