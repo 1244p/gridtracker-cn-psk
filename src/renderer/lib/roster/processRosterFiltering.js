@@ -67,6 +67,7 @@ function processRosterFiltering(callRoster, rosterSettings)
         callObj.cqz in CR.ignoredCQz ||
         callObj.dxcc in CR.ignoredDxcc ||
         callObj.spotterDxcc in CR.ignoredDeDxcc ||
+        callObj.spotterCont in CR.ignoredDeCont ||
         callObj.grid in CR.ignoredGrid ||
         dxCall in CR.ignoredCQ ||
         (dxCall + ":" + callObj.dxcc) in CR.ignoredCQ)
@@ -138,13 +139,6 @@ function processRosterFiltering(callRoster, rosterSettings)
 
     // Feed Roster: a station that spotted itself
     if (rse.hideSelfSpots && callObj.selfSpot)
-    {
-      entry.tx = false;
-      continue;
-    }
-
-    // Feed Roster: the spotter's (DE) DXCC
-    if ((rse.noMyDeDxcc || rse.onlyMyDeDxcc) && (callObj.spotterDxcc === myDxcc ? rse.noMyDeDxcc : rse.onlyMyDeDxcc))
     {
       entry.tx = false;
       continue;

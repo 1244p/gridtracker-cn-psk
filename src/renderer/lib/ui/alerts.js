@@ -1011,8 +1011,8 @@ function setVisualAudioAlerts()
   audioAlertRulesDiv.style.display = feed ? "none" : "";
   wantRRCQDiv.style.display = feed ? "none" : "";
   moreExceptionsButton.style.display = feed ? "none" : "";
-  // DXCC exceptions: the Feed Roster has the spotted station's (DX) and the spotter's (DE)
-  noMyDeDxccDiv.style.display = onlyMyDeDxccDiv.style.display = hideSelfSpotsDiv.style.display = feed ? "" : "none";
+  // Feed Roster: Hide Self-Spotters, and its DXCC exceptions are for the spotted station ("DX DXCC")
+  hideSelfSpotsDiv.style.display = feed ? "" : "none";
   setI18nText(noMyDxccLabel, feed ? "roster.secondary.exceptions.noMyDXDXCC" : "roster.secondary.exceptions.noMyDXCC");
   setI18nText(onlyMyDxccLabel, feed ? "roster.secondary.exceptions.onlyMyDXDXCC" : "roster.secondary.exceptions.onlyMyDXCC");
 
@@ -1081,8 +1081,6 @@ function applyExceptions()
   cqOnly.checked = exceptions.cqOnly;
   noMyDxcc.checked = exceptions.noMyDxcc;
   onlyMyDxcc.checked = exceptions.onlyMyDxcc;
-  noMyDeDxcc.checked = exceptions.noMyDeDxcc === true;
-  onlyMyDeDxcc.checked = exceptions.onlyMyDeDxcc === true;
   hideSelfSpots.checked = exceptions.hideSelfSpots === true;
   useseQSL.checked = exceptions.useseQSL;
   onlySpot.checked = exceptions.onlySpot;

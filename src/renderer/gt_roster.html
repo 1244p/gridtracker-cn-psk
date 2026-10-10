@@ -395,6 +395,7 @@
             <option value="CQ" id="ignoreCqOption">CQ</option>
             <option value="DXCC" id="ignoreDxccOption">DXCC</option>
             <option value="DEDXCC" id="ignoreDeDxccOption" data-i18n="rosterColumns.DEDXCC.header">DE DXCC</option>
+            <option value="DECont" id="ignoreDeContOption" data-i18n="rosterColumns.DECont.header">DE Cont</option>
             <option value="Grid">Grid</option>
             <option value="CQz">CQ Zone</option>
             <option value="ITUz">ITU Zone</option>
@@ -409,6 +410,15 @@
           </div>
           <select id="ignoreDxccSelect" >
             <option value=-1 selected="true" data-i18n="mapFilter.prop.Unknown">Unknown</option>
+          </select>
+          <select id="ignoreDeContSelect">
+            <option value="AF">AF</option>
+            <option value="AN">AN</option>
+            <option value="AS">AS</option>
+            <option value="EU">EU</option>
+            <option value="NA">NA</option>
+            <option value="OC">OC</option>
+            <option value="SA">SA</option>
           </select>
           <select id="ignoreCqzSelect"></select>
           <select id="ignoreItuzSelect"></select>
@@ -618,14 +628,6 @@
               <div>
                 <input type="checkbox" id="onlyMyDxcc" onchange="noMyDxcc.checked=false; huntingValueChanged(noMyDxcc); huntingValueChanged(this);" />
                 <label id="onlyMyDxccLabel" data-i18n="roster.secondary.exceptions.onlyMyDXCC" for="onlyMyDxcc">Only My DXCC</label>
-              </div>
-              <div id="noMyDeDxccDiv">
-                <input type="checkbox" id="noMyDeDxcc" onchange="onlyMyDeDxcc.checked=false; huntingValueChanged(onlyMyDeDxcc); huntingValueChanged(this);" />
-                <label data-i18n="roster.secondary.exceptions.noMyDEDXCC" for="noMyDeDxcc">Not My DE DXCC</label>
-              </div>
-              <div id="onlyMyDeDxccDiv">
-                <input type="checkbox" id="onlyMyDeDxcc" onchange="noMyDeDxcc.checked=false; huntingValueChanged(noMyDeDxcc); huntingValueChanged(this);" />
-                <label data-i18n="roster.secondary.exceptions.onlyMyDEDXCC" for="onlyMyDeDxcc">Only My DE DXCC</label>
               </div>
               <div id="hideSelfSpotsDiv">
                 <input type="checkbox" id="hideSelfSpots" onchange="huntingValueChanged(this);" />

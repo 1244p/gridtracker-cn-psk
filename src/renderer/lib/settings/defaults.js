@@ -621,9 +621,6 @@ const def_settings = {
       // DX DXCC (the spotted station's)
       noMyDxcc: false,
       onlyMyDxcc: false,
-      // DE DXCC (the spotter's)
-      noMyDeDxcc: false,
-      onlyMyDeDxcc: false,
       // Spots where the station spotted itself
       hideSelfSpots: false,
       cqOnly: false,
@@ -668,6 +665,7 @@ const def_settings = {
       County: false,
       POTA: false,
       Cont: false,
+      DECont: false,
       Freq: true,
       Dist: false,
       Azim: false,
@@ -684,7 +682,7 @@ const def_settings = {
     },
     columnOrder: [
       "Callsign", "Spotter", "CQ", "Grid", "DXCC", "Flag", "State", "County", "Band", "Mode", "Wanted", "Msg",
-      "POTA", "DEDXCC", "DXM", "Cont",
+      "POTA", "DEDXCC", "DXM", "Cont", "DECont",
       "Freq", "Dist", "Azim",
       "CQz", "ITUz", "PX",
       "LoTW", "eQSL", "OQRS",
@@ -715,6 +713,8 @@ const def_settings = {
     ignoredDxcc: {},
     // DE DXCC: spots from spotters in these DXCC entities
     ignoredDeDxcc: {},
+    // DE Cont: spots from spotters on these continents
+    ignoredDeCont: {},
     ignoredCQz: {},
     ignoredITUz: {}
   },

@@ -729,6 +729,7 @@ function addFeedSpot(parts, now)
   if (callObj.spotter !== spotter)
   {
     callObj.spotterDxcc = callsignToDxcc(spotter);
+    callObj.spotterCont = callObj.spotterDxcc > 0 && GT.dxccInfo[callObj.spotterDxcc] ? GT.dxccInfo[callObj.spotterDxcc].continent : "";
     callObj.selfSpot = feedBaseCallsign(spotter) === feedBaseCallsign(DEcall);
   }
   callObj.spotter = spotter;

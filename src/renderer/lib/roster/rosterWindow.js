@@ -84,7 +84,7 @@ CR.profiles = {
     ignores: () => GT.settings,
     // Entries from instances that are gone, or unticked in a multi-instance roster, are hidden
     filter: (callObj) => (callObj.instance in GT.instances) && !(GT.instanceCount > 1 && GT.instances[callObj.instance].crEnable === false),
-    excludedColumns: { Spotter: true, CQ: true, DEDXCC: true },
+    excludedColumns: { Spotter: true, CQ: true, DEDXCC: true, DECont: true },
     watchersTest: {},
     alertTimer: null
   },
@@ -125,9 +125,9 @@ Object.defineProperties(CR, {
 });
 
 // Each roster's ignores, read and written (Clear All replaces the object) in its profile's settings;
-// one the roster doesn't have (the Feed Roster's CQ, the Call Roster's DE DXCC) reads as empty
+// one the roster doesn't have (the Feed Roster's CQ, the Call Roster's DE DXCC and DE Cont) reads as empty
 const NO_IGNORES = Object.freeze({});
-for (const key of ["ignoredCalls", "ignoredCQ", "ignoredDxcc", "ignoredDeDxcc", "ignoredGrid", "ignoredCQz", "ignoredITUz"])
+for (const key of ["ignoredCalls", "ignoredCQ", "ignoredDxcc", "ignoredDeDxcc", "ignoredDeCont", "ignoredGrid", "ignoredCQz", "ignoredITUz"])
 {
   Object.defineProperty(CR, key, {
     get: () => CR.profile.ignores()[key] || NO_IGNORES,
@@ -1182,6 +1182,7 @@ function initSelectors()
     CQ: ignoreCqDiv,
     DXCC: ignoreDxccSelect,
     DEDXCC: ignoreDxccSelect,
+    DECont: ignoreDeContSelect,
     CQz: ignoreCqzSelect,
     ITUz: ignoreItuzSelect,
     Spotter: ignoreCallsignValue
@@ -1197,6 +1198,7 @@ function hideIgnoreElements()
   ignoreGridValue.style.display = "none";
   ignoreCqDiv.style.display = "none";
   ignoreDxccSelect.style.display = "none";
+  ignoreDeContSelect.style.display = "none";
   ignoreCqzSelect.style.display = "none";
   ignoreItuzSelect.style.display = "none";
 }
@@ -1256,6 +1258,10 @@ function addNewIgnore()
   {
     ignoreDeDxcc(ignoreDxccSelect.value);
   }
+  else if (CR.ignoreType === "DECont")
+  {
+    ignoreDeCont(ignoreDeContSelect.value);
+  }
   else if (CR.ignoreType === "Grid")
   {
     ignoreGrid(ignoreGridValue.value);
@@ -1309,6 +1315,14 @@ function ignoreDxcc(dxcc)
 function ignoreDeDxcc(dxcc)
 {
   CR.ignoredDeDxcc[dxcc] = true;
+  storeBlocks();
+  viewRoster();
+}
+
+// Feed Roster: spots from spotters on this continent
+function ignoreDeCont(cont)
+{
+  CR.ignoredDeCont[cont] = true;
   storeBlocks();
   viewRoster();
 }
@@ -1388,6 +1402,13 @@ function deleteDeDxccIgnore(key)
   viewRoster();
 }
 
+function deleteDeContIgnore(key)
+{
+  delete CR.ignoredDeCont[key];
+  storeBlocks();
+  viewRoster();
+}
+
 function deleteGridIgnore(key)
 {
   delete CR.ignoredGrid[key];
@@ -1433,6 +1454,13 @@ function clearAllDxccIgnores()
 function clearAllDeDxccIgnores()
 {
   CR.ignoredDeDxcc = {};
+  storeBlocks();
+  viewRoster();
+}
+
+function clearAllDeContIgnores()
+{
+  CR.ignoredDeCont = {};
   storeBlocks();
   viewRoster();
 }
@@ -1558,12 +1586,13 @@ function updateRosterTabControls()
   ignoreCqOption.style.display = feed ? "none" : "";
   watcherSpotterOption.style.display = feed ? "" : "none";
   watcherCallingOption.style.display = feed ? "none" : "";
-  // DXCC exceptions: the Feed Roster has the spotted station's (DX) and the spotter's (DE)
-  noMyDeDxccDiv.style.display = onlyMyDeDxccDiv.style.display = hideSelfSpotsDiv.style.display = feed ? "" : "none";
+  // Feed Roster: Hide Self-Spotters, and its DXCC exceptions are for the spotted station ("DX DXCC")
+  hideSelfSpotsDiv.style.display = feed ? "" : "none";
   setI18nText(noMyDxccLabel, feed ? "roster.secondary.exceptions.noMyDXDXCC" : "roster.secondary.exceptions.noMyDXCC");
   setI18nText(onlyMyDxccLabel, feed ? "roster.secondary.exceptions.onlyMyDXDXCC" : "roster.secondary.exceptions.onlyMyDXCC");
   // DXCC ignores: likewise DX DXCC and DE DXCC in the Feed Roster
   ignoreDeDxccOption.style.display = feed ? "" : "none";
+  ignoreDeContOption.style.display = feed ? "" : "none";
   ignoreDxccOption.textContent = feed ? I18N("rosterColumns.DXCC.feedHeader") : "DXCC";
   if (CR.dxccIgnoreItem)
   {
@@ -1584,7 +1613,7 @@ function updateRosterTabControls()
   moreExceptionsButton.style.display = feed ? "none" : "";
   wantRRCQDiv.style.display = feed ? "none" : "";
 
-  if ((!feed && (CR.ignoreType === "Spotter" || CR.ignoreType === "DEDXCC")) || (feed && CR.ignoreType === "CQ"))
+  if ((!feed && (CR.ignoreType === "Spotter" || CR.ignoreType === "DEDXCC" || CR.ignoreType === "DECont")) || (feed && CR.ignoreType === "CQ"))
   {
     ignoreTypeSelect.value = "Callsign";
     ignoreTypeChanged("Callsign");
@@ -1691,6 +1720,17 @@ function renderIgnoresTab()
     Object.keys(CR.ignoredDeDxcc).sort().forEach(function (key)
     {
       html.push(`<tr><td align='left' style='color:#5caeff;'>${GT.dxccToAltName[key]} (${GT.dxccInfo[key].pp})</td><td style='cursor:pointer;' onclick='deleteDeDxccIgnore("${key}")'><img src='img/trash_24x48.png' style='height:17px;margin:-1px;margin-bottom:-3px;padding:0px'></td></tr>`);
+    });
+    html.push("</table></div>");
+  }
+
+  if (isFeedRoster() && Object.keys(CR.ignoredDeCont).length > 0)
+  {
+    clearString = "<th style='cursor:pointer;' onclick='clearAllDeContIgnores()'>Clear All</th>";
+    html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${I18N("rosterColumns.DECont.header")}</th>${clearString}</tr>`);
+    Object.keys(CR.ignoredDeCont).sort().forEach(function (key)
+    {
+      html.push(`<tr><td align='left' style='color:#5caeff;'>${key}</td><td style='cursor:pointer;' onclick='deleteDeContIgnore("${key}")'><img src='img/trash_24x48.png' style='height:17px;margin:-1px;margin-bottom:-3px;padding:0px'></td></tr>`);
     });
     html.push("</table></div>");
   }
@@ -1920,8 +1960,6 @@ function applyActiveRoster()
   cqOnly.checked = CR.activeExceptions.cqOnly;
   noMyDxcc.checked = CR.activeExceptions.noMyDxcc;
   onlyMyDxcc.checked = CR.activeExceptions.onlyMyDxcc;
-  noMyDeDxcc.checked = CR.activeExceptions.noMyDeDxcc === true;
-  onlyMyDeDxcc.checked = CR.activeExceptions.onlyMyDeDxcc === true;
   hideSelfSpots.checked = CR.activeExceptions.hideSelfSpots === true;
 
   usesLoTW.checked = CR.activeExceptions.usesLoTW;
@@ -2134,6 +2172,11 @@ function handleContextMenu(ev)
     {
       CR.targetDxcc = CR.callRoster[parent.id].callObj.spotterDxcc;
       CR.deDxccMenu.popup();
+    }
+    else if (name === "DECont" && CR.callRoster[parent.id] && CR.callRoster[parent.id].callObj.spotterCont)
+    {
+      CR.targetDeCont = CR.callRoster[parent.id].callObj.spotterCont;
+      CR.deContMenu.popup();
     }
     else
     {
@@ -4064,6 +4107,21 @@ function createRestOfMenus()
   }));
 
   CR.deDxccMenu.append(new MenuItem({
+    type: "normal",
+    label: I18N("roster.menu.EditIgnores"),
+    enabled: true,
+    click: function () { openIgnores(); }
+  }));
+
+  // Feed Roster: the spotter's continent ("DE Cont" column)
+  CR.deContMenu = new Menu();
+  CR.deContMenu.append(new MenuItem({
+    type: "normal",
+    label: I18N("roster.menu.IgnoreDECont"),
+    click: function () { ignoreDeCont(CR.targetDeCont); }
+  }));
+
+  CR.deContMenu.append(new MenuItem({
     type: "normal",
     label: I18N("roster.menu.EditIgnores"),
     enabled: true,

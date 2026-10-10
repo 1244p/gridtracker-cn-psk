@@ -1,6 +1,6 @@
 const DEFAULT_COLUMN_ORDER = [
   "Callsign", "Band", "Mode", "Calling", "Spotter", "CQ", "Rig", "Wanted", "Grid", "Msg",
-  "POTA", "DXCC", "DEDXCC", "Flag", "DXM", "State", "County", "Cont",
+  "POTA", "DXCC", "DEDXCC", "Flag", "DXM", "State", "County", "Cont", "DECont",
   "dB", "Freq", "DT", "Dist", "Azim",
   "CQz", "ITUz", "PX",
   "LoTW", "eQSL", "OQRS",
@@ -179,7 +179,9 @@ const ROSTER_COLUMNS = {
     tableData: (callObj) => ({
       title: callObj.spotterDxcc > 0 ? GT.dxccInfo[callObj.spotterDxcc].pp : "",
       name: "DEDXCC",
-      style: "color: #5caeff;",
+      // Like DX DXCC: click centers the map on the spotter's entity and dazzles it (not in compact mode)
+      style: (CR.rosterSettings.compact || !(callObj.spotterDxcc > 0)) ? "color: #5caeff;" : "color: #5caeff; cursor: pointer;",
+      onClick: (CR.rosterSettings.compact || !(callObj.spotterDxcc > 0)) ? null : `centerOnDxcc(${callObj.spotterDxcc})`,
       html: callObj.spotterDxcc > 0 ? GT.dxccToAltName[callObj.spotterDxcc] : "&nbsp;"
     })
   },
@@ -233,12 +235,29 @@ const ROSTER_COLUMNS = {
     }
   },
 
+  // The Feed Roster calls it "DX Cont", next to its "DE Cont" (the spotter's)
   Cont: {
+    label: () => isFeedRoster() ? I18N("rosterColumns.Cont.feedHeader") : "Cont",
     compare: callObjSimpleComparer("cont"),
+    tableHeader: () => ({ html: isFeedRoster() ? I18N("rosterColumns.Cont.feedHeader") : "Cont" }),
     tableData: (callObj) => ({
       align: "center",
       rawAttrs: callObj.style.cont,
       html: callObj.cont ? callObj.cont : "&nbsp;"
+    })
+  },
+
+  // Feed Roster: continent of the station that reported the spot
+  DECont: {
+    label: () => I18N("rosterColumns.DECont.header"),
+    compare: callObjSimpleComparer("spotterCont"),
+    tableHeader: () => ({ html: I18N("rosterColumns.DECont.header"), title: I18N("rosterColumns.DECont.title") }),
+    tableData: (callObj) => ({
+      align: "center",
+      // Right-click: Ignore DE Cont
+      name: "DECont",
+      style: "color: #5caeff;",
+      html: callObj.spotterCont || "&nbsp;"
     })
   },
 
