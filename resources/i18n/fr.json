@@ -229,7 +229,7 @@
     "settings.map.animatePaths.label": "Animer les chemins actifs",
     "settings.map.animatePaths.hover": "Animation de la ligne du trafic",
     "settings.map.equator.enable.hover": "Basculer les parallèles et méridiens principaux",
-    "settings.map.dxcwFeed.hover": "Basculer les flux DX",
+    "settings.map.dxcwFeed.hover": "Basculer les spots des flux DX",
     "gt.feedSpot.title": "Spot du flux",
     "gt.feedSpot.age": "Âge",
     "gt.feedSpot.dist": "Dist",

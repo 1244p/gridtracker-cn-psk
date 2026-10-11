@@ -42,7 +42,7 @@ GT.rtsnPins = {};
 GT.rtsnCallsigns = {};
 GT.feedCallsigns = {};
 // Feed spots are kept for an hour after they were last spotted, whatever is shown: Settings -> Feeds
-// "Feed Spot Max Age" limits the map, the Feed Roster's "Roster Max Age" limits the Feed Roster
+// "Feed Spots Max Age" limits the map, the Feed Roster's "Roster Max Age" limits the Feed Roster
 const FEED_KEEP_SECONDS = 3600;
 // Feed Roster entries (same shape as GT.callRoster entries), separate from the Call Roster's WSJT-X decodes
 GT.feedRoster = {};

@@ -626,7 +626,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div id="gtFlagButton" onclick="toggleGtMap();" class="iconButton" data-i18n="gt.button.gtFlag.hover" title="Toggle View GridTracker Spotters">
           <img id="gtFlagImg" src="" class="buttonImg" />
         </div>
-        <div id="dxcwFeedButton" onclick="toggleDxcwFeed();" class="iconButton" style="display:none;" title="Toggle DX Feeds" data-i18n="settings.map.dxcwFeed.hover">
+        <div id="dxcwFeedButton" onclick="toggleDxcwFeed();" class="iconButton" style="display:none;" title="Toggle DX Feed Spots" data-i18n="settings.map.dxcwFeed.hover">
           <img id="dxcwFeedImg" src="img/feed_menu.png" class="buttonImg" />
         </div>
       </div>
@@ -1880,6 +1880,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       </div>
     </div>
     <div id="feedsSettingsDiv" class="settingsTabcontent">
+      <!-- The sources temp/feeds.js (the RTSN server's feeds worker) takes spots from; names stay English -->
+      <div style="text-align:center; font-weight:bold; margin:4px 0 2px 0;"><span data-i18n="settings.feeds.dxFeeds.label">DX Feeds</span><br /><span style="font-weight:normal;">(G7VRD: DX Cluster / CW Skimmer, Spothole)</span></div>
       <div class="mapItem" style="padding:10px;">
         <div class="mapItem feedGroups">
           <div data-i18n="roster.feeds.modes.label">Modes</div>
@@ -1888,7 +1890,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <label class="feedGroup"><span data-i18n="roster.feeds.modes.Phone">Phone</span><input type="checkbox" id="feedPhoneEnable" onchange="changeFeedGroups()" /></label>
         </div>
         <div class="mapItem feedGroups" id="feedMaxAgeDiv">
-          <div data-i18n="settings.feeds.maxAge.label">Feed Spot Max Age</div>
+          <div data-i18n="settings.feeds.maxAge.label">Feed Spots Max Age</div>
           <input type="range" min="60" max="3600" value="300" step="60" class="slider" id="feedMaxAge"
             data-i18n="settings.feeds.maxAge.hover" title="How long a feed spot is kept on the map after it was last spotted"
             oninput="changeFeedMaxAge()" onkeyup="redrawDxcwSpots()" onmouseup="redrawDxcwSpots()" />

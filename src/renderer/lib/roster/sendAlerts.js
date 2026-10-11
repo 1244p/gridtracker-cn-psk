@@ -89,13 +89,14 @@ function sendAlerts()
 
   if (pushAlerts > 0)
   {
+    const pushTitle = (feedRoster ? "Feed Alert - " : "GT Alert - ") + formatCallsign(GT.settings.app.myCall);
     if (GT.settings.msg.msgPushover)
     {
-      sendPushOverAlert(parseCRJson(pushReport));
+      sendPushOverAlert(pushTitle, parseCRJson(pushReport));
     }
     if (GT.settings.msg.msgSimplepush)
     {
-      sendSimplePushMessage(GT.settings.msg.msgSimplepushNotifyOnly ? parseCRJson(pushReport) : parseCRJsonToMarkdown(pushReport));
+      sendSimplePushMessage(pushTitle, GT.settings.msg.msgSimplepushNotifyOnly ? parseCRJson(pushReport) : parseCRJsonToMarkdown(pushReport));
     }
   }
 
@@ -129,14 +130,14 @@ function sendAlerts()
 }
 
 
-function sendSimplePushMessage(message)
+function sendSimplePushMessage(title, message)
 {
   if (GT.settings.msg.msgSimplepushDailySchedule && !GT.isWithinScheduledMinutes(GT.settings.msg.msgSimplepushScheduleStart, GT.settings.msg.msgSimplepushScheduleEnd)) return;
 
   const url = "https://api.simplepu.sh/v1/" + (GT.settings.msg.msgSimplepushNotifyOnly ? "notifications" : "tasks") + "/json";
 
   let data = {
-    title: "GT Alert - " + formatCallsign(GT.settings.app.myCall),
+    title: title,
     content: message,
     contentFormat: "markdown"
   };
@@ -155,7 +156,7 @@ function sendSimplePushMessage(message)
   );
 }
 
-function sendPushOverAlert(message)
+function sendPushOverAlert(title, message)
 {
   if (GT.settings.msg.msgPushoverDailySchedule && !GT.isWithinScheduledMinutes(GT.settings.msg.msgPushoverScheduleStart, GT.settings.msg.msgPushoverScheduleEnd)) return;
 
@@ -163,7 +164,7 @@ function sendPushOverAlert(message)
   let data = {
     user: GT.settings.msg.msgPushoverUserKey,
     token: GT.settings.msg.msgPushoverToken,
-    title: "GT Alert - " + formatCallsign(GT.settings.app.myCall),
+    title: title,
     message: message
   };
 
@@ -178,6 +179,13 @@ function sendPushOverAlert(message)
   );
 }
 
+// Feed spots carry no SNR (RSTsent stays "-"), so Feed Roster alerts show the mode in its place;
+// called from sendAlerts, so isFeedRoster() reflects the roster sending them
+function alertSignalOrMode(entry)
+{
+  return isFeedRoster() ? entry.mode : String(entry.RSTsent);
+}
+
 function parseCRJson(data)
 {
   let message = "";
@@ -188,7 +196,7 @@ function parseCRJson(data)
 
     if (entry.shouldRosterAlert == true && entry.rosterAlerted == false)
     {
-      const parts = [formatCallsign(callsign), entry.dxccName, String(entry.RSTsent)];
+      const parts = [formatCallsign(callsign), entry.dxccName, alertSignalOrMode(entry)];
       if (entry.grid) parts.push(entry.grid);
       parts.push(entry.band);
       if (entry.state) parts.push(entry.state);
@@ -230,7 +238,7 @@ function parseCRJsonToMarkdown(data)
     let entry = row.entry;
     let parts = [
       entry.dxccName,
-      entry.RSTsent.toString(),
+      alertSignalOrMode(entry),
       entry.grid,
       entry.band,
       entry.state

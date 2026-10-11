@@ -229,7 +229,7 @@
   "settings.map.animatePaths.label": "Animar rutas activas",
   "settings.map.animatePaths.hover": "Alternar animación de rutas de tráfico",
   "settings.map.equator.enable.hover": "Alternar paralelos y meridianos principales",
-  "settings.map.dxcwFeed.hover": "Alternar Fuentes DX",
+  "settings.map.dxcwFeed.hover": "Alternar spots de Fuentes DX",
   "gt.feedSpot.title": "Spot de fuente",
   "gt.feedSpot.age": "Edad",
   "gt.feedSpot.dist": "Dist",

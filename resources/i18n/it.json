@@ -229,7 +229,7 @@
     "settings.map.animatePaths.label": "Animazione percorsi attivi",
     "settings.map.animatePaths.hover": "Animazione della linea del traffico",
     "settings.map.equator.enable.hover": "Alterna paralleli e meridiani principali",
-    "settings.map.dxcwFeed.hover": "Alterna Feed DX",
+    "settings.map.dxcwFeed.hover": "Alterna spot Feed DX",
     "gt.feedSpot.title": "Spot del feed",
     "gt.feedSpot.age": "Età",
     "gt.feedSpot.dist": "Dist",

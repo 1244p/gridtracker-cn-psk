@@ -4,8 +4,9 @@ directories:
   buildResources: build
 files:
   - '!**/.vscode/*'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CLAUDE.md,HISTORY.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!tools{,/**/*}'
 asar: true
 afterPack: "./electron-builder-afterpack.js"
 win:

@@ -229,7 +229,7 @@
     "settings.map.animatePaths.label": "Aktive Pfade animieren",
     "settings.map.animatePaths.hover": "Pfad-Animation umschalten",
     "settings.map.equator.enable.hover": "Hauptbreitenkreise und Meridiane umschalten",
-    "settings.map.dxcwFeed.hover": "DX-Feeds umschalten",
+    "settings.map.dxcwFeed.hover": "DX-Feed-Spots umschalten",
     "gt.feedSpot.title": "Feed-Spot",
     "gt.feedSpot.age": "Alter",
     "gt.feedSpot.dist": "Entf.",

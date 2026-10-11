@@ -694,7 +694,7 @@ const def_settings = {
     sortReverse: true,
     watcherSortColumn: "name",
     watcherSortReverse: false,
-    // Feed Roster Max Age: 2 minutes (the map's Feed Spot Max Age is app.feedMaxAge)
+    // Feed Roster Max Age: 2 minutes (the map's Feed Spots Max Age is app.feedMaxAge)
     rosterTime: 120,
     watchers: {},
     feeds: {

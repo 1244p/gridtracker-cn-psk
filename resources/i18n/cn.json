@@ -230,7 +230,7 @@
     "settings.map.animatePaths.label": "活动路径动画效果",
     "settings.map.animatePaths.hover": "其他电台通联路径以动画效果显示",
     "settings.map.equator.enable.hover": "切换主要经纬线",
-    "settings.map.dxcwFeed.hover": "切换 DX 数据源",
+    "settings.map.dxcwFeed.hover": "切换 DX 数据源报告",
     "gt.feedSpot.title": "数据源报告",
     "gt.feedSpot.age": "时长",
     "gt.feedSpot.dist": "距离",

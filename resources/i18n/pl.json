@@ -229,7 +229,7 @@
   "settings.map.animatePaths.label": "Animuj Aktywne Ścieżki",
   "settings.map.animatePaths.hover": "Przełącz animację ścieżek ruchu",
   "settings.map.equator.enable.hover": "Przełącz Główne Równoleżniki i Południki",
-  "settings.map.dxcwFeed.hover": "Przełącz Kanały DX",
+  "settings.map.dxcwFeed.hover": "Przełącz spoty Kanałów DX",
   "gt.feedSpot.title": "Spot z kanału",
   "gt.feedSpot.age": "Wiek",
   "gt.feedSpot.dist": "Odl.",

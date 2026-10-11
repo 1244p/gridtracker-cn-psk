@@ -229,7 +229,7 @@
   "settings.map.animatePaths.label": "Animeer Actieve Routes",
   "settings.map.animatePaths.hover": "Schakel Verkeersroute Animatie",
   "settings.map.equator.enable.hover": "Schakel Belangrijkste Parallellen en Meridianen",
-  "settings.map.dxcwFeed.hover": "Schakel DX-feeds",
+  "settings.map.dxcwFeed.hover": "Schakel DX-feedspots",
   "gt.feedSpot.title": "Feed-spot",
   "gt.feedSpot.age": "Leeftijd",
   "gt.feedSpot.dist": "Afst.",

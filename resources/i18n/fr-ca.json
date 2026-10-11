@@ -229,7 +229,7 @@
     "settings.map.animatePaths.label": "Animer les tracés",
     "settings.map.animatePaths.hover": "Animation des lignes",
     "settings.map.equator.enable.hover": "Afficher méridiens et parallèles",
-    "settings.map.dxcwFeed.hover": "Afficher les flux DX",
+    "settings.map.dxcwFeed.hover": "Afficher les spots des flux DX",
     "gt.feedSpot.title": "Spot du flux",
     "gt.feedSpot.age": "Âge",
     "gt.feedSpot.dist": "Dist",

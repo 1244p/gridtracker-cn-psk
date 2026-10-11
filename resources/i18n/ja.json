@@ -229,7 +229,7 @@
     "settings.map.animatePaths.label": "アクティブなパスのアニメーション",
     "settings.map.animatePaths.hover": "トラフィックパスのアニメーションを切り替え",
     "settings.map.equator.enable.hover": "主要な緯線と経線を切り替え",
-    "settings.map.dxcwFeed.hover": "DXフィードを切り替え",
+    "settings.map.dxcwFeed.hover": "DXフィードのスポットを切り替え",
     "gt.feedSpot.title": "フィードスポット",
     "gt.feedSpot.age": "経過",
     "gt.feedSpot.dist": "距離",

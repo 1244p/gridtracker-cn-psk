@@ -45,6 +45,9 @@
         <button data-i18n="settings.General.label" id="generalbox" class="infoTablinks active" onclick="openInfoTab(event, 'generalSettingsDiv')">
           General
         </button>
+        <button data-i18n="roster.feeds.label" id="feedsbox" class="infoTablinks" style="display:none;" onclick="openInfoTab(event, 'feedsBoxDiv', renderFeedsTab)">
+          Feeds
+        </button>
         <button data-i18n="roster.watcher.label" id="watcherbox" class="infoTablinks" onclick="openInfoTab(event, 'watcherBoxDiv', openWatchersTab);">
           Watcher
         </button>
@@ -53,9 +56,6 @@
         </button>
         <button data-i18n="roster.ignores.label" id="ingoresbox" class="infoTablinks" onclick="openInfoTab(event, 'ignoresBoxDiv', renderIgnoresTab)">
           Ignores
-        </button>
-        <button data-i18n="roster.feeds.label" id="feedsbox" class="infoTablinks" style="display:none;" onclick="openInfoTab(event, 'feedsBoxDiv', renderFeedsTab)">
-          Feeds
         </button>
       </div>
       <div id="generalSettingsDiv" class="infoTabcontent">

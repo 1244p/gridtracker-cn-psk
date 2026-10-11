@@ -1474,11 +1474,19 @@ function clearAllITUzIgnores()
   viewRoster();
 }
 
-// The pane is shown before the tab renders, so the Ignores and Watcher tabs can measure where they start
+// The pane is shown before the tab renders, so the Ignores and Watcher tabs can measure where they start;
+// the Feed Roster opens on its Feeds tab
 function openSettings()
 {
   settingsDiv.style.display = "inline-block";
-  openInfoTab("generalbox", "generalSettingsDiv");
+  if (isFeedRoster())
+  {
+    openInfoTab("feedsbox", "feedsBoxDiv", renderFeedsTab);
+  }
+  else
+  {
+    openInfoTab("generalbox", "generalSettingsDiv");
+  }
 }
 
 function openWatcher()
