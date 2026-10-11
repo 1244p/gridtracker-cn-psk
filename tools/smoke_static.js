@@ -72,7 +72,9 @@ const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 ok(`package.json version ${pkg.version} has the 2.YYMMDD.N form`, /^2\.\d{6}\.\d+$/.test(pkg.version));
 const cl = fs.readFileSync("CHANGELOG.md", "utf8");
 const top = (cl.match(/^## \[v?([^\]]+)\]/m) || [])[1];
-ok(`CHANGELOG.md topmost section [v${top}] matches package.json`, top === pkg.version);
+// Right after a release CHANGELOG.md has no version section until the next version is started
+if (top === undefined) ok("CHANGELOG.md has no version section yet (just released)", true);
+else ok(`CHANGELOG.md topmost section [v${top}] matches package.json`, top === pkg.version);
 // UTF-8 read as Windows-1252: â€ / âœ / â— (punctuation, ✔, ◇), Ã + a Latin-1 letter (é, ê, ...), ðŸ (emoji)
 const garbled = /â€|âœ|â—|Ã[\u0080-¿]|ðŸ/;
 for (const f of ["CHANGELOG.md", "HISTORY.md"]) ok(`${f} has no garbled characters`, !garbled.test(fs.readFileSync(f, "utf8")));
