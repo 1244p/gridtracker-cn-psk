@@ -237,6 +237,7 @@
     "settings.Colors.label": "色",
     "settings.BandColors.label": "バンドの色",
     "settings.BandColors.reset.hover": "バンドの色をデフォルトに戻す",
+    "gt.slider.arrowKeys": "(矢印キーで細かく調整できます)",
     "settings.map.equator.color.label": "経線と緯線の色",
     "settings.map.terminator.label" : "グレイライン(昼夜境界線)",
     "settings.map.terminator.Horizon" : "地平線",

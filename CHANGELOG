@@ -400,6 +400,7 @@ Logging:
 - "DX Cont" column (the Call Roster's Cont column) and new "DE Cont" column: the spotter's continent
 - Exceptions (in the Feed Roster and Settings -> Audio Alerts -> Feed Roster): "Not My DX DXCC" and "Only My DX DXCC" for the spotted station
   - New "Hide Self-Spotters": hides spots where the station spotted itself (W1AW-#, W1AW/P and VE/W1AW count as W1AW)
+  - "..." opens the Feed Roster's Exceptions settings tab, which has Uses LoTW (with its last-upload age)
 - Settings -> Watcher: New "Spotter" type, with or without Regex, highlighted in the Spotter column
   - A plain Spotter watcher also covers the spotter's skimmer suffixes (W3LPL also covers W3LPL-# and W3LPL-2)
 - "Spotter" category in the Feed Roster's Settings -> Ignores, for spotters sending false or too many questionable spots
@@ -408,6 +409,7 @@ Logging:
 #### Call Roster
 
 - Mode column: CW, SSB and RTTY now have their own colors, other unlisted modes show in white
+- Sliders in the roster window now show "(Use Arrow Keys For Smaller Increments)" on hover, like the main window; translated in both
 - DXCC column: click to center the map on the entity and highlight (dazzle) its outline, like clicking a Grid
 - Fixed dragging the Band or Mode column when it is shown for multiple bands or modes but not enabled
   - Hidden columns now keep their place when other columns are dragged

@@ -695,6 +695,12 @@ table.rosterTable td:last-child {
   align-items:center;
 }
 
+/* Feed Roster: only Uses LoTW, centered instead of in the grid's first column */
+.exceptionTab.feedExceptions {
+  display: flex;
+  justify-content: center;
+}
+
 .exceptionTab > div {
   margin: 6px;
   padding: 5px;

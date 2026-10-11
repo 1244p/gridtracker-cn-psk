@@ -237,6 +237,7 @@
   "settings.Colors.label": "Kleuren",
   "settings.BandColors.label": "Bandkleuren",
   "settings.BandColors.reset.hover": "Bandkleuren herstellen naar standaard",
+  "gt.slider.arrowKeys": "(Gebruik de pijltjestoetsen voor kleinere stappen)",
   "settings.map.equator.color.label": "Meridianen & Parallellen Kleur",
   "settings.map.terminator.label" : "Grayline (Schemerzone) Terminator",
   "settings.map.terminator.Horizon" : "Horizon",

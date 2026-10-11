@@ -237,6 +237,7 @@
     "settings.Colors.label": "Colors",
     "settings.BandColors.label": "Band Colors",
     "settings.BandColors.reset.hover": "Reset Band Colors To Default",
+    "gt.slider.arrowKeys": "(Use Arrow Keys For Smaller Increments)",
     "settings.map.equator.color.label": "Meridians &amp; Parallels Color",
     "settings.map.terminator.label" : "Grayline Terminator",
     "settings.map.terminator.Horizon" : "Horizon",

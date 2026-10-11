@@ -238,6 +238,7 @@
     "settings.Colors.label": "顏色",
     "settings.BandColors.label": "波段顏色",
     "settings.BandColors.reset.hover": "將波段顏色重設為預設值",
+    "gt.slider.arrowKeys": "(使用方向鍵進行更小幅度的調整)",
     "settings.map.equator.color.label": "經緯線顏色",
     "settings.map.terminator.label": "晨昏線 (灰線)",
     "settings.map.terminator.Horizon": "地平線",

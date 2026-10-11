@@ -237,6 +237,7 @@
     "settings.Colors.label": "Farben",
     "settings.BandColors.label": "Bandfarben",
     "settings.BandColors.reset.hover": "Bandfarben auf Standard zurücksetzen",
+    "gt.slider.arrowKeys": "(Pfeiltasten für kleinere Schritte verwenden)",
     "settings.map.equator.color.label": "Farbe der Meridiane und Breitenkreise",
     "settings.map.terminator.label" : "Tag-Nacht-Grenze (Graulinie)",
     "settings.map.terminator.Horizon" : "Horizont",

@@ -237,6 +237,7 @@
     "settings.Colors.label": "Couleurs",
     "settings.BandColors.label": "Couleurs des bandes",
     "settings.BandColors.reset.hover": "Rétablir les couleurs des bandes par défaut",
+    "gt.slider.arrowKeys": "(Utilisez les flèches du clavier pour des pas plus fins)",
     "settings.map.equator.color.label": "Couleur méridiens/parallèles",
     "settings.map.terminator.label" : "Ligne grise (Terminator)",
     "settings.map.terminator.Horizon" : "Horizon",

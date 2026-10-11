@@ -1608,10 +1608,10 @@ function updateRosterTabControls()
   maxDTDiv.style.display = feed ? "none" : "";
   minFreqDiv.style.display = feed ? "none" : "";
   maxFreqDiv.style.display = feed ? "none" : "";
-  // The Feed Roster has no Exceptions settings tab (and so no "..." to it), and no RR73
-  exceptionsbox.style.display = feed ? "none" : "";
-  moreExceptionsButton.style.display = feed ? "none" : "";
+  // The Feed Roster has no RR73; its Exceptions settings tab ("...") has only Uses LoTW (dB / DT / Freq are hidden above),
+  // centered
   wantRRCQDiv.style.display = feed ? "none" : "";
+  exceptionTabDiv.classList.toggle("feedExceptions", feed);
 
   if ((!feed && (CR.ignoreType === "Spotter" || CR.ignoreType === "DEDXCC" || CR.ignoreType === "DECont")) || (feed && CR.ignoreType === "CQ"))
   {
@@ -1620,7 +1620,7 @@ function updateRosterTabControls()
   }
 
   // An open settings tab redraws for the roster now showing
-  if ((feedsBoxDiv.style.display === "block" && !feed) || (exceptionsBoxDiv.style.display === "block" && feed))
+  if (feedsBoxDiv.style.display === "block" && !feed)
   {
     openInfoTab("generalbox", "generalSettingsDiv");
   }
@@ -1868,6 +1868,12 @@ function init()
   loadFilterSettings();
   updateInstances();
   loadRosterI18n();
+  // Like the main window: every slider's hover mentions the arrow keys (after the translations set any hover)
+  for (const slider of document.querySelectorAll("input[type='range']"))
+  {
+    if (slider.title.length > 0) slider.title += "\n";
+    slider.title += I18N("gt.slider.arrowKeys");
+  }
   setRosterTop();
   createActiveAwardsFromSettings();
   registerCutAndPasteContextMenu();

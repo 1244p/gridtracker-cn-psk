@@ -1007,10 +1007,10 @@ function setVisualAudioAlerts()
   referenceNeed.value = roster.logbook.referenceNeed;
   huntNeed.value = roster.logbook.huntNeed;
 
-  // The Feed Roster has no Rules, no Spot column, no RR73, no Exceptions settings tab ("...") and no Band/Mode Memory
+  // The Feed Roster has no Rules, no Spot column, no RR73 and no Band/Mode Memory; its "..." opens its Exceptions
+  // settings tab, which has only Uses LoTW
   audioAlertRulesDiv.style.display = feed ? "none" : "";
   wantRRCQDiv.style.display = feed ? "none" : "";
-  moreExceptionsButton.style.display = feed ? "none" : "";
   // Feed Roster: Hide Self-Spotters, and its DXCC exceptions are for the spotted station ("DX DXCC")
   hideSelfSpotsDiv.style.display = feed ? "" : "none";
   setI18nText(noMyDxccLabel, feed ? "roster.secondary.exceptions.noMyDXDXCC" : "roster.secondary.exceptions.noMyDXCC");

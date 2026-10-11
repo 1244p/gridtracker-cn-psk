@@ -767,7 +767,7 @@ function postInit()
     for (let i = 0; i < x.length; i++)
     {
       if (x[i].title.length > 0) x[i].title += "\n";
-      x[i].title += "(Use Arrow Keys For Smaller Increments)";
+      x[i].title += I18N("gt.slider.arrowKeys");
     }
 
     section = "DataBreakout";

@@ -237,6 +237,7 @@
   "settings.Colors.label": "Kolory",
   "settings.BandColors.label": "Kolory pasm",
   "settings.BandColors.reset.hover": "Przywróć domyślne kolory pasm",
+  "gt.slider.arrowKeys": "(Użyj klawiszy strzałek dla mniejszych kroków)",
   "settings.map.equator.color.label": "Kolor Równoleżników i Południków",
   "settings.map.terminator.label" : "Szara Linia (Grayline)",
   "settings.map.terminator.Horizon" : "Horyzont",
