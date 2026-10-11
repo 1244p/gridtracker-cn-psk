@@ -748,6 +748,14 @@ const def_settings = {
 };
 
 def_settings.feedAudioAlerts.media = { ...def_settings.audioAlerts.media };
+// Feed Roster speech says "Feed", to tell it from the Call Roster's: "Wanted Feed Grid", "Many Feed Grids"
+for (const key in def_settings.feedAudioAlerts.media)
+{
+  if (/Speech(Single|Multi)$/.test(key))
+  {
+    def_settings.feedAudioAlerts.media[key] = def_settings.feedAudioAlerts.media[key].replace(/^(Wanted|Many) /, "$1 Feed ");
+  }
+}
 
 // Each roster's default columns, copied before anything can change them (new users' settings start as
 // these very objects): for the roster windows' "Reset Columns to Default"

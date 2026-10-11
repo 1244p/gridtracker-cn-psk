@@ -1176,7 +1176,7 @@ function loadAudioAlertSettings()
       let input = document.createElement("input");
       input.id = id = key + "SpeechSingle";
       input.type = "text";
-      input.size = 16;
+      input.size = 22;
       input.value = audioAlertsMedia()[id];
       input.className = "inputTextValue";
       parent.appendChild(input);
@@ -1210,7 +1210,7 @@ function loadAudioAlertSettings()
       input = document.createElement("input");
       input.id = id = key + "SpeechMulti";
       input.type = "text";
-      input.size = 16;
+      input.size = 22;
       input.value = audioAlertsMedia()[id];
       input.className = "inputTextValue";
       parent.appendChild(input);

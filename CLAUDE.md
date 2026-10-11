@@ -53,6 +53,7 @@ Scripts in [tools/](tools/) (run from the repo root; each file's header has its 
 - [reload_i18n.js](tools/reload_i18n.js): reloads the locale file in the running main window (see Running dev).
 - [eol_check.js](tools/eol_check.js), [bom_check.js](tools/bom_check.js): line endings / BOM of given files; every `.js` with a BOM.
 - [changelog_html.js](tools/changelog_html.js): regenerates CHANGELOG.md's `### HTML List` section from its `### MD Markup Format` section (dry run unless `write`).
+- [changelog_discord.js](tools/changelog_discord.js): splits the `### MD Markup Format` section into Discord messages (at most 2000 characters each; add `4000` for Nitro) and writes them into a `### Discord Messages` section at the end of the version section, one ` ```md ` block per message (dry run unless `write`). Paste the text inside each block, not the fence lines.
 
 Text files in this repo are CRLF with no BOM. Do bulk or scripted edits with a Node script (keep the file's line endings, check anchors match exactly once, dry run first), then check with `eol_check.js`. One-off test scripts go in the session scratchpad, not `tools/`.
 
@@ -69,6 +70,6 @@ Text files in this repo are CRLF with no BOM. Do bulk or scripted edits with a N
 
 - Version format in `package.json` is `2.YYMMDD.N` (e.g. `2.261008.3`); bump it with user-visible changes.
 - New work goes in [CHANGELOG.md](CHANGELOG.md): add user-facing entries to the version section being worked on (the topmost `## [v2.YYMMDD.N]`, matching `package.json`), under its `#### Area` heading (`Call Roster`, `Map / UI`, `App`, …) as `- ` bullets, sub-points two-space indented. New UI text needs a `data-i18n` key translated in every `resources/i18n/*.json`.
-- The version section has a `### MD Markup Format` part (edit this one) and an `### HTML List` part generated from it: run `node tools/changelog_html.js write` after changing the Markdown.
+- The version section has a `### MD Markup Format` part (edit this one) and an `### HTML List` part generated from it: run `node tools/changelog_html.js write` and `node tools/changelog_discord.js write` after changing the Markdown (they regenerate `### HTML List` and the `### Discord Messages` section after it).
 - Old releases go in [HISTORY.md](HISTORY.md) (oldest first): once a version is released, its section moves from CHANGELOG.md to the end of HISTORY.md. Don't add new entries there.
 - CHANGELOG.md is packaged with the app; HISTORY.md, CLAUDE.md and `tools/` are left out (`files:` in `electron-builder.yml` and `electron-builder.win7.yml`).
