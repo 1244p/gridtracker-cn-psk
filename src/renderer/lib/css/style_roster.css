@@ -396,13 +396,6 @@ input.slider {
 }
 
 
-/* Feed Roster Mode selector: grows with every mode seen, wrapping past 80% of the window's width */
-#instancesDiv.feedModes {
-  white-space: normal;
-  max-width: 80%;
-  margin: 0 auto;
-}
-
 #instancesWrapper .button {
   display: inline-block;
   margin: 1px;
@@ -615,8 +608,8 @@ table.rosterTable td:last-child {
 
 .feedBands {
   display: grid;
-  grid-template-columns: repeat(4, auto);
-  gap: 2px 12px;
+  grid-template-columns: repeat(6, auto);
+  gap: 4px 14px;
   margin-top: 4px;
   text-align: left;
 }
@@ -624,6 +617,16 @@ table.rosterTable td:last-child {
 .feedBand {
   white-space: nowrap;
   cursor: pointer;
+}
+
+.feedBand input {
+  margin-right: 2px;
+}
+
+/* Feed Roster Settings -> Feeds: Allow Alert Script / Notifications centered vertically in their box */
+#feedsAllowBox {
+  display: inline-flex;
+  align-items: center;
 }
 
 .acknowledged {

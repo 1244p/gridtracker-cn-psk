@@ -694,7 +694,8 @@ const def_settings = {
     sortReverse: true,
     watcherSortColumn: "name",
     watcherSortReverse: false,
-    rosterTime: 300,
+    // Feed Roster Max Age: 2 minutes (the map's Feed Spot Max Age is app.feedMaxAge)
+    rosterTime: 120,
     watchers: {},
     feeds: {
       // Feed Roster audio alerts come from Settings -> Audio Alerts -> Feed Roster; these cover the script and push
@@ -702,9 +703,9 @@ const def_settings = {
       notifications: false,
       // Bands the user unticked; anything not listed is shown
       hiddenBands: {},
-      // Every mode seen in feed spots (mode: shown), for the Feed Roster's Mode selector; false = unticked.
-      // It only grows
-      modes: {}
+      // Every mode seen in feed spots (mode: shown), for the Feed Roster's Settings -> Feeds -> Modes; false = unticked.
+      // Starts with the common ones and only grows
+      modes: { CW: true, FT4: true, FT8: true, SSB: true }
     },
     // Feed Roster ignores, independent of the Call Roster's (the top-level ignored* keys), no CQ ignores;
     // spotter ignores are feed-only already and stay in the top-level ignoredSpotters

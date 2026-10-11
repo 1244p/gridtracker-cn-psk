@@ -99,7 +99,7 @@ const ROSTER_COLUMNS = {
   Mode: {
     compare: callObjSimpleComparer("mode"),
     tableData: (callObj) => ({
-      style: `color: #${CR.modeColors[callObj.mode] || "FFFFFF"};`,
+      style: `color: #${GT.modeColors[callObj.mode] || "FFFFFF"};`,
       html: callObj.mode
     })
   },

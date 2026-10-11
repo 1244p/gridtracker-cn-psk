@@ -205,13 +205,20 @@ function mediaCheck()
 
   });
 
-  GT.modes = requireJson("data/modes.json");
-  for (const key in GT.modes)
+  // data/modes.json: per mode { digital, phone, color }; GT.modes / GT.modes_phone keep their mode -> bool shape
+  const modeData = requireJson("data/modes.json");
+  GT.modes = {};
+  GT.modes_phone = {};
+  GT.modeColors = {};
+  for (const key in modeData)
   {
+    GT.modes[key] = modeData[key].digital;
+    GT.modes_phone[key] = modeData[key].phone;
+    GT.modeColors[key] = modeData[key].color;
     gtModeFilter.appendChild(newOption(key));
   }
-
-  GT.modes_phone = requireJson("data/modes-phone.json");
+  // Feeds name JS8 "JS8CALL"
+  GT.modeColors.JS8CALL = GT.modeColors.JS8;
 
   let appName = I18N("settings.about.AppName");
   let gtName = electron.ipcRenderer.sendSync("getAppName");

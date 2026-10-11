@@ -40,20 +40,6 @@ Object.assign(CR,
   callsignDatabaseDXCC: {},
   callsignDatabaseUS: {},
   callsignDatabaseUSplus: {},
-  modeColors: {
-    FT2: "FF8811",
-    FT4: "7777FF",
-    FT8: "11FF11",
-    JS8: "11FFFF",
-    JT4: "EE1111",
-    JT9: "7CFC00",
-    JT65: "E550E5",
-    QRA64: "FF00FF",
-    MSK144: "1149FF",
-    CW: "FFFF00",
-    SSB: "FF66CC",
-    RTTY: "C080FF"
-  },
   rosterTimeout: null,
   rosterFocus: false,
   lastTime: 0,
@@ -381,9 +367,9 @@ function runRoster(render)
   if (render)
   {
     renderRoster(CR.callRoster, rosterSettings);
-    // New spots can bring new modes
-    if (CR.profile === CR.profiles.feed) updateFeedModes();
   }
+  // New spots can bring new modes into Settings -> Feeds
+  if (CR.profile === CR.profiles.feed) updateFeedModes();
 
   const profile = CR.profile;
   if (profile.alertTimer !== null)
@@ -517,14 +503,13 @@ function instanceChange(what)
 
 function updateInstances()
 {
-  // The Feed Roster uses this selector for its modes
+  // The Feed Roster has no instance selector (its modes are in its Settings -> Feeds)
   if (CR.visibleProfile === CR.profiles.feed)
   {
-    updateFeedModes();
+    instancesDiv.innerHTML = "";
+    instancesWrapper.style.display = "none";
     return;
   }
-  CR.feedModesKey = null;
-  instancesDiv.classList.remove("feedModes");
 
   if (GT.instanceCount > 1)
   {
@@ -556,8 +541,7 @@ function updateInstances()
   }
 }
 
-// Feed Roster: the instance selector as a Mode selector, always shown (with the extended controls, like the
-// instances), listing every mode seen in feed spots, ticked or not; it wraps past 80% of the window's width
+// Feed Roster Settings -> Feeds -> Modes: every mode seen in feed spots, ticked or not, laid out like the Bands
 function updateFeedModes()
 {
   const modes = feedSettings().modes;
@@ -568,14 +552,11 @@ function updateFeedModes()
   if (key !== CR.feedModesKey)
   {
     CR.feedModesKey = key;
-    instancesDiv.innerHTML = list.map(mode =>
-      `<div class='button' style='background-color:blue;'>` +
-      `<label style='cursor:pointer;'>` +
-      `<input type='checkbox' ${modes[mode] === false ? "" : "checked"} onchange='feedModeChange(this, "${mode}");' />&nbsp;${mode}</label></div>`
+    feedModesDiv.innerHTML = list.map(mode =>
+      `<label class='feedBand' style='color:#${GT.modeColors[mode] || "FFFFFF"};'>` +
+      `<input type='checkbox' ${modes[mode] === false ? "" : "checked"} onchange='feedModeChange(this, "${mode}")' />${mode}</label>`
     ).join("");
   }
-  instancesDiv.classList.add("feedModes");
-  instancesWrapper.style.display = (CR.windowSettings.controls && CR.windowSettings.controlsExtended) ? "" : "none";
 }
 
 function feedModeChange(checkbox, mode)
@@ -1650,6 +1631,7 @@ function renderFeedsTab()
     `<label class='feedBand' style='color:#${GT.bandColors[band]};'>` +
     `<input type='checkbox' ${band in feeds.hiddenBands ? "" : "checked"} onchange='feedBandChanged(this, "${band}")' />${band}</label>`
   ).join("");
+  updateFeedModes();
 }
 
 function feedBandChanged(checkbox, band)

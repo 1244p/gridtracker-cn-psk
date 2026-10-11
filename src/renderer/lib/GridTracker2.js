@@ -254,6 +254,8 @@ GT.Zday = false;
 GT.maps = [];
 GT.modes = {};
 GT.modes_phone = {};
+// Mode -> roster color (RRGGBB), from data/modes.json
+GT.modeColors = {};
 GT.colorBands = [
   "OOB",
   "4000m",

@@ -359,7 +359,7 @@ function feedsActive()
   return GT.settings.app.offAirServicesEnable == true && GT.settings.map.offlineMode == false && GT.settings.app.dxFeeds == true;
 }
 
-// A mode's feed group, as the RTSN server groups them: CW, Phone (modes-phone.json), anything else Digital
+// A mode's feed group, as the RTSN server groups them: CW, Phone (phone in data/modes.json), anything else Digital
 function feedGroup(mode)
 {
   if (mode == "CW") return "CW";

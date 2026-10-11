@@ -360,7 +360,7 @@ Logging:
     - CW, Digital and Phone: which spots to receive, for the Feed Roster and the map (all on by default)
     - Feed Spot Max Age: how long feed spots stay on the map, 1 to 60 minutes (default 5 minutes)
     - Clear All Feeds: clears all feed data received (Feed Roster and map); new spots keep arriving
-  - Feed spots are kept for an hour after they were last spotted; the map shows them per Feed Spot Max Age, the Feed Roster per its own Roster Max Age (up to 1 hour, default 5 minutes)
+  - Feed spots are kept for an hour after they were last spotted; the map shows them per Feed Spot Max Age, the Feed Roster per its own Roster Max Age (up to 1 hour, default 2 minutes)
 
 #### Call Roster
 
@@ -387,12 +387,11 @@ Logging:
 - US feed spots get the same state and county lookups as decodes
 - POTA: feed spots get the activator's park from a park reference in the spot's comment, otherwise like decodes (current POTA spot or scheduled activation), or "?-????" for a "CQ POTA" spot; works with Wanted POTA and the POTA column
   - The park sticks: a later spot without one doesn't erase it, and newer information (a spot naming another park, or a newer POTA spot) replaces it, so an activator who moves parks is picked up
-- Mode selector (where the Call Roster has its instance selector), always shown with the extended controls: one tick box per mode seen in feed spots; untick a mode to hide its spots in the Feed Roster
-  - Every mode seen is remembered, ticked or not
 - "Feeds" tab in the Feed Roster's Settings:
   - Allow Alert Script for feed spots (audio alerts are set in Settings -> Audio Alerts -> Feed Roster)
   - Allow Notifications (Pushover, Simplepush) for feed spots
   - Feed spots never trigger Custom Alerts
+  - Modes: one tick box per mode seen in feed spots; untick a mode to hide its spots in the Feed Roster (every mode seen is remembered, ticked or not)
   - Bands: choose which bands' feed spots appear, based on a US or non-US band plan (all bands on by default)
 - "Spotter" column: the station that reported a feed spot
   - Right-click a spotter for Lookup, Add Watcher (a Spotter watcher), Copy, Ignore Spotter or Edit Ignores
@@ -408,7 +407,6 @@ Logging:
 
 #### Call Roster
 
-- Mode column: CW, SSB and RTTY now have their own colors, other unlisted modes show in white
 - Sliders in the roster window now show "(Use Arrow Keys For Smaller Increments)" on hover, like the main window; translated in both
 - DXCC column: click to center the map on the entity and highlight (dazzle) its outline, like clicking a Grid
 - Fixed dragging the Band or Mode column when it is shown for multiple bands or modes but not enabled
