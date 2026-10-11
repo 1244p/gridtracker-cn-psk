@@ -38,9 +38,9 @@ function generatePrintTable()
   }
 
   let halfOfRows = parseInt(rows.length / 2); 
-  let htmlWorker = "<tr><th colspan='4'>Hot Key List (" + gtShortVersion + ")</th></tr>";
+  let htmlWorker = "<tr><th colspan='4'>" + I18N("gt.print.hotKeyList") + " (" + gtShortVersion + ")</th></tr>";
   htmlWorker += "<tr><th>Key</th><th>Action</th><th>Key</th><th>Action</th></tr>";
-  GT.printableHotkeyList = "<table class='darkTable'><tr><th colspan='4'><h1>GridTracker2</h1><h3>Hot Key List (<i>" + gtShortVersion + "</i>)</h3></th></tr>";
+  GT.printableHotkeyList = "<table class='darkTable'><tr><th colspan='4'><h1>GridTracker2</h1><h3>" + I18N("gt.print.hotKeyList") + " (<i>" + gtShortVersion + "</i>)</h3></th></tr>";
   GT.printableHotkeyList += "<tr><th>Key</th><th>Action</th><th>Key</th><th>Action</th></tr>";
   for (let x = 0; x <= halfOfRows; x++)
   {

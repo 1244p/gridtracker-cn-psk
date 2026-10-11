@@ -16,7 +16,7 @@ function importSettings(contents)
     {
       if (Number(data.currentVersion.substring(0,7)) < 2241005 )
       {
-        importSettingsInfo.innerHTML = "<font style='color:orange;font-weight:bold'>Incompatible Version!</font>";
+        importSettingsInfo.innerHTML = "<font style='color:orange;font-weight:bold'>" + I18N("gt.settings.incompatibleVersion") + "</font>";
       }
       else
       {
@@ -31,12 +31,12 @@ function importSettings(contents)
     }
     else
     {
-      importSettingsInfo.innerHTML = "<font style='color:orange;font-weight:bold'>File Corrupt!</font>";
+      importSettingsInfo.innerHTML = "<font style='color:orange;font-weight:bold'>" + I18N("gt.settings.fileCorrupt") + "</font>";
     }
   }
   catch (e)
   {
-    importSettingsInfo.innerHTML = "<font style='color:orange;font-weight:bold'>File Read!</font>";
+    importSettingsInfo.innerHTML = "<font style='color:orange;font-weight:bold'>" + I18N("gt.settings.fileRead") + "</font>";
   }
 }
 
@@ -265,7 +265,7 @@ function loadAdifSettings()
     findTrustedQSLPaths();
   } catch (e) {
     if (logLOTWqsoCheckBox.checked == true) {
-      alert("Unable to access LoTW TrustedQSL (TQSL) due to OS permissions\nLogging to LoTW disabled for this session\nRun as administrator or allow file access to GridTracker if problem persists");
+      alert(I18N("gt.settings.tqslPermission"));
       logLOTWqsoCheckBox.checked = false;
     }
   }
@@ -406,7 +406,7 @@ function saveGridTrackerSettings()
   catch (e)
   {
     console.error(e);
-    alert("Failure to write settings to: " + filename);
+    alert(I18N("gt.settings.writeFailed") + " " + filename);
   }
 }
 

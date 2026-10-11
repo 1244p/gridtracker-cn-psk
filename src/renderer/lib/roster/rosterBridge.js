@@ -200,11 +200,11 @@ function toggleCRScript()
   GT.settings.app.crScript = GT.crScript;
   if (GT.crScript == 1)
   {
-    addLastTraffic("<font style='color:lightgreen'>Call Roster Script Enabled</font>");
+    addLastTraffic("<font style='color:lightgreen'>" + I18N("gt.callRoster.scriptEnabled") + "</font>");
   }
   else
   {
-    addLastTraffic("<font style='color:yellow'>Call Roster Script Disabled</font>");
+    addLastTraffic("<font style='color:yellow'>" + I18N("gt.callRoster.scriptDisabled") + "</font>");
   }
   goProcessRoster();
 }

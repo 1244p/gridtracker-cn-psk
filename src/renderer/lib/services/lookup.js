@@ -379,7 +379,7 @@ function readLookupSession(buffer, sessionTag, keyTag, errorTag)
   if (oDOM.getElementsByTagName("parsererror").length > 0)
   {
     GT.qrzLookupSessionId = null;
-    return "<font color='red'>Unknown Error</font>";
+    return "<font color='red'>" + I18N("gt.test.unknownError") + "</font>";
   }
 
   const json = XML2jsobj(oDOM.documentElement);
@@ -387,7 +387,7 @@ function readLookupSession(buffer, sessionTag, keyTag, errorTag)
   if (!json.hasOwnProperty(sessionTag))
   {
     GT.qrzLookupSessionId = null;
-    return "<font color='red'>Invalid Response</font>";
+    return "<font color='red'>" + I18N("gt.test.invalidResponse") + "</font>";
   }
 
   const session = json[sessionTag];
@@ -863,23 +863,23 @@ function displayLookupObject(lookup, gridPass, fromCache = false)
   );
 
   const dates = joinIfBothWithDash(p("efdate"), p("expdate"));
-  addRowIf(detailsRows, "Effective Dates", dates);
+  addRowIf(detailsRows, I18N("gt.lookup.effectiveDates"), dates);
 
   const aliases = joinCommaIf(p("aliases"), p("p_call"));
   addRowIf(detailsRows, "Aliases", aliases, ` title='${lookupHtml(aliases)}'`);
 
   detailsRows.push(
-    makeRow("Polish OT", lookup, "plot"),
-    makeRow("German DOK", lookup, "dok"),
-    makeYesNoRow("DOK is Sonder-DOK", lookup, "sondok"),
+    makeRow(I18N("gt.lookup.polishOT"), lookup, "plot"),
+    makeRow(I18N("gt.lookup.germanDOK"), lookup, "dok"),
+    makeYesNoRow(I18N("gt.lookup.sonderDOK"), lookup, "sondok"),
     `<tr><td>DXCC</td><td>${lookupHtml(p("dxcc"))} - ${lookupHtml(GT.dxccToAltName[p("dxcc")] || "Unknown")}</td></tr>`,
-    makeRow("CQ zone", lookup, "cqzone"),
-    makeRow("ITU zone", lookup, "ituzone"),
+    makeRow(I18N("rosterColumns.Wanted.cqz"), lookup, "cqzone"),
+    makeRow(I18N("rosterColumns.Wanted.ituz"), lookup, "ituzone"),
     makeRow("IOTA", lookup, "iota"),
     makeRow("FIPS", lookup, "fips"),
     makeRow("FRN", lookup, "frn"),
     makeRow("Timezone", lookup, "TimeZone"),
-    makeRow("GMT Offset", lookup, "GMTOffset"),
+    makeRow(I18N("gt.lookup.gmtOffset"), lookup, "GMTOffset"),
     makeRow("County", lookup, "county"),
     makeRow("Latitude", lookup, "lat"),
     makeRow("Longitude", lookup, "lon")
@@ -918,9 +918,9 @@ function displayLookupObject(lookup, gridPass, fromCache = false)
     makeRow("Born", lookup, "born"),
     makeYesNoRow("LoTW", lookup, "lotw"),
     makeYesNoRow("eQSL", lookup, "eqsl"),
-    makeYesNoRow("Bureau QSL", lookup, "bqsl"),
-    makeYesNoRow("Mail Direct QSL", lookup, "mqsl"),
-    makeRow("QSL Via", lookup, "qsl_via"),
+    makeYesNoRow(I18N("gt.lookup.bureauQSL"), lookup, "bqsl"),
+    makeYesNoRow(I18N("gt.lookup.mailDirectQSL"), lookup, "mqsl"),
+    makeRow(I18N("gt.lookup.qslVia"), lookup, "qsl_via"),
     makeRow("QRZ Admin", lookup, "user"),
     makeRow("Prefix", lookup, "prefix"),
     lookup.source
@@ -929,13 +929,13 @@ function displayLookupObject(lookup, gridPass, fromCache = false)
   if (GT.settings.callsignLookups.lotwUseEnable == true && call in GT.lotwCallsigns)
   {
     detailsRows.push(
-      `<tr><td>LoTW Member</td><td>&#10004; (${userDayString(GT.lotwCallsigns[call] * 86400 * 1000)})</td></tr>`
+      `<tr><td>${I18N("gt.lookup.lotwMember")}</td><td>&#10004; (${userDayString(GT.lotwCallsigns[call] * 86400 * 1000)})</td></tr>`
     );
   }
 
   if (GT.settings.callsignLookups.eqslUseEnable == true && call in GT.eqslCallsigns)
   {
-    detailsRows.push("<tr><td>eQSL Member</td><td>&#10004;</td></tr>");
+    detailsRows.push("<tr><td>" + I18N("gt.lookup.eqslMember") + "</td><td>&#10004;</td></tr>");
   }
 
   if (GT.settings.callsignLookups.oqrsUseEnable == true && call in GT.oqrsCallsigns)
@@ -1236,7 +1236,7 @@ function searchLogForCallsign(call)
   }
   if (lastRow)
   {
-    html.push("<tr><th style='color:cyan'>Last QSO</th><td>");
+    html.push("<tr><th style='color:cyan'>" + I18N("gt.lookup.lastQSO") + "</th><td>");
     html.push("<font color='#" + GT.bandColors[list[lastRow].band] + "'>" + list[lastRow].band + "," + list[lastRow].mode + " </font> " + userTimeString(list[lastRow].time * 1000));
     html.push("</td></tr>");
   }

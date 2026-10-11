@@ -13,7 +13,7 @@ class RotateNorthControl extends ol.control.Control {
 
     const button = document.createElement('button');
     button.innerHTML = "<img src='img/north.png' style='width:1em'></img>";
-    button.title = "Reset Heading";
+    button.title = I18N("gt.map.resetHeading");
 
     const element = document.createElement('div');
     element.className = 'rotate-north ol-unselectable ol-control';
@@ -151,7 +151,7 @@ function initMap()
   const mapsData = requireJson("data/maps.json");
   if (!mapsData)
   {
-    alert("Internal Map Data file Corrupt, GridTracker2 will now crash");
+    alert(I18N("gt.map.dataCorrupt"));
     return;
   }
 

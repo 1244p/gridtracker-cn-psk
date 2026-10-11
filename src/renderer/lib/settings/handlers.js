@@ -13,14 +13,14 @@ function ignoreMessagesToggle()
     txrxdec.style.backgroundColor = "Green";
     txrxdec.style.borderColor = "GreenYellow";
     txrxdec.innerHTML = "RECEIVE";
-    txrxdec.title = "Click to ignore incoming messages";
+    txrxdec.title = I18N("gt.status.ignoreMessages.hover");
   }
   else
   {
     txrxdec.style.backgroundColor = "DimGray";
     txrxdec.style.borderColor = "DarkGray";
     txrxdec.innerHTML = "IGNORE";
-    txrxdec.title = "Click to resume reading messages";
+    txrxdec.title = I18N("gt.status.resumeMessages.hover");
   }
 }
 
@@ -29,7 +29,7 @@ function changeGridDecay()
   GT.settings.app.gridsquareDecayTime = parseInt(gridDecay.value);
   decayRateTd.innerHTML =
     Number(GT.settings.app.gridsquareDecayTime) == 0
-      ? "<I>No Decay</I>"
+      ? "<I>" + I18N("settings.grids.noDecay") + "</I>"
       : toDHMS(Number(GT.settings.app.gridsquareDecayTime));
 }
 

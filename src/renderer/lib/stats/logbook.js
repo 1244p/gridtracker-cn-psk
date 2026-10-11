@@ -334,7 +334,7 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
     const endIndex = Math.min(startIndex + perPage, ObjectCount);
 
     const workHead = `<b> Entries (${ObjectCount})</b>` + 
-      (GT.qsoPages > 1 ? `<br><font style='font-size:15px;' color='cyan' onClick='window.opener.renderLogbookView(${mySort}, -1);'>&#8678;&nbsp;</font> Page ${GT.qsoPage + 1} of ${GT.qsoPages} (${endIndex - startIndex}) <font style='font-size:16px;' color='cyan' onClick='window.opener.renderLogbookView(${mySort}, 1);'>&nbsp;&#8680;</font>` : "");
+      (GT.qsoPages > 1 ? `<br><font style='font-size:15px;' color='cyan' onClick='window.opener.renderLogbookView(${mySort}, -1);'>&#8678;&nbsp;</font> ${I18N("gt.logbook.page").replace("{0}", GT.qsoPage + 1).replace("{1}", GT.qsoPages)} (${endIndex - startIndex}) <font style='font-size:16px;' color='cyan' onClick='window.opener.renderLogbookView(${mySort}, 1);'>&nbsp;&#8680;</font>` : "");
 
     setStatsDiv("workedHeadDiv", workHead);
 
@@ -431,7 +431,7 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
 
       let newSelect = document.createElement("select");
       newSelect.id = "bandFilter";
-      newSelect.title = "Band Filter";
+      newSelect.title = I18N("gt.logbook.bandFilter");
 
       let option = document.createElement("option");
       option.value = "Mixed";
@@ -455,7 +455,7 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
 
       newSelect = document.createElement("select");
       newSelect.id = "modeFilter";
-      newSelect.title = "Mode Filter";
+      newSelect.title = I18N("gt.logbook.modeFilter");
 
       option = document.createElement("option");
       option.value = "Mixed";
@@ -486,7 +486,7 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
 
       newSelect = document.createElement("select");
       newSelect.id = "dxccFilter";
-      newSelect.title = "DXCC Filter";
+      newSelect.title = I18N("gt.logbook.dxccFilter");
 
       option = document.createElement("option");
       option.value = 0;
@@ -507,7 +507,7 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
 
       newSelect = document.createElement("select");
       newSelect.id = "qslFilter";
-      newSelect.title = "QSL Filter";
+      newSelect.title = I18N("gt.logbook.qslFilter");
 
       option = document.createElement("option");
       option.value = "All";

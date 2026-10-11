@@ -16,7 +16,7 @@ function timedGetVoices()
     GT.voices = window.speechSynthesis.getVoices();
     if (GT.voices.length > 0 &&  GT.speechAvailable == false)
     {
-      alertVoiceInput.title = "Select Voice";
+      alertVoiceInput.title = I18N("gt.audio.selectVoice");
       for (let i = 0; i < GT.voices.length; i++)
       {
         let option = document.createElement("option");
@@ -86,7 +86,7 @@ function gotAudioDevices(deviceInfos)
   soundCardDiv.innerHTML = "";
   let newSelect = document.createElement("select");
   newSelect.id = "soundCardInput";
-  newSelect.title = "Select Sound Card";
+  newSelect.title = I18N("gt.audio.selectSoundCard");
 
   let foundCards = {};
   for (let i = 0; i != deviceInfos.length; ++i)

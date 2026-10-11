@@ -282,7 +282,7 @@ function handleInstanceStatus(newMessage)
 
         html.push("<div  style='vertical-align:top;display:inline-block;margin-right:8px;'>");
         html.push("<table class='darkTable' align=center>");
-        html.push("<tr><th colspan=7>Last " + GT.lastMessages.length + " Decoded Messages</th></tr>");
+        html.push("<tr><th colspan=7>" + I18N("gt.print.lastDecoded").replace("{0}", GT.lastMessages.length) + "</th></tr>");
         html.push("<tr><th>Time</th><th>dB</th><th>DT</th><th>Freq</th><th>Mode</th><th>Message</th><th>DXCC</th></tr>");
 
         html.push(GT.lastMessages.join(""));
@@ -1430,7 +1430,7 @@ function setCallAndGrid(callsign, grid, instance = null, genMessages = true)
 
       responseArray = responseArray.slice(0, length);
       wsjtUdpMessage(responseArray, responseArray.length, port, address);
-      addLastTraffic("<font color='lightgreen'>Generated Msgs</font>");
+      addLastTraffic("<font color='lightgreen'>" + I18N("gt.msg.generated") + "</font>");
     }
     else
     {
@@ -1458,7 +1458,7 @@ function setCallAndGrid(callsign, grid, instance = null, genMessages = true)
   }
   if (thisInstance && thisInstance.TxEnabled == 1 && genMessages == true)
   {
-    addLastTraffic("<font color='yellow'>Transmit Enabled!</font><br><font color='yellow'>Generate Msgs Aborted</font>");
+    addLastTraffic("<font color='yellow'>" + I18N("gt.msg.txEnabled") + "</font><br><font color='yellow'>" + I18N("gt.msg.generateAborted") + "</font>");
   }
 }
 
@@ -1874,7 +1874,7 @@ function updateBasedOnIni()
       if (which.N1MMServer == GT.settings.N1MM.ip && which.N1MMServerPort == GT.settings.N1MM.port)
       {
         buttonN1MMCheckBox.checked = GT.settings.N1MM.enable = false;
-        alert(which.appName + " N1MM Logger+ is enabled in WSJT-X with same settings, disabled GridTracker N1MM logger");
+        alert(I18N("gt.msg.n1mmConflict").replace("{0}", which.appName));
       }
     }
 

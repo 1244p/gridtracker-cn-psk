@@ -35,16 +35,16 @@ function aimRotator(info)
       sendUdpMessage(payload, payload.length, parseInt(GT.settings.pstrotator.port), GT.settings.pstrotator.ip);
       if (callObj.DEcall)
       {
-        addLastTraffic(`<font style='color:white'>Aiming rotator at ${callObj.DEcall}</font>`);
+        addLastTraffic(`<font style='color:white'>${I18N("gt.rotator.aimAt").replace("{0}", callObj.DEcall)}</font>`);
       }
       else
       {
-        addLastTraffic(`<font style='color:white'>Aiming rotator to ${callObj.heading}&deg;</font>`);
+        addLastTraffic(`<font style='color:white'>${I18N("gt.rotator.aimTo").replace("{0}", callObj.heading)}</font>`);
       }
     }
     catch (e)
     {
-      addLastTraffic("<font style='color:red'>UDP aimRotator failed</font>");
+      addLastTraffic("<font style='color:red'>" + I18N("gt.rotator.udpFailed") + "</font>");
     }
   }
 }

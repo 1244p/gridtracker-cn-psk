@@ -91,7 +91,7 @@
         <div class="mapItem"  align="center" id="clearRosterOnBandChangeDiv">
           <table>
             <tr align="center">
-              <td>Clear Roster on Band change</td>
+              <td data-i18n="roster.settings.clearOnBand.label">Clear Roster on Band change</td>
             </tr>
             <tr align="center">
               <td colspan="1">
@@ -103,7 +103,7 @@
         <div class="mapItem"  align="center">
           <table>
             <tr align="center">
-              <td>Decode Delay On Focus</td>
+              <td data-i18n="roster.settings.delayOnFocus.label">Decode Delay On Focus</td>
             </tr>
             <tr align="center"></tr>
               <td  align="center" colspan="1">
@@ -128,14 +128,14 @@
           <div class="button" style="margin: 5px; font:larger; padding:5px;" onclick="resetRosterColumns()" data-i18n="roster.settings.resetColumns">Reset Columns To Default</div>
         </div>
         <div class="mapItem" id="compactEnityDiv">
-          Compact Mode Entity<br />
+          <span data-i18n="roster.settings.compactEntity.label">Compact Mode Entity</span><br />
           <select id="compactEntitySelect" onchange="compactEntityChanged()"></select>
         </div>
         </div>
         <div class="mapItem">
           <table align="center">
             <tr align="center">
-              <td align="center">Window Filters</td>
+              <td align="center" data-i18n="roster.settings.windowFilters.label">Window Filters</td>
             </tr>
             <tr align="center">
               <td align="center">
@@ -223,7 +223,7 @@
                 <div class="mapItem">
                   <table align="center">
                     <tr align="center">
-                      <td align="center">Hue Rotate</td>
+                      <td align="center" data-i18n="roster.settings.hueRotate.label">Hue Rotate</td>
                     </tr>
                     <tr align="center">
                       <td align="center" id="filterhuerotateTd"></td>
@@ -241,7 +241,7 @@
             <tr>
               <td>
                 <div class="mapItem">
-                  <div class="button" style="margin: 10px;padding:3px;" onclick="resetFilters()" title="Reset Filters">Reset Filters
+                  <div class="button" style="margin: 10px;padding:3px;" onclick="resetFilters()" data-i18n="roster.settings.resetFilters.label" title="Reset Filters">Reset Filters
                     (Ctrl-L)</div>
                 </div>
               </td>
@@ -374,7 +374,7 @@
           <span id="maxLoTWView" class="roundBorderValue" style="width: 35px;">3</span>
           <p>
           <input
-            title="Max time since their last upload"
+            data-i18n="roster.secondary.exceptions.maxLoTW.hover" title="Max time since their last upload"
             type="range"
             min="3"
             max="27"
@@ -397,8 +397,8 @@
             <option value="DEDXCC" id="ignoreDeDxccOption" data-i18n="rosterColumns.DEDXCC.header">DE DXCC</option>
             <option value="DECont" id="ignoreDeContOption" data-i18n="rosterColumns.DECont.header">DE Cont</option>
             <option value="Grid">Grid</option>
-            <option value="CQz">CQ Zone</option>
-            <option value="ITUz">ITU Zone</option>
+            <option value="CQz" data-i18n="rosterColumns.Wanted.cqz">CQ Zone</option>
+            <option value="ITUz" data-i18n="rosterColumns.Wanted.ituz">ITU Zone</option>
             <option value="Spotter" id="ignoreSpotterOption" data-i18n="roster.ignores.spotters">Spotter</option>
           </select>
           <input id="ignoreCallsignValue" type="text" class="inputTextValue" size="10" style="text-transform: uppercase;" />

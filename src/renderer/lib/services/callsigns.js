@@ -454,7 +454,7 @@ function processCtyDatVer(buffer) {
   } catch (e) {
     GT.downloadingCtyDat = false;
     if (window.bigctyUpdatedTd) {
-      bigctyUpdatedTd.innerHTML = "Version check";
+      bigctyUpdatedTd.innerHTML = I18N("gt.bigcty.versionCheck");
       bigctyDetailsTd.innerHTML = "Error!";
     }
     console.error(e);
@@ -496,14 +496,14 @@ function processCtyDat(buffer) {
         }
       } else {
         if (window.bigctyUpdatedTd) {
-          bigctyUpdatedTd.innerHTML = "Invalid data";
+          bigctyUpdatedTd.innerHTML = I18N("gt.bigcty.invalidData");
           bigctyDetailsTd.innerHTML = "Corrupt!";
         }
       }
     }
   } catch (e) {
     if (window.bigctyUpdatedTd) {
-      bigctyUpdatedTd.innerHTML = "Failed to parse";
+      bigctyUpdatedTd.innerHTML = I18N("gt.bigcty.parseFailed");
       bigctyDetailsTd.innerHTML = "Error!";
     }
     console.error(e);

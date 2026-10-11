@@ -438,6 +438,7 @@ Logging:
 #### App
 
 - All new text translated for every supported language
+- About 230 more tooltips, labels and status messages are now translated (main window buttons and settings, Call Roster settings, logging and test results, Lookup details); GridTracker feature names such as Call Roster stay in English
 - Fixed the Democratic Republic of the Congo (DRC) and Republic of the Congo flags being swapped
 - Fixed the Band Activity popout window not opening on macOS
 

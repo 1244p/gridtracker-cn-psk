@@ -393,7 +393,7 @@ function handleKpIndexJSON(json)
 function captureScreenshot()
 {
   electron.ipcRenderer.send("capturePageToClipboard", "GridTracker2");
-  addLastTraffic("<font style='color:lightgreen;'>Screenshot Captured</font>");
+  addLastTraffic("<font style='color:lightgreen;'>" + I18N("gt.ui.screenshotCaptured") + "</font>");
   playAlertMediaFile("Camera Click 1.mp3");
 }
 

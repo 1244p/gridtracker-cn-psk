@@ -1679,7 +1679,7 @@ function renderIgnoresTab()
   
   if (Object.keys(CR.ignoredCalls).length > 0)
   {
-    clearString = "<th style='cursor:pointer;' onclick='clearAllCallsignIgnores()'>Clear All</th>";
+    clearString = "<th style='cursor:pointer;' onclick='clearAllCallsignIgnores()'>" + I18N("roster.ignores.clearAll") + "</th>";
     html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>Callsigns</th>${clearString}</tr>`);
     Object.keys(CR.ignoredCalls).sort().forEach(function (key)
     {
@@ -1690,7 +1690,7 @@ function renderIgnoresTab()
 
   if (!isFeedRoster() && Object.keys(CR.ignoredCQ).length > 0)
   {
-    clearString = "<th style='cursor:pointer;' onclick='clearAllCQIgnores()'>Clear All</th>";
+    clearString = "<th style='cursor:pointer;' onclick='clearAllCQIgnores()'>" + I18N("roster.ignores.clearAll") + "</th>";
     html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>CQ</th>${clearString}</tr>`);
     Object.keys(CR.ignoredCQ).sort().forEach(function (rawKey)
     {
@@ -1704,7 +1704,7 @@ function renderIgnoresTab()
 
   if (Object.keys(CR.ignoredDxcc).length > 0)
   {
-    clearString = "<th style='cursor:pointer;' onclick='clearAllDxccIgnores()'>Clear All</th>";
+    clearString = "<th style='cursor:pointer;' onclick='clearAllDxccIgnores()'>" + I18N("roster.ignores.clearAll") + "</th>";
     html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${isFeedRoster() ? I18N("rosterColumns.DXCC.feedHeader") : "DXCC"}</th>${clearString}</tr>`);
     Object.keys(CR.ignoredDxcc).sort().forEach(function (key)
     {
@@ -1715,7 +1715,7 @@ function renderIgnoresTab()
 
   if (isFeedRoster() && Object.keys(CR.ignoredDeDxcc).length > 0)
   {
-    clearString = "<th style='cursor:pointer;' onclick='clearAllDeDxccIgnores()'>Clear All</th>";
+    clearString = "<th style='cursor:pointer;' onclick='clearAllDeDxccIgnores()'>" + I18N("roster.ignores.clearAll") + "</th>";
     html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${I18N("rosterColumns.DEDXCC.header")}</th>${clearString}</tr>`);
     Object.keys(CR.ignoredDeDxcc).sort().forEach(function (key)
     {
@@ -1726,7 +1726,7 @@ function renderIgnoresTab()
 
   if (isFeedRoster() && Object.keys(CR.ignoredDeCont).length > 0)
   {
-    clearString = "<th style='cursor:pointer;' onclick='clearAllDeContIgnores()'>Clear All</th>";
+    clearString = "<th style='cursor:pointer;' onclick='clearAllDeContIgnores()'>" + I18N("roster.ignores.clearAll") + "</th>";
     html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${I18N("rosterColumns.DECont.header")}</th>${clearString}</tr>`);
     Object.keys(CR.ignoredDeCont).sort().forEach(function (key)
     {
@@ -1737,7 +1737,7 @@ function renderIgnoresTab()
 
   if (Object.keys(CR.ignoredGrid).length > 0)
   {
-    clearString = "<th style='cursor:pointer;' onclick='clearAllGridIgnores()'>Clear All</th>";
+    clearString = "<th style='cursor:pointer;' onclick='clearAllGridIgnores()'>" + I18N("roster.ignores.clearAll") + "</th>";
     html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>Grid</th>${clearString}</tr>`);
     Object.keys(CR.ignoredGrid).sort().forEach(function (key)
     {
@@ -1748,8 +1748,8 @@ function renderIgnoresTab()
 
   if (Object.keys(CR.ignoredCQz).length > 0)
   {
-    clearString = "<th style='cursor:pointer;' onclick='clearAllCQzIgnores()'>Clear All</th>";
-    html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>CQ Zones</th>${clearString}</tr>`);
+    clearString = "<th style='cursor:pointer;' onclick='clearAllCQzIgnores()'>" + I18N("roster.ignores.clearAll") + "</th>";
+    html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${I18N("gt.viewInfo.cqZones")}</th>${clearString}</tr>`);
     Object.keys(CR.ignoredCQz).sort().forEach(function (key)
     {
       html.push(`<tr><td align='left' style='color:cyan;'>${key}</td><td style='cursor:pointer;' onclick='deleteCQzIgnore("${key}")'><img src='img/trash_24x48.png' style='height:17px;margin:-1px;margin-bottom:-3px;padding:0px'></td></tr>`);
@@ -1759,8 +1759,8 @@ function renderIgnoresTab()
 
   if (Object.keys(CR.ignoredITUz).length > 0)
   {
-    clearString = "<th style='cursor:pointer;' onclick='clearAllITUzIgnores()'>Clear All</th>";
-    html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>ITU Zones</th>${clearString}</tr>`);
+    clearString = "<th style='cursor:pointer;' onclick='clearAllITUzIgnores()'>" + I18N("roster.ignores.clearAll") + "</th>";
+    html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${I18N("gt.awardNames.ITU")}</th>${clearString}</tr>`);
     Object.keys(CR.ignoredITUz).sort().forEach(function (key)
     {
       html.push(`<tr><td align='left' style='color:cyan;'>${key}</td><td style='cursor:pointer;' onclick='deleteITUzIgnore("${key}")'><img src='img/trash_24x48.png' style='height:17px;margin:-1px;margin-bottom:-3px;padding:0px'></td></tr>`);
@@ -1770,7 +1770,7 @@ function renderIgnoresTab()
 
   if (isFeedRoster() && Object.keys(CR.ignoredSpotters).length > 0)
   {
-    clearString = "<th style='cursor:pointer;' onclick='clearAllSpotterIgnores()'>Clear All</th>";
+    clearString = "<th style='cursor:pointer;' onclick='clearAllSpotterIgnores()'>" + I18N("roster.ignores.clearAll") + "</th>";
     html.push(`<div class='ignoresTables'><table class='darkTable' align='center'><tr><th align='left'>${I18N("roster.ignores.spotters")}</th>${clearString}</tr>`);
     Object.keys(CR.ignoredSpotters).sort().forEach(function (key)
     {
@@ -3740,8 +3740,8 @@ CR.watcherColumns = {
   type: { text: "Type", sort: true, cmp: stringCompare },
   regex: { text: "Regex", sort: true, cmp: boolCompare },
   text: { text: "Text", sort: true, cmp: stringCompare },
-  startTime: { text: "Start Date", sort: true, cmp: numberCompare },
-  endTime: { text: "End Date", sort: true, cmp: numberCompare },
+  startTime: { text: I18N("roster.watcher.startDate"), sort: true, cmp: numberCompare },
+  endTime: { text: I18N("roster.watcher.endDate"), sort: true, cmp: numberCompare },
   edit: { text: "Edit", sort: false },
   delete: { text: "Delete", sort: false }
 };
@@ -4042,13 +4042,13 @@ function createRestOfMenus()
 
   CR.CQMenu.append(new MenuItem({
     type: "normal",
-    label: "Ignore CQ from DXCC",
+    label: I18N("roster.menu.IgnoreCQFromDXCC"),
     click: function () { ignoreCQ(CR.callRoster[CR.targetCQ].DXcall, CR.callRoster[CR.targetCQ].callObj.dxcc); }
   }));
 
   CR.CQMenu.append(new MenuItem({
     type: "normal",
-    label: "Ignore CQ from All",
+    label: I18N("roster.menu.IgnoreCQFromAll"),
     click: function () { ignoreCQ(CR.callRoster[CR.targetCQ].DXcall, -1); }
   }));
 
@@ -4143,7 +4143,7 @@ function createRestOfMenus()
 
   CR.GridMenu.append(new MenuItem({
     type: "normal",
-    label: "Ignore Grid",
+    label: I18N("roster.menu.IgnoreGrid"),
     click: function () { ignoreGrid(CR.callRoster[CR.targetHash].callObj.grid); }
   }));
 

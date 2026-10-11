@@ -1164,7 +1164,7 @@ function renderStatsBox()
   }
   catch (e)
   {
-    html.push(`<br> In Section: ${scoreSection}<br>${I18N("gt.scorecardError")}`);
+    html.push(`<br> ${I18N("gt.stats.inSection")} ${scoreSection}<br>${I18N("gt.scorecardError")}`);
   }
 
   setStatsDiv("statViewDiv", html.join(""));

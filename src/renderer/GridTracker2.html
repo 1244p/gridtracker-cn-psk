@@ -243,7 +243,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <table align="center">
           <tr>
             <td colspan="2">
-              <div id="appTitle" class="button" title="Click to hide menu" style="
+              <div id="appTitle" class="button" data-i18n="map.hideMenu.hover" title="Click to hide menu" style="
                     color: #fff;
                     margin: 0;
                     padding: 0;
@@ -261,32 +261,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           </tr>
           <tr>
             <td>
-              <div id="frequency" title="Frequency (Band)" style="font-weight: bold">0.000.000 Hz (?)</div>
+              <div id="frequency" data-i18n="gt.status.frequency.hover" title="Frequency (Band)" style="font-weight: bold">0.000.000 Hz (?)</div>
             </td>
             <td>
               <div id="wsjtxMode" title="Mode"></div>
             </td>
           </tr>
         </table>
-        <div id="currentTime" style="cursor: pointer" title="Toggle Local / UTC Time" onclick="toggleTime();"></div>
+        <div id="currentTime" style="cursor: pointer" data-i18n="gt.status.time.hover" title="Toggle Local / UTC Time" onclick="toggleTime();"></div>
 
         <table align="center" style="border-collapse: collapse; margin-bottom: 2px">
           <tr id="dxCallBoxDiv" class="DXCallBox">
             <td>
-              <div id="localDXcall" style="cursor: pointer" title="Who you're calling or last called"
+              <div id="localDXcall" style="cursor: pointer" data-i18n="gt.status.dxCall.hover" title="Who you're calling or last called"
                 onclick="startLookup(GT.localDXcall,localDXGrid.innerHTML);"
                 oncontextmenu="renderLogbookByCall(GT.localDXcall, event);">
                 -
               </div>
             </td>
             <td>
-              <div id="localDXGrid" style="cursor: pointer" title="Their Gridsquare"
+              <div id="localDXGrid" style="cursor: pointer" data-i18n="gt.status.dxGrid.hover" title="Their Gridsquare"
                 onclick="centerOn(localDXGrid.innerHTML);">
                 -
               </div>
             </td>
             <td>
-              <div id="localDXReport" title="Last known SNR">&nbsp;</div>
+              <div id="localDXReport" data-i18n="gt.status.dxReport.hover" title="Last known SNR">&nbsp;</div>
             </td>
           </tr>
           <tr>
@@ -328,7 +328,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div style="display: inline-block; cursor: pointer; right: 0px" onClick="rigChange(true);">&nbsp;▶</div>
       </div>
       <div id="operatingMode" style="margin: 0; margin-bottom: 1px; cursor: pointer" onclick="ignoreMessagesToggle()"
-        title="Click to ignore incoming messages">
+        data-i18n="gt.status.ignoreMessages.hover" title="Click to ignore incoming messages">
         <div data-i18n="sidebarNoMessages" id="txrxdec" style="background-color: Green; border-style: outset; border-color: yellow; border-width: 3px"
           class="roundBorder">
           waiting for message
@@ -358,7 +358,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               Rx Calls
             </td>
             <td align="center"><div style="cursor: pointer" onclick="openInfoTab('calbox', 'callsignBoxDiv', showCallsignBox)"
-              title="Callsigns Heard" class="roundBorderValue" align="center">
+              data-i18n="quickStats.CallRX.hover" title="Callsigns Heard" class="roundBorderValue" align="center">
               <div id="callsignCount">0</div>
               </div>
             </td>
@@ -368,7 +368,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               QSO
             </td>
             <td align="center"><div style="cursor: pointer" class="roundBorderValue"  
-              onclick="resetSearch(); openInfoTab('qsobox', 'workedBoxDiv', renderLogbookView);" title="Worked Stations">
+              onclick="resetSearch(); openInfoTab('qsobox', 'workedBoxDiv', renderLogbookView);" data-i18n="quickStats.QSO.hover" title="Worked Stations">
               <div id="qsoCount">0</div>
               </div>
             </td>
@@ -379,7 +379,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               Rx DXCC
             </td>
             <td><div style="cursor: pointer" class="roundBorderValue"
-              onclick="openInfoTab('calbox', 'callsignBoxDiv', showCallsignBox);" title="DXCC Heard" align="center">
+              onclick="openInfoTab('calbox', 'callsignBoxDiv', showCallsignBox);" data-i18n="quickStats.DXCCRx.hover" title="DXCC Heard" align="center">
               <div id="countryCount">0</div>
               </div>
             </td>
@@ -390,14 +390,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </td>
             <td><div style="cursor: pointer" class="roundBorderValue" 
               onclick="resetSearch(); GT.filterQSL='true'; openInfoTab('qsobox', 'workedBoxDiv', renderLogbookView)"
-              title="Show Confirmed List" align="center">
+              data-i18n="quickStats.QSL.hover" title="Show Confirmed List" align="center">
               <div id="qslCount">0</div>
             </div></td>
           </tr>
           <tr id="rowsFilteredTr">
             <td colspan=4><div style="cursor: pointer; background-color: #000; color: orange;" class="roundBorderValue" 
               onclick="openLogbookSettings()"
-              title="ADIF Log records have been filtered based on your settings" align="center">
+              data-i18n="gt.status.logFiltered.label" title="ADIF Log records have been filtered based on your settings" align="center">
               Log Entries Filtered
               </div>
             </td>
@@ -425,7 +425,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         >
         <div>
           <div data-i18n="mapFilter.title.label" style="display:inline-block;font-weight:bold;" onclick="checkMapViewFiltersMaximize()">Map View Filters</div>
-          <div style="float:right;margin-top:1px;margin-right:1px;cursor: pointer;" onclick="toggleMapViewFiltersCollapse()"><img id="mapViewFiltersCollapseImg" class="roundBorder" src="img/minimize.png" height="12" title="Hide Controls" /></div>
+          <div style="float:right;margin-top:1px;margin-right:1px;cursor: pointer;" onclick="toggleMapViewFiltersCollapse()"><img id="mapViewFiltersCollapseImg" class="roundBorder" src="img/minimize.png" height="12" data-i18n="mapFilter.hide.hover" title="Hide Controls" /></div>
         </div>
         <table align="center" id="mapViewFiltersTable">
           <tr data-i18n="mapFilter.band.hover" title="Select Band&#10;(Auto tracks WSJT-X)">
@@ -539,49 +539,49 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </table>
       </div>
       <div id="buttonsDiv" style="margin-top:1px;margin-left: 1px; display:grid;gap:0px;grid-template-columns: 1fr 1fr 1fr 1fr 1fr;grid-template-rows: auto;">
-        <div id="homeButton" class="iconButton" onclick="setCenterQTH();" title="Re-center map">
+        <div id="homeButton" class="iconButton" onclick="setCenterQTH();" data-i18n="gt.button.home.hover" title="Re-center map">
           <img id="homeImg" src="img/home.png" class="buttonImg" />
         </div>
         <div id="projectionButton" class="iconButton" onclick="changeMapProjection();" title="Toggle AEQD" data-i18n="buttons.AEQD.hover" >
           <img id="projectionImg" src="img/aeqd.png" class="buttonImg" />
         </div>
-        <div id="callRosterButton" class="iconButton" onclick="openCallRosterWindow();" oncontextmenu="openCallRosterWindow(false);" title="Open Call Roster">
+        <div id="callRosterButton" class="iconButton" onclick="openCallRosterWindow();" oncontextmenu="openCallRosterWindow(false);" data-i18n="gt.button.callRoster.hover" title="Open Call Roster">
           <img src="img/roster-icon.png" class="buttonImg" />
         </div>
-        <div id="pushPinButton" onclick="togglePushPinMode();" class="iconButton" title="Toggle Push-Pin Mode">
+        <div id="pushPinButton" onclick="togglePushPinMode();" class="iconButton" data-i18n="gt.button.pushPin.hover" title="Toggle Push-Pin Mode">
           <img id="pinImg" src="" class="buttonImg" />
         </div>
-        <div id="gridModeDiv" onclick="toggleGridMode()" class="iconButton" title="Toggle Maidenhead Width">
+        <div id="gridModeDiv" onclick="toggleGridMode()" class="iconButton" data-i18n="gt.button.gridMode.hover" title="Toggle Maidenhead Width">
           <img id="modeImg" src="" class="buttonImg" />
         </div>
-        <div id="statsDiv" onclick="showRootInfoBox();" oncontextmenu="showRootInfoBox(false);" class="iconButton" title="Show Stats">
+        <div id="statsDiv" onclick="showRootInfoBox();" oncontextmenu="showRootInfoBox(false);" class="iconButton" data-i18n="gt.button.stats.hover" title="Show Stats">
           <img src="img/stats-button.png" class="buttonImg" />
         </div>
-        <div id="Grayline" onclick="toggleEarth()" class="iconButton" title="Toggle Grayline">
+        <div id="Grayline" onclick="toggleEarth()" class="iconButton" data-i18n="gt.button.grayline.hover" title="Toggle Grayline">
           <img id="graylineImg" src="" class="buttonImg" />
         </div>
-        <div id="lunaButton" onclick="toggleMoon();" class="iconButton" title="Toggle Moon">
+        <div id="lunaButton" onclick="toggleMoon();" class="iconButton" data-i18n="gt.button.moon.hover" title="Toggle Moon">
           <img id="lunaButonImg" src="img/luna.png" class="buttonImg" />
         </div>
-        <div id="helpButton" onclick="toggleHelp();" class="iconButton" title="Toggle Hotkey List">
+        <div id="helpButton" onclick="toggleHelp();" class="iconButton" data-i18n="gt.button.help.hover" title="Toggle Hotkey List">
           <img src="img/help.png" class="buttonImg" />
         </div>
-        <div id="alterMuteDiv" onclick="toggleAlertMute()" class="iconButton" title="Toggle Audio Mute">
+        <div id="alterMuteDiv" onclick="toggleAlertMute()" class="iconButton" data-i18n="gt.button.mute.hover" title="Toggle Audio Mute">
           <img id="alertMuteImg" src="" class="buttonImg" />
         </div>
         <div id="settingsButton" onclick="showSettingsBox();" class="iconButton" title="Settings">
           <img src="img/settings-button.png" class="buttonImg" />
         </div>
-        <div id="adifLoadDiv" onclick="adifLoadDialog()" class="iconButton" title="Load ADIF Log">
+        <div id="adifLoadDiv" onclick="adifLoadDialog()" class="iconButton" data-i18n="gt.button.adifLoad.hover" title="Load ADIF Log">
           <img src="img/adif.png" class="buttonImg" />
         </div>
-        <div id="buttonAdifCheckBoxDiv" onclick="startupAdifLoadFunction()" class="iconButton" title="Reload Local ADIF Files">
+        <div id="buttonAdifCheckBoxDiv" onclick="startupAdifLoadFunction()" class="iconButton" data-i18n="gt.button.adifReload.hover" title="Reload Local ADIF Files">
           <img src="img/Log_Button_Local.png" class="buttonImg" />
         </div>
-        <div id="timezoneButton" onclick="toggleTimezones()" class="iconButton" title="Toggle Timezone Layer">
+        <div id="timezoneButton" onclick="toggleTimezones()" class="iconButton" data-i18n="gt.button.timezone.hover" title="Toggle Timezone Layer">
           <img id="timezoneImg" src="img/timezone-button.png" class="buttonImg" />
         </div>
-        <div id="gridOverlayButton" onclick="toggleAllGrids()" class="iconButton" title="Toggle All Grid Overlay">
+        <div id="gridOverlayButton" onclick="toggleAllGrids()" class="iconButton" data-i18n="gt.button.gridOverlay.hover" title="Toggle All Grid Overlay">
             <img id="gridOverlayImg" src="img/grid-overlay.png" class="buttonImg" />
         </div>
         <div id="equatorButton"  onclick="changeEquatorEnable()" class="iconButton" title="Toggle Major Parallels and Meridians" data-i18n="settings.map.equator.enable.hover">
@@ -590,40 +590,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div id="rangeRingsButton"  onclick="changeRangeRingsEnable()" class="iconButton" title="Toggle Range Rings" data-i18n="settings.map.RangeRings.enable.hover">
           <img id="rangeRingsImg" src="img/range-rings.png" class="buttonImg" />
         </div>
-        <div id="radarButton" onclick="toggleRadar()" class="iconButton" title="Toggle US Radar">
+        <div id="radarButton" onclick="toggleRadar()" class="iconButton" data-i18n="gt.button.radar.hover" title="Toggle US Radar">
           <img id="radarImg" src="img/radar-button.png" class="buttonImg" />
         </div>
-        <div id="predButton" onclick="cyclePredLayer()" class="iconButton" title="Cycle Prediction Layer">
+        <div id="predButton" onclick="cyclePredLayer()" class="iconButton" data-i18n="gt.button.pred.hover" title="Cycle Prediction Layer">
           <img id="predImg" src="img/no-pred.png" class="buttonImg" />
         </div>
-        <div id="conditionsButton" onclick="showConditionsWindow();" oncontextmenu="showConditionsWindow(false);" class="iconButton" title="View Current Conditions">
+        <div id="conditionsButton" onclick="showConditionsWindow();" oncontextmenu="showConditionsWindow(false);" class="iconButton" data-i18n="gt.button.conditions.hover" title="View Current Conditions">
           <img src="img/conditions.png" class="buttonImg" />
         </div>
-        <div id="buttonSpotsBoxDiv" onclick="cycleSpotsView()" class="iconButton" title="View Spot Reports">
+        <div id="buttonSpotsBoxDiv" onclick="cycleSpotsView()" class="iconButton" data-i18n="gt.button.spots.hover" title="View Spot Reports">
           <img id="spotsButtonImg" src="img/spots.png" class="buttonImg" />
         </div>
-        <div id="lookupButton" onclick="toggleLookupWindow()" oncontextmenu="toggleLookupWindow(false)" class="iconButton" title="Open Lookup Window">
+        <div id="lookupButton" onclick="toggleLookupWindow()" oncontextmenu="toggleLookupWindow(false)" class="iconButton" data-i18n="gt.button.lookup.hover" title="Open Lookup Window">
           <img src="img/lookup.png" class="buttonImg" />
         </div>
-        <div id="buttonPsk24CheckBoxDiv" onclick="grabPsk24()" class="iconButton" title="Your PSK 24hour report">
+        <div id="buttonPsk24CheckBoxDiv" onclick="grabPsk24()" class="iconButton" data-i18n="gt.button.psk24.hover" title="Your PSK 24hour report">
           <img id="pskImg" src="img/psk_24_32.png" class="buttonImg" />
         </div>
-        <div id="buttonQRZCheckBoxDiv" onclick="if ( ValidateQrzApi(qrzApiKey ) ) grabQrzComLog()" class="iconButton" title="Download log from QRZ.com">
+        <div id="buttonQRZCheckBoxDiv" onclick="if ( ValidateQrzApi(qrzApiKey ) ) grabQrzComLog()" class="iconButton" data-i18n="gt.button.qrz.hover" title="Download log from QRZ.com">
             <img id="qrzLogImg" src="img/Log_Button_QRZ.png" class="buttonImg" />
         </div>
-        <div id="buttonLOTWCheckBoxDiv" onclick="if ( ValidateText(lotwLogin) && ValidateText(lotwPassword) ) {  grabLOtWLog(false); } " class="iconButton" title="Download log from Logbook of the World">
+        <div id="buttonLOTWCheckBoxDiv" onclick="if ( ValidateText(lotwLogin) && ValidateText(lotwPassword) ) {  grabLOtWLog(false); } " class="iconButton" data-i18n="gt.button.lotw.hover" title="Download log from Logbook of the World">
             <img id="lotwLogImg" src="img/Log_Button_LoTW.png" class="buttonImg" />
         </div>
-        <div id="buttonClubCheckBoxDiv" onclick="if ( ValidateText(clubEmail) && ValidateText(clubPassword) ) { grabClubLog(); }" class="iconButton" title="Download log from ClubLog">
+        <div id="buttonClubCheckBoxDiv" onclick="if ( ValidateText(clubEmail) && ValidateText(clubPassword) ) { grabClubLog(); }" class="iconButton" data-i18n="gt.button.clublog.hover" title="Download log from ClubLog">
             <img id="ClubLogImg" src="img/Log_Button_Club.png" class="buttonImg" />
         </div>
-        <div id="buttonAcLogCheckBoxDiv" onclick="grabAcLog()" class="iconButton" title="Download log from N3FJP Logger">
+        <div id="buttonAcLogCheckBoxDiv" onclick="grabAcLog()" class="iconButton" data-i18n="gt.button.n3fjp.hover" title="Download log from N3FJP Logger">
           <img id="AcLogImg" src="img/Log_Button_N3FJP.png" class="buttonImg" />
       </div>
         <div id="potaButton" onClick="togglePotaMap();" class="iconButton" title="Parks On The Air">
           <img id="potaImg" src="img/pota.png" class="buttonImg" />
         </div>
-        <div id="gtFlagButton" onclick="toggleGtMap();" class="iconButton" title="Toggle View GridTracker Spotters">
+        <div id="gtFlagButton" onclick="toggleGtMap();" class="iconButton" data-i18n="gt.button.gtFlag.hover" title="Toggle View GridTracker Spotters">
           <img id="gtFlagImg" src="" class="buttonImg" />
         </div>
         <div id="dxcwFeedButton" onclick="toggleDxcwFeed();" class="iconButton" style="display:none;" title="Toggle DX Feeds" data-i18n="settings.map.dxcwFeed.hover">
@@ -799,7 +799,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <td data-i18n="settings.general.UDP.Messages.label"><b>Receive UDP Messages</b></td>
             </tr>
             <tr>
-              <td id="lastMsgTimeDiv">No messages yet.</td>
+              <td id="lastMsgTimeDiv"><span data-i18n="settings.general.UDP.noMessages">No messages yet.</span></td>
             </tr>
             <tr>
               <td><div id="secondsAgoMsg" class="roundBorderValue">Never</div></td>
@@ -807,7 +807,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <tr>
               <td>
                 <label data-i18n="settings.general.UDP.Multicast.label" for="multicastEnable">Multicast?</label>
-                <input title="Enable / Disable Local Network Multicast" type="checkbox" id="multicastEnable"
+                <input data-i18n="settings.general.UDP.MulticastEnable.hover" title="Enable / Disable Local Network Multicast" type="checkbox" id="multicastEnable"
                   onclick="setMulticastEnable(this);" />
               </td>
             </tr>
@@ -858,7 +858,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <tr>
               <td>
                 <label data-i18n="settings.general.Enabled.label" for="udpForwardEnable">Enabled?</label>
-                <input title="Enable / Disable UDP Message forwarding" type="checkbox" id="udpForwardEnable"
+                <input data-i18n="settings.general.Fwd.Enable.hover" title="Enable / Disable UDP Message forwarding" type="checkbox" id="udpForwardEnable"
                   onclick="setUdpForwardEnable(this);" />
               </td>
             </tr>
@@ -877,7 +877,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <tr>
               <td>
                 <label data-i18n="settings.general.UDP.Multicast.label" for="adifBroadcastMulticast">Multicast?</label>
-                <input title="Enable / Disable Multicast" type="checkbox" id="adifBroadcastMulticast"
+                <input data-i18n="settings.general.ADIF.Multicast.hover" title="Enable / Disable Multicast" type="checkbox" id="adifBroadcastMulticast"
                   onclick="setAdifBroadcastMulticast(this);" />
               </td>
             </tr>
@@ -900,7 +900,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <tr>
               <td>
                 <label data-i18n="settings.general.Enabled.label" for="adifBroadcastEnable">Enabled?</label>
-                <input title="Enable / Disable ADIF UDP Broadcast Logging" type="checkbox" id="adifBroadcastEnable"
+                <input data-i18n="settings.general.ADIF.Enable.hover" title="Enable / Disable ADIF UDP Broadcast Logging" type="checkbox" id="adifBroadcastEnable"
                   onclick="setAdifBroadcastEnable(this);" />
               </td>
             </tr>
@@ -996,7 +996,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <div class="mapItem">
         <table align="center">
           <tr>
-            <td title="Window Theme">Window Theme</td>
+            <td data-i18n="settings.general.WindowTheme.label" title="Window Theme">Window Theme</td>
           </tr>
           <tr>
             <td>
@@ -1091,7 +1091,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <tr>
               <td>
                 <label data-i18n="settings.general.ClearSettingSure.label" for="imSureCheck">Yes, I'm sure!</label>
-                <input type="checkbox" id="imSureCheck" title="Must be checked to enable clearing of settings" />
+                <input type="checkbox" id="imSureCheck" data-i18n="settings.general.ClearSettingSure.check.hover" title="Must be checked to enable clearing of settings" />
               </td>
             </tr>
           </table>
@@ -1137,7 +1137,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <th colspan="6" style="font-weight: bold; color: yellow">WSJT-X</th>
             </tr>
             <tr>
-              <td>Clear on CQ</td>
+              <td data-i18n="settings.features.ClearOnCQ.label">Clear on CQ</td>
               <td>
                 <input type="checkbox" id="clearOnCQ" onclick="changeClearOnCQ();" />
               </td>
@@ -1191,13 +1191,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <tr id="simplepushMsgEnableTr">
             <td data-i18n="settings.OAMS.simplepush.enable.label" for="msgSimplepush" >Simplepush</td>
             <td>
-              <input title="Toggle Simplepush" type="checkbox" id="msgSimplepush" onclick="setOamsSimplepush(this);" />
+              <input data-i18n="settings.OAMS.simplepush.enable.hover" title="Toggle Simplepush" type="checkbox" id="msgSimplepush" onclick="setOamsSimplepush(this);" />
             </td>
           </tr>
           <tr id="pushoverMsgEnableTr">
             <td data-i18n="settings.OAMS.pushover.enable.label" for="msgPushover">Pushover</td>
             <td>
-              <input title="Toggle Pushover" type="checkbox" id="msgPushover" onclick="setOamsPushover(this);" />
+              <input data-i18n="settings.OAMS.pushover.enable.hover" title="Toggle Pushover" type="checkbox" id="msgPushover" onclick="setOamsPushover(this);" />
             </td>
           </tr>
           <tr id="offAirServicesTr">
@@ -1209,7 +1209,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <tr id="spottingEnableTr">
             <td data-i18n="settings.spotting.enable.label" for="spottingEnable">Spotting</td>
             <td>
-              <input title="Enable / Disable Spotting" type="checkbox" id="spottingEnable" onclick="setSpottingEnable(); redrawSpots();" />
+              <input data-i18n="settings.spotting.toggle.hover" title="Enable / Disable Spotting" type="checkbox" id="spottingEnable" onclick="setSpottingEnable(); redrawSpots();" />
             </td>
           </tr>
           <tr id="spotMergeTr">
@@ -1247,7 +1247,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               </tr>
               <tr>
                 <td>
-                  <input title="SimplePush API Key to forward messages to your phone" type="text" id="msgSimplepushApiKey"
+                  <input data-i18n="settings.OAMS.simplepush.apitoken.hover" title="SimplePush API Key to forward messages to your phone" type="text" id="msgSimplepushApiKey"
                     class="inputTextValue" maxlength="255" size="16"
                     oninput="ValidateText(this); newMessageSetting(this);" />
                 </td>
@@ -1310,7 +1310,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <tr>
                 <td>
                   <label data-i18n="settings.OAMS.pushover.userkey.label" for="msgPushoverUserKey">User Key</label>
-                  <input title="Pushover User Key to forward messages to your phone" type="text" id="msgPushoverUserKey"
+                  <input data-i18n="settings.OAMS.pushover.userkey.input.hover" title="Pushover User Key to forward messages to your phone" type="text" id="msgPushoverUserKey"
                          class="inputTextValue" maxlength="255" size="16"
                          oninput="ValidateText(this); newMessageSetting(this);" />
                 </td>
@@ -1318,7 +1318,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <tr>
                 <td>
                   <label data-i18n="settings.OAMS.pushover.token.label" for="msgPushoverToken">API Token</label>
-                  <input title="Pushover API Token to forward messages to your phone" type="text" id="msgPushoverToken"
+                  <input data-i18n="settings.OAMS.pushover.token.input.hover" title="Pushover API Token to forward messages to your phone" type="text" id="msgPushoverToken"
                          class="inputTextValue" maxlength="255" size="16"
                          oninput="ValidateText(this); newMessageSetting(this);" />
                 </td>
@@ -1406,25 +1406,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           </tr>
           <tr>
             <td data-i18n="settings.lookup.AddData.label">Add Lookup Data to QSO Log Event</td>
-            <td title="When finsihing a QSO...&#10;add extra data from Lookup service">
+            <td data-i18n="settings.lookup.AddData.hover" title="When finishing a QSO ...&#10;add extra data from Lookup service">
               <input type="checkbox" id="lookupMerge" onclick="changeLookupMerge(this)" />
             </td>
           </tr>
           <tr id="lookupMissingGridTr" disabled="true">
             <td data-i18n="settings.lookup.AddGrid.label">Add Lookup Grid if QSO Grid missing</td>
-            <td title="Add Lookup Grid if QSO Grid Missing">
+            <td data-i18n="settings.lookup.AddGrid.hover" title="Add Lookup Grid if QSO Grid Missing">
               <input type="checkbox" id="lookupMissingGrid" onclick="changeLookupMerge(this)" />
             </td>
           </tr>
           <tr>
             <td data-i18n="settings.lookup.OpenOnTx.label">Open Lookup On Transmit</td>
-            <td title="Open Lookup Window On Transmit">
+            <td data-i18n="settings.lookup.OpenOnTx.hover" title="Open Lookup Window On Transmit">
               <input type="checkbox" id="lookupOnTx" onclick="changelookupOnTx()" />
             </td>
           </tr>
           <tr>
             <td data-i18n="settings.lookup.CloseOnLog.label">Close Lookup After Logging</td>
-            <td title="Close Lookup Window After Logging">
+            <td data-i18n="settings.lookup.CloseOnLog.hover" title="Close Lookup Window After Logging">
               <input type="checkbox" id="lookupCloseLog" onclick="changelookupOnTx()" />
             </td>
           </tr>
@@ -1456,7 +1456,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <td id="ulsCountTd">0</td>
           </tr>
           <tr>
-            <td>Canada Callsigns</td>
+            <td data-i18n="settings.callsigns.canada.label">Canada Callsigns</td>
             <td>
               <input type="checkbox" id="cacUseEnable" onclick="cacValuesChanged();" />
             </td>
@@ -1555,7 +1555,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <tr>
             <td data-i18n="settings.audio.Speech.Phonetics.label"
               title="Speak Callsigns and Gridsquares phonetically">Phonetics</td>
-            <td title="Speak Callsigns and Gridsquares phonetically">
+            <td data-i18n="settings.audio.Speech.Phonetics.hover" title="Speak Callsigns and Gridsquares phonetically">
               <input type="checkbox" id="speechPhonetics" onclick="changeSpeechValues()" />
             </td>
           </tr>
@@ -1567,7 +1567,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <div  style="padding: 5px" class="mapItem">
         <table align="center">
           <tr>
-            <td>QSL Location Authority</td>
+            <td data-i18n="settings.logbook.qslAuthority.label">QSL Location Authority</td>
           </tr>
           <tr>
             <td>
@@ -1578,7 +1578,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <option value="C">Clublog</option>
                 <option value="A">N3FJP</option>
                 <option value="O">Other</option>
-                <option value="0">Last Loaded</option>
+                <option value="0" data-i18n="settings.logbook.qslAuthority.lastLoaded">Last Loaded</option>
                 <option value="1">None</option>
               </select>
             </td>
@@ -1588,7 +1588,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <div class="mapItem" style="padding: 5px">
         <table align="center">
           <tr>
-            <td align="center">Logbook Items Per Page</td>
+            <td align="center" data-i18n="settings.logbook.itemsPerPage.label">Logbook Items Per Page</td>
           </tr>
           <tr>
             <td align="center" id="qsoItemsPerPageTd">100</td>
@@ -1604,7 +1604,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <br />
       <div style="padding: 5px" class="mapItem">
         <div style="padding: 5px" class="mapItem"
-          title="Filter Logbook QSOs to include these Callsigns only&#10;(comma separated)">
+          data-i18n="settings.logbook.callsigns.hover" title="Filter Logbook QSOs to include these Callsigns only&#10;(comma separated)">
           <table align="center" id="qsoCallsignsFound">
             <tr>
               <td data-i18n="settings.logbook.callsigns.label">Working Callsign(s)</td>
@@ -1612,7 +1612,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <tr>
               <td id="workingCallsignEnableTd" >
                 <label data-i18n="settings.logbook.callsigns.enable" for="workingCallsignEnable">Enable?</label>
-                <input title="Enable Filtering" type="checkbox" id="workingCallsignEnable"
+                <input data-i18n="settings.logbook.enableFiltering.hover" title="Enable Filtering" type="checkbox" id="workingCallsignEnable"
                   onclick="workingCallsignEnableChanged(this);" />
               </td>
             </tr>
@@ -1627,21 +1627,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           </table>
         </div>
         <div style="padding: 5px" class="mapItem"
-        title="Filter Logbook QSOs to include these Grids only&#10;(comma separated)">
+        data-i18n="settings.logbook.grids.hover" title="Filter Logbook QSOs to include these Grids only&#10;(comma separated)">
         <table align="center" id="qsoGridsFound">
           <tr>
-            <td>Working Grid(s)</td>
+            <td data-i18n="settings.logbook.grids.label">Working Grid(s)</td>
           </tr>
           <tr>
             <td id="workingGridEnableTd">
-              <label for="workingGridEnable">Enable?</label>
-              <input title="Enable Filtering" type="checkbox" id="workingGridEnable"
+              <label data-i18n="settings.logbook.callsigns.enable" for="workingGridEnable">Enable?</label>
+              <input data-i18n="settings.logbook.enableFiltering.hover" title="Enable Filtering" type="checkbox" id="workingGridEnable"
                 onclick="workingGridEnableChanged(this);" />
             </td>
           </tr>
           <tr>
             <td id="workingGridsTd">
-              <label  for="workingGridsValue">Grid(s)</label>
+              <label data-i18n="settings.logbook.grids.grids" for="workingGridsValue">Grid(s)</label>
               <input id="workingGridsValue" type="text" class="inputTextValue" size="15"
                 onkeypress="return validGridKeys(event.charCode);"
                 oninput="workingGridsChanged(this);" />
@@ -1650,7 +1650,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </table>
       </div>
         <br />
-        <div style="padding: 5px" class="mapItem" title="Filter Logbook QSOs from before this Date">
+        <div style="padding: 5px" class="mapItem" data-i18n="settings.logbook.date.hover" title="Filter Logbook QSOs from before this Date">
           <table align="center">
             <tr>
               <td data-i18n="settings.logbook.date.label"><b>Working Date</b></td>
@@ -1658,7 +1658,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <tr>
               <td id="workingDateEnableTd">
                 <label data-i18n="settings.logbook.date.enable" for="workingDateEnable">Enable?</label>
-                <input title="Enable Filtering" type="checkbox" id="workingDateEnable"
+                <input data-i18n="settings.logbook.enableFiltering.hover" title="Enable Filtering" type="checkbox" id="workingDateEnable"
                   onclick="workingDateEnableChanged(this);" />
               </td>
             </tr>
@@ -1666,13 +1666,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <td>
                 <div class="roundBorderValue" style="margin-bottom:5px; width: auto; font-size: larger; font-weight: bold"
                  id="workingDateString">
-                  No Date
+                  <span data-i18n="settings.logbook.date.none">No Date</span>
                 </div>
               </td>
               <td></td>
             </tr>
             <tr>
-              <td id="workingDateTd" title="Date/Time is UTC">
+              <td id="workingDateTd" data-i18n="settings.logbook.date.utc.hover" title="Date/Time is UTC">
                 <label data-i18n="settings.logbook.date.date" for="workingDateValue">UTC</label> <input type="datetime-local" id="workingDateValue" value="1970-01-01T00:00" style="background-color: green; color: yellow;" onchange="workingDateChanged()" />
               </td>
             </tr>
@@ -1709,7 +1709,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <td data-i18n="settings.grids.splitQSL.label" align="center">Split QSL Grids</td>
           </tr>
           <tr align="center">
-            <td title="Toggle Split QSL Grids with Live Grids">
+            <td data-i18n="settings.grids.splitQSL.hover" title="Toggle Split QSL Grids with Live Grids">
               <input type="checkbox" id="splitQSLValue" onclick="changeSplitQSL()" />
             </td>
           </tr>
@@ -1721,7 +1721,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <td data-i18n="settings.grids.AutoMouseOver.label" align="center">Auto Mouseover Grids</td>
           </tr>
           <tr align="center">
-            <td title="Toggle Auto Mouseover Grid Tables">
+            <td data-i18n="settings.grids.AutoMouseOver.hover" title="Toggle Auto Mouseover Grid Tables">
               <input type="checkbox" id="mouseOverValue" onclick="changeMouseOverValue()" />
             </td>
           </tr>
@@ -1747,7 +1747,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <div class="mapItem">
         <table align="center">
           <tr>
-            <td align="center">'All Grid Overlay' Opacity</td>
+            <td align="center" data-i18n="settings.grids.allGridOpacity.label">'All Grid Overlay' Opacity</td>
             <td align="left" id="allGridOpacityTd">100%</td>
           </tr>
           <tr align="center">
@@ -1766,7 +1766,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <td data-i18n="settings.grids.reset.title" align="center"><b><i>Gridsquare Colors</i></b>
             </tr>
             <tr align="center">
-              <td title="Reset Gridsquare Colors To Default">
+              <td data-i18n="settings.grids.reset.hover" title="Reset Gridsquare Colors To Default">
                 <div data-i18n="settings.grids.reset.label" class="button" onclick="resetGridsquareColors()">Reset Colors
                 </div>
               </td>
@@ -1942,7 +1942,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div class="flexItem">
           <label data-i18n="settings.map.animatePaths.label" for="animateValue">Animate Active Paths</label>
           <input type="checkbox" id="animateValue" onclick="changeAnimate()" />
-          <input title="Animation Speed" type="range" min="1" max="20" value="10" step="1" class="slider" id="animateSpeedValue" oninput="changeAnimateSpeedValue()" />
+          <input data-i18n="settings.map.animateSpeed.hover" title="Animation Speed" type="range" min="1" max="20" value="10" step="1" class="slider" id="animateSpeedValue" oninput="changeAnimateSpeedValue()" />
         </div>
         <div class="flexItem">
           <label data-i18n="settings.map.GraylineDarkness.label">Grayline Darkness</label>
@@ -1966,7 +1966,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <input type="checkbox" id="qrzDxccFallbackValue" onclick="changeQrzDxccFallbackValue();" />
         </div>
         <div class="flexItem">
-          <label>Prediction Layer Opacity</label>
+          <label data-i18n="settings.map.predOpacity.label">Prediction Layer Opacity</label>
           <input type="range" min="0.05" max="1" value="0.3" step="0.01" class="slider" id="predOpacityValue" oninput="changePredOpacityValue();" />
           <label id="predOpacityTd">0.3</label>
         </div>
@@ -2059,7 +2059,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <th data-i18n="settings.logging.tableheader.result">Result</th>
           </tr>
           <tr>
-            <td>App Log(s)</td>
+            <td data-i18n="settings.logging.appLogs.label">App Log(s)</td>
             <td></td>
             <td></td>
             <td>
@@ -2245,7 +2245,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <br />
               <label data-i18n="settings.logging.CloudLog.details.StationProfile" for="CloudlogStationProfileID">Station Profile</label>
               <select id="CloudlogStationProfileID" onchange="CloudLogProfileChanged(this)">
-                <option value="1" selected="true">Press Test</option>
+                <option value="1" selected="true" data-i18n="settings.logging.Cloudlog.pressTest">Press Test</option>
               </select>
             </td>
             <td>
@@ -2308,7 +2308,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <div style="display: inline-block">
                 <div data-i18n="settings.logging.LoTW.details.TQSLPath" class="flexButton" style="display: inline-block" id="selectTQSLButton">TQSL Path
                 </div>
-                <div id="tqslFileDiv" style="display: inline-block; margin:3px;" class="roundBorderValue">No file selected</div>
+                <div id="tqslFileDiv" style="display: inline-block; margin:3px;" class="roundBorderValue"><span data-i18n="settings.logging.tqsl.noFile">No file selected</span></div>
               </div><br>
                 <label data-i18n="settings.logging.LoTW.details.TQSLPass" for="lotwTrusted">TQSL Password</label>
                 <input id="lotwTrusted" type="password" class="inputTextValue" size="8"
@@ -2421,7 +2421,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 onkeypress='return validNumberKeys(event.charCode);'
                 oninput="ValidatePort(this,acLogCheckbox, null ); acLogLoggerChanged(); " />
               <span id="acLogQslSpan">
-                <label for="acLogQsl">QSL By</label>
+                <label data-i18n="settings.logging.N3FJP.qslBy" for="acLogQsl">QSL By</label>
                 <select id="acLogQsl" onchange="acLogLoggerChanged();">
                   <option value="A">Any</option>
                   <option value="C">Card</option>
@@ -2496,8 +2496,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <th>Entity</th>
                 <th>Count</th>
                 <th>Type</th>
-                <th>On Single</th>
-                <th>On Multiple</th>
+                <th data-i18n="settings.alerts.AudioAlert.onSingle">On Single</th>
+                <th data-i18n="settings.alerts.AudioAlert.onMultiple">On Multiple</th>
               </tr>
               <tr>
                 <td>
@@ -2514,8 +2514,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <th>Entity</th>
                 <th>Count</th>
                 <th>Type</th>
-                <th>On Single</th>
-                <th>On Multiple</th>
+                <th data-i18n="settings.alerts.AudioAlert.onSingle">On Single</th>
+                <th data-i18n="settings.alerts.AudioAlert.onMultiple">On Multiple</th>
               </tr>
               <tr>
                 <td>
@@ -2701,7 +2701,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <div class="columns">
               <div>
                 <input type="checkbox" id="everyDecode" onchange="alertRulesValueChanged(this);" />
-                <label  for="everyDecode">Every Decode</label>
+                <label data-i18n="settings.alerts.rules.everyDecode" for="everyDecode">Every Decode</label>
               </div>
             </div>
           </div>      
@@ -2774,9 +2774,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <div style="font-size:small; font-weight: bolder;" id="updateVersionText"></div>
         </h2>
         <p>
-          GridTracker2 is a warehouse of amateur radio information presented in an easy to use interface<br />
+          <span data-i18n="settings.about.blurb">GridTracker2 is a warehouse of amateur radio information presented in an easy to use interface</span><br />
           <br>
-          Learn more at
+          <span data-i18n="settings.about.learnMore">Learn more at</span>
           <a href="https://gridtracker.org" target="_blank" style="cursor: pointer; font-weight: bold; color:cyan;">GridTracker.org!</a>
         </p>
         <p>Copyright &copy; 2026 Stephen Loomis, NØTTL, Henry Forte, N2VFL, Matthew Chambers, NRØQ<br>
