@@ -116,6 +116,38 @@ function loadAllSettings()
     GT.settings.roster.columnOrder.splice(indexOfOAMS, 1);
   }
 
+  if (GT.settings.feedRoster)
+  {
+    const feedRoster = GT.settings.feedRoster;
+
+    // CW is kept in step between Settings -> Feeds and the Feed Roster's Spots -> Modes (syncFeedRosterCW): settings
+    // from before that, with CW off in either place, have it off in both
+    if (feedRoster.feeds && feedRoster.feeds.modes && (GT.settings.app.feedCW === false || feedRoster.feeds.modes.CW === false))
+    {
+      GT.settings.app.feedCW = false;
+      feedRoster.feeds.modes.CW = false;
+    }
+
+    // DE DXCC and DE Cont columns became "DEDXCCv2" / "DEContv2" when they changed to shown by default: the old
+    // on/off choice is dropped (the new key takes the default), and each keeps its place in the saved column order
+    for (const [oldKey, newKey, after] of [["DEDXCC", "DEDXCCv2", "DXCC"], ["DECont", "DEContv2", "Cont"]])
+    {
+      if (feedRoster.columns) delete feedRoster.columns[oldKey];
+      if (feedRoster.sortColumn === oldKey) feedRoster.sortColumn = newKey;
+      if (Array.isArray(feedRoster.columnOrder) && !feedRoster.columnOrder.includes(newKey))
+      {
+        const indexOfOld = feedRoster.columnOrder.indexOf(oldKey);
+        if (indexOfOld > -1) feedRoster.columnOrder[indexOfOld] = newKey;
+        else
+        {
+          const indexOfAfter = feedRoster.columnOrder.indexOf(after);
+          if (indexOfAfter > -1) feedRoster.columnOrder.splice(indexOfAfter + 1, 0, newKey);
+          else feedRoster.columnOrder.push(newKey);
+        }
+      }
+    }
+  }
+
   // Deprecated single app log path
   if (GT.settings.app.wsjtLogPath)
   {

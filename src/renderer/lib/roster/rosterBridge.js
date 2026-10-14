@@ -189,6 +189,12 @@ function defaultRosterColumns(rosterName)
   return { columns: { ...def.columns }, columnOrder: def.columnOrder.slice() };
 }
 
+// Roster window "Reset Colors": a fresh copy of one roster's default column colors
+function defaultRosterColors(rosterName)
+{
+  return { ...def_rosterColors[rosterName] };
+}
+
 function setRosterSpot(enabled)
 {
   GT.rosterSpot = enabled;

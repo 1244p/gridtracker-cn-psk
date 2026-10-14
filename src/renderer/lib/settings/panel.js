@@ -100,6 +100,16 @@ function openAudioAlertSettings(rosterName = null)
   electron.ipcRenderer.send("showWin", "GridTracker2")
 }
 
+// From the roster window's Settings -> Colors: clicking the Band or Mode swatch
+function openColorSettings()
+{
+  openSettingsTab(colorsSettingsButton, 'bandColorsSettingsDiv');
+  helpDiv.style.display = "none";
+  GT.helpShow = false;
+  rootSettingsDiv.style.display = "inline-flex";
+  electron.ipcRenderer.send("showWin", "GridTracker2")
+}
+
 function openSettingsTab(evt, tabName)
 {
   // Declare all variables

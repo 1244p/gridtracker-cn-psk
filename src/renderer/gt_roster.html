@@ -46,7 +46,7 @@
           General
         </button>
         <button data-i18n="roster.feeds.label" id="feedsbox" class="infoTablinks" style="display:none;" onclick="openInfoTab(event, 'feedsBoxDiv', renderFeedsTab)">
-          Feeds
+          Spots
         </button>
         <button data-i18n="roster.watcher.label" id="watcherbox" class="infoTablinks" onclick="openInfoTab(event, 'watcherBoxDiv', openWatchersTab);">
           Watcher
@@ -56,6 +56,9 @@
         </button>
         <button data-i18n="roster.ignores.label" id="ingoresbox" class="infoTablinks" onclick="openInfoTab(event, 'ignoresBoxDiv', renderIgnoresTab)">
           Ignores
+        </button>
+        <button data-i18n="roster.columns.tab.label" id="colorsbox" class="infoTablinks" onclick="openInfoTab(event, 'colorsBoxDiv', renderColorsTab)">
+          Columns
         </button>
       </div>
       <div id="generalSettingsDiv" class="infoTabcontent">
@@ -123,9 +126,6 @@
         </div>
         <div class="mapItem">
           <div class="button" style="margin: 5px; font:larger; padding:5px;" id="compactModeDiv" onclick="compactModeChanged()">Compact Mode</div>
-        </div>
-        <div class="mapItem" id="resetRosterColumnsDiv">
-          <div class="button" style="margin: 5px; font:larger; padding:5px;" onclick="resetRosterColumns()" data-i18n="roster.settings.resetColumns">Reset Columns To Default</div>
         </div>
         <div class="mapItem" id="compactEnityDiv">
           <span data-i18n="roster.settings.compactEntity.label">Compact Mode Entity</span><br />
@@ -455,6 +455,18 @@
           </table>
         </div>
       </div>
+      <!-- Column colors of the roster showing; each roster keeps its own (renderColorsTab in rosterWindow.js) -->
+      <div id="colorsBoxDiv" class="infoTabcontent">
+        <div class="mapItem" align="center">
+          <div data-i18n="roster.colors.title.label">Edit Columns</div>
+          <div id="rosterColorsDiv" class="bandColorsGrid rosterColorsGrid"></div>
+          <br />
+          <div class="rosterColorsButtons">
+            <div data-i18n="roster.colors.reset.label" class="button" title="Reset this roster's column colors to default" onclick="resetRosterColors()">Reset Colors</div>
+            <div id="resetRosterColumnsDiv" class="button" onclick="resetRosterColumns()" data-i18n="roster.settings.resetColumns">Reset Column Order</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="MainCallRoster" style="display:block;">
       <div id="rosterTabs" style="display:none;">
@@ -636,7 +648,15 @@
               </div>
               <div id="hideSelfSpotsDiv">
                 <input type="checkbox" id="hideSelfSpots" onchange="huntingValueChanged(this);" />
-                <label data-i18n="roster.secondary.exceptions.hideSelfSpots" for="hideSelfSpots">Hide Self-Spotters</label>
+                <label data-i18n="roster.secondary.exceptions.hideSelfSpots" for="hideSelfSpots">Hide Self-Spot</label>
+              </div>
+              <div id="autoBandDiv">
+                <input type="checkbox" id="autoBand" onchange="huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.autoBand.label" for="autoBand">Auto Band</label>
+              </div>
+              <div id="autoModeDiv">
+                <input type="checkbox" id="autoMode" onchange="huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.autoMode.label" for="autoMode">Auto Mode</label>
               </div>
 
              <div id="onlySpotDiv">

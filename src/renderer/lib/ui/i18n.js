@@ -77,6 +77,20 @@ function setI18nText(element, key)
   }
 }
 
+// Logbook reference options that say "Live" (the rig's band / mode): the Feed Roster says "Spots" (the spot's)
+const LOGBOOK_LIVE_OPTION_KEYS = { 0: "liveBandMode", 1: "liveBandMixMode", 2: "liveBandDigiMode", 3: "mixBandLiveMode" };
+const LOGBOOK_SPOTS_OPTION_KEYS = { 0: "spotsBandMode", 1: "spotsBandMixMode", 2: "spotsBandDigiMode", 3: "mixBandSpotsMode" };
+
+function setLogbookOptionLabels(select, feed)
+{
+  const keys = feed ? LOGBOOK_SPOTS_OPTION_KEYS : LOGBOOK_LIVE_OPTION_KEYS;
+  for (const value in keys)
+  {
+    const option = select.querySelector(`option[value="${value}"]`);
+    if (option) setI18nText(option, "roster.controls.logbook." + keys[value]);
+  }
+}
+
 function changeLocale()
 {
   GT.settings.app.locale = languageLocale.value;

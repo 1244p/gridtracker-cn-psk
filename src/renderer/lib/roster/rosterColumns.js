@@ -1,11 +1,24 @@
 const DEFAULT_COLUMN_ORDER = [
   "Callsign", "Band", "Mode", "Calling", "Spotter", "CQ", "Rig", "Wanted", "Grid", "Msg",
-  "POTA", "DXCC", "DEDXCC", "Flag", "DXM", "State", "County", "Cont", "DECont",
+  "POTA", "DXCC", "DEDXCCv2", "Flag", "DXM", "State", "County", "Cont", "DEContv2",
   "dB", "Freq", "DT", "Dist", "Azim",
   "CQz", "ITUz", "PX",
   "LoTW", "eQSL", "OQRS",
   "Life", "Spot",  "Age", "UTC"
 ]
+
+// Column colors (6-digit hex, no "#") are in each roster's own settings, CR.rosterSettings.colors, defaulting to
+// k_callRosterColumnColors / k_feedRosterColumnColors in defaults.js and edited in Settings -> Colors. Saved colors end up in HTML style attributes,
+// so only plain 6-digit hex is used; anything else falls back to the default
+const ROSTER_COLOR_REGEXP = /^[0-9A-Fa-f]{6}$/;
+
+// "#RRGGBB" for this roster's column
+function rosterColor(column)
+{
+  const saved = CR.rosterSettings.colors && CR.rosterSettings.colors[column];
+  if (typeof saved === "string" && ROSTER_COLOR_REGEXP.test(saved)) return "#" + saved;
+  return "#" + (window.opener.defaultRosterColors(CR.profile.name)[column] || "EEEEEE");
+}
 
 // Feed Roster: ▲ before the callsign when a rig on the spot's band and mode can work it
 function markWorkableFeed(callObj, html)
@@ -84,6 +97,7 @@ const ROSTER_COLUMNS = {
   Rig: {
     compare: callObjSimpleComparer("instance"),
     tableData: (callObj) => ({
+      style: `color: ${rosterColor("Rig")};`,
       html: callObj.instance
     })
   },
@@ -130,7 +144,7 @@ const ROSTER_COLUMNS = {
   CQ: {
     compare: callObjSimpleComparer("CQ"),
     tableData: (callObj) => ({
-      style: "color: #0F0;",
+      style: `color: ${rosterColor("CQ")};`,
       align: "center",
       html: callObj.CQ ? "&#10004;" : "&nbsp;"
     })
@@ -143,7 +157,7 @@ const ROSTER_COLUMNS = {
     tableHeader: () => ({ html: I18N("rosterColumns.Spotter.header"), title: I18N("rosterColumns.Spotter.title") }),
     tableData: (callObj) => ({
       name: "Spotter",
-      style: "color: #5caeff;",
+      style: `color: ${rosterColor("Spotter")};`,
       html: callObj.spotter ? formatCallsign(callObj.spotterHTML || callObj.spotter) : "&nbsp;"
     })
   },
@@ -152,7 +166,13 @@ const ROSTER_COLUMNS = {
     compare: callObjLocaleComparer("DXcall"),
     tableData: (callObj) => ({
       name: "Msg",
-      html: callObj.msgHTML || htmlEntities(callObj.msg)
+      // Shortened on screen only (a long feed spot comment ends in "…"), the whole message on hover; Watcher
+      // matches inside it keep their own highlight
+      class: "msgCol",
+      title: callObj.msg,
+      style: `color: ${rosterColor("Msg")};`,
+      // The width limit is on this wrapper: a table cell's max-width is only a hint to the table layout
+      html: `<div class="msgCut">${callObj.msgHTML || htmlEntities(callObj.msg)}</div>`
     })
   },
 
@@ -171,8 +191,9 @@ const ROSTER_COLUMNS = {
     })
   },
 
-  // Feed Roster: DXCC entity of the station that reported the spot
-  DEDXCC: {
+  // Feed Roster: DXCC entity of the station that reported the spot. The key has "v2" because its default changed to
+  // shown: saved settings for the old "DEDXCC" key are dropped at startup (GridTracker2.js)
+  DEDXCCv2: {
     label: () => I18N("rosterColumns.DEDXCC.header"),
     compare: getterSimpleComparer((elem) => elem.callObj.spotterDxcc > 0 ? GT.dxccToAltName[elem.callObj.spotterDxcc] : null),
     tableHeader: () => ({ html: I18N("rosterColumns.DEDXCC.header"), title: I18N("rosterColumns.DEDXCC.title") }),
@@ -180,7 +201,7 @@ const ROSTER_COLUMNS = {
       title: callObj.spotterDxcc > 0 ? GT.dxccInfo[callObj.spotterDxcc].pp : "",
       name: "DEDXCC",
       // Like DX DXCC: click centers the map on the spotter's entity and dazzles it (not in compact mode)
-      style: (CR.rosterSettings.compact || !(callObj.spotterDxcc > 0)) ? "color: #5caeff;" : "color: #5caeff; cursor: pointer;",
+      style: `color: ${rosterColor("DEDXCCv2")};` + ((CR.rosterSettings.compact || !(callObj.spotterDxcc > 0)) ? "" : " cursor: pointer;"),
       onClick: (CR.rosterSettings.compact || !(callObj.spotterDxcc > 0)) ? null : `centerOnDxcc(${callObj.spotterDxcc})`,
       html: callObj.spotterDxcc > 0 ? GT.dxccToAltName[callObj.spotterDxcc] : "&nbsp;"
     })
@@ -247,8 +268,8 @@ const ROSTER_COLUMNS = {
     })
   },
 
-  // Feed Roster: continent of the station that reported the spot
-  DECont: {
+  // Feed Roster: continent of the station that reported the spot ("v2": see DEDXCCv2)
+  DEContv2: {
     label: () => I18N("rosterColumns.DECont.header"),
     compare: callObjSimpleComparer("spotterCont"),
     tableHeader: () => ({ html: I18N("rosterColumns.DECont.header"), title: I18N("rosterColumns.DECont.title") }),
@@ -256,7 +277,7 @@ const ROSTER_COLUMNS = {
       align: "center",
       // Right-click: Ignore DE Cont
       name: "DECont",
-      style: "color: #5caeff;",
+      style: `color: ${rosterColor("DEContv2")};`,
       html: callObj.spotterCont || "&nbsp;"
     })
   },
@@ -264,7 +285,7 @@ const ROSTER_COLUMNS = {
   dB: {
     compare: callObjSimpleComparer("RSTsent"),
     tableData: (callObj) => ({
-      style: "color:#CCC;",
+      style: `color: ${rosterColor("dB")};`,
       html: `<b>${callObj.RSTsent}</b>`
     })
   },
@@ -272,7 +293,7 @@ const ROSTER_COLUMNS = {
   Freq: {
     compare: callObjSimpleComparer("delta"),
     tableData: (callObj) => ({
-      style: "color: #00FF00;",
+      style: `color: ${rosterColor("Freq")};`,
       html: callObj.instance === GT.feedInstance ? (callObj.freq > 0 ? formatMhz(callObj.freq / 1000) : "&nbsp;") : callObj.delta
     })
   },
@@ -280,7 +301,7 @@ const ROSTER_COLUMNS = {
   DT: {
     compare: callObjSimpleComparer("dt"),
     tableData: (callObj) => ({
-      style: "color: #5caeff;",
+      style: `color: ${rosterColor("DT")};`,
       html: callObj.instance === GT.feedInstance ? "&nbsp;" : callObj.dt
     })
   },
@@ -289,7 +310,7 @@ const ROSTER_COLUMNS = {
     compare: callObjSimpleComparer("distance"),
     tableHeader: () => ({ html: `Dist (${window.opener.distanceUnit.value.toLowerCase()})` }),
     tableData: (callObj) => ({
-      style: "color: cyan;",
+      style: `color: ${rosterColor("Dist")};`,
       html: (callObj.distance > 0 ? Math.round(callObj.distance * MyCircle.validateRadius(window.opener.distanceUnit.value)) : "&nbsp;")
     })
   },
@@ -297,7 +318,7 @@ const ROSTER_COLUMNS = {
   Azim: {
     compare: callObjSimpleComparer("heading"),
     tableData: (callObj) => ({
-      style: "color: yellow;",
+      style: `color: ${rosterColor("Azim")};`,
       html: (callObj.distance > 0 ? Math.round(callObj.heading) : "&nbsp;")
     })
   },
@@ -349,7 +370,7 @@ const ROSTER_COLUMNS = {
           else
           {
             return {
-              style: "color: #0F0;",
+              style: `color: ${rosterColor("LoTW")};`,
               align: "center",
               title: `${I18N("rosterColumns.LoTW.LastUpdate")}${
                 window.opener.userDayString(GT.lotwCallsigns[callObj.DEcall] * 86400000)
@@ -361,7 +382,7 @@ const ROSTER_COLUMNS = {
         else
         {
           return {
-            style: "color: #0F0;",
+            style: `color: ${rosterColor("LoTW")};`,
             align: "center",
             title: `${I18N("rosterColumns.LoTW.LastUpdate")}${
               window.opener.userDayString(GT.lotwCallsigns[callObj.DEcall] * 86400000)
@@ -382,7 +403,7 @@ const ROSTER_COLUMNS = {
   eQSL: {
     compare: false,
     tableData: (callObj) => ({
-      style: "color: #0F0;",
+      style: `color: ${rosterColor("eQSL")};`,
       align: "center",
       html: (callObj.DEcall in GT.eqslCallsigns ? "&#10004;" : "&nbsp;")
     })
@@ -391,7 +412,7 @@ const ROSTER_COLUMNS = {
   OQRS: {
     compare: false,
     tableData: (callObj) => ({
-      style: "color: #0F0;",
+      style: `color: ${rosterColor("OQRS")};`,
       align: "center",
       html: (callObj.DEcall in GT.oqrsCallsigns ? "&#10004;" : "&nbsp;")
     })
@@ -400,7 +421,7 @@ const ROSTER_COLUMNS = {
   Life: {
     compare: callObjSimpleComparer("life"),
     tableData: (callObj) => ({
-      style: "color: #EEE;",
+      style: `color: ${rosterColor("Life")};`,
       class: "lifeCol",
       id: `lm${callObj.hash}`,
       html: toDHMS(timeNowSec() - callObj.life)
@@ -410,7 +431,7 @@ const ROSTER_COLUMNS = {
   UTC: {
     compare: callObjSimpleComparer("age"),
     tableData: (callObj) => ({
-      style: "color: #EEE;",
+      style: `color: ${rosterColor("UTC")};`,
       html: (callObj.even ? "<font style='text-decoration: underline'>" : "") + callObj.UTC + (callObj.even ? "</font>" : "")
     })
   },
@@ -418,7 +439,7 @@ const ROSTER_COLUMNS = {
   Age: {
     compare: callObjSimpleComparer("age"),
     tableData: (callObj) => ({
-      style: "color: #EEE;",
+      style: `color: ${rosterColor("Age")};`,
       class: "timeCol",
       id: `tm${callObj.hash}`,
       html: toDHMS(timeNowSec() - callObj.age)
@@ -445,7 +466,7 @@ const ROSTER_COLUMNS = {
       return 0;
     },
     tableData: (callObj) => ({
-      style: "color: #EEE;",
+      style: `color: ${rosterColor("Spot")};`,
       class: "spotCol",
       id: `sp${callObj.hash}`,
       html: getSpotString(callObj)
@@ -466,6 +487,7 @@ const ROSTER_COLUMNS = {
     compare: (a, b) => wantedColumnComparer(a.callObj, b.callObj),
     tableData: (callObj) => ({
       class: "wantedCol",
+      style: `color: ${rosterColor("Wanted")};`,
       title: wantedColumnParts(callObj).map(entry => `• ${entry}`).join("\n"),
       html: wantedColumnParts(callObj).join(" - ", { html: true })
     })

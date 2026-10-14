@@ -405,7 +405,7 @@ function createFeedTipTable(toolElement)
       ${LL ? `<tr><td>${I18N("gt.feedSpot.dist")}</td><td style='color:cyan'>${dist}${distanceUnit.value.toLowerCase()}</td></tr>
       <tr><td>${I18N("gt.feedSpot.azim")}</td><td style='color:yellow'>${bearing}&deg;</td></tr>` : ""}
       <tr><td>${I18N("gt.newCallList.Time")}</td><td>${userTimeString(callObj.time * 1000)}</td></tr>
-      <tr><td>${I18N("gt.newCallList.LastMsg")}</td><td>${htmlEntities(callObj.msg)}</td></tr>
+      <tr><td>${I18N("gt.newCallList.LastMsg")}</td><td style='white-space:normal;max-width:300px;'>${htmlEntities(callObj.msg)}</td></tr>
     </table>`;
   return 10;
 }

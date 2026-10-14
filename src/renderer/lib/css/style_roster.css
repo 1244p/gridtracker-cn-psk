@@ -366,6 +366,22 @@ body.feedRosterShown #huntingMatrixDiv h3 {
   border-bottom-color: #660;
 }
 
+/* Exceptions: which ones show varies (Only Wanted, Spotted Me, eQSL / OQRS, LoTW's "...": Call Roster 7-11 items,
+   Feed Roster 9-12), so balance them over two even columns instead of filling a fixed height.
+   Spacing is padding, not margin: a column's top margin is dropped, which would misalign the columns */
+#exceptionDiv .columns {
+  display: block;
+  column-count: 2;
+  column-gap: 8px;
+  max-height: none;
+}
+
+#exceptionDiv .columns > div {
+  break-inside: avoid;
+  margin-top: 0;
+  padding-top: 3px;
+}
+
 #exceptionDiv h3 {
   color: rgb(206, 89, 89);
   border-bottom: 2px solid rgba(253, 113, 113, 0.644);
@@ -623,6 +639,66 @@ table.rosterTable td:last-child {
   margin-right: 2px;
 }
 
+/* Settings -> Colors: the main window's band color cells, wider for column names, 6 to a row */
+.rosterColorsGrid {
+  grid-template-columns: repeat(6, 84px);
+}
+
+/* Drag a cell to move its column; the tick box sits under the swatch */
+.rosterColorCell[draggable="true"] {
+  cursor: grab;
+}
+
+.rosterColorCell input[type="checkbox"] {
+  margin: 2px 0 0 0;
+}
+
+/* Band, Mode and Flag: a fixed swatch the size and frame of the color pickers */
+.rosterColorSample {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 50px;
+  height: 25px;
+  padding: 1px 2px;
+  border: 2px outset #888;
+  border-radius: 2px;
+  background-color: #000;
+  font-weight: bold;
+  line-height: 19px;
+  vertical-align: top;
+  overflow: hidden;
+}
+
+.rosterColorSample.rosterColorLink {
+  cursor: pointer;
+}
+
+/* Flag: same 50x25 frame as a color picker, the flag stretched to fill inside it (46x21).
+   img/flags/24/un.png is 24x24 with the flag itself at columns 1-22, rows 4-19 (the rest is shadow / transparent):
+   scale that 22x16 to 46x21 and clip the rest */
+.rosterColorSample.rosterColorFlag {
+  padding: 0;
+}
+
+.rosterColorSample.rosterColorFlag img {
+  width: 50.18px;
+  height: 31.5px;
+  margin: -5.25px 0 0 -2.09px;
+}
+
+.rosterColorSample img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Reset Colors and Reset Column Order side by side */
+.rosterColorsButtons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
 /* Feed Roster Settings -> Feeds: Allow Alert Script / Notifications centered vertically in their box */
 #feedsAllowBox {
   display: inline-flex;
@@ -636,6 +712,26 @@ table.rosterTable td:last-child {
   padding-right: 3px;
 }
 
+
+/* Msg: a long message is cut on screen only ("…"), on the cell's inner .msgCut (a table cell's own max-width is only
+   a hint to the table layout). The widths match MSG_VISIBLE_CHARS in processRosterHunting.js */
+.msgCol .msgCut {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Feed Roster: narrower, about 22 characters of a spot comment, centered in the column */
+body.feedRosterShown .msgCol {
+  text-align: center;
+}
+
+body.feedRosterShown .msgCol .msgCut {
+  max-width: 146px;
+  display: inline-block;
+  vertical-align: top;
+}
 
 .wantedCol {
   max-width: 160px;

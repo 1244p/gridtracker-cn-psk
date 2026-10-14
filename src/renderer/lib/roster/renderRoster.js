@@ -58,19 +58,8 @@ function renderRoster(callRoster, rosterSettings)
 
   let html = [CR.rosterSettings.compact ? renderCompactRosterHeaders() : renderNormalRosterHeaders(rosterColumns)];
 
-  // Feed spots can only be worked from a rig already on their band and mode
-  const workableFeeds = {};
-  if (feedRoster)
-  {
-    for (const id in GT.instances)
-    {
-      const instance = GT.instances[id];
-      if (instance.valid && instance.open && instance.status)
-      {
-        workableFeeds[instance.status.Band + "|" + instance.status.MO] = true;
-      }
-    }
-  }
+  // Feed spots can only be worked from a rig already on their band and mode (WSJT-X, JTDX or AC Log)
+  const workableFeeds = feedRoster ? feedRigBandModes().bandModes : {};
 
   // Third loop: render all rows
   for (const x in visibleCallList)

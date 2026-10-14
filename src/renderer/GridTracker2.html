@@ -773,7 +773,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           onclick="openSettingsTab(event, 'mapSettingsDiv')">Map</button>
         <button data-i18n="settings.Grids.label" class="settingsTablinks"
           onclick="openSettingsTab(event, 'gridSettingsDiv')">Grids</button>
-        <button data-i18n="settings.Colors.label" class="settingsTablinks"
+        <button data-i18n="settings.Colors.label" id="colorsSettingsButton" class="settingsTablinks"
           onclick="openSettingsTab(event, 'bandColorsSettingsDiv')">Colors</button>
         <button data-i18n="settings.Feeds.label" id="feedsSettingsButton" class="settingsTablinks" style="display:none;"
           onclick="openSettingsTab(event, 'feedsSettingsDiv')">Feeds</button>
@@ -2681,7 +2681,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               </div>
               <div id="hideSelfSpotsDiv">
                 <input type="checkbox" id="hideSelfSpots" onchange="huntingValueChanged(this);" />
-                <label data-i18n="roster.secondary.exceptions.hideSelfSpots" for="hideSelfSpots">Hide Self-Spotters</label>
+                <label data-i18n="roster.secondary.exceptions.hideSelfSpots" for="hideSelfSpots">Hide Self-Spot</label>
+              </div>
+              <div id="autoBandDiv">
+                <input type="checkbox" id="autoBand" onchange="huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.autoBand.label" for="autoBand">Auto Band</label>
+              </div>
+              <div id="autoModeDiv">
+                <input type="checkbox" id="autoMode" onchange="huntingValueChanged(this);" />
+                <label data-i18n="roster.secondary.exceptions.autoMode.label" for="autoMode">Auto Mode</label>
               </div>
               <div id="onlySpotDiv">
                 <input type="checkbox" id="onlySpot" onchange="huntingValueChanged(this);" />

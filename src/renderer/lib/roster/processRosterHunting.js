@@ -15,6 +15,13 @@ function createEmptyAudioAlerts()
   };
 }
 
+// Msg column (.msgCol: 260px, Feed Roster 146px): about this many characters show; a watcher match past them is
+// brought into view, starting about MSG_LEAD_CHARS before it
+const MSG_VISIBLE_CHARS = 34;
+const MSG_VISIBLE_CHARS_FEED = 19;
+const MSG_LEAD_CHARS = 12;
+const MSG_LEAD_CHARS_FEED = 7;
+
 const kInversionAlpha = "DD";
 const kRow = "#000000";
 const kBold = "#000000;font-weight: bold;";
@@ -54,10 +61,12 @@ function processRosterHunting(callRoster, rosterSettings)
   // Cache time once for the Watchers lookup to avoid syscalls inside the loop
   const now = Date.now();
 
-  // The Feed Roster swaps the callsign (yellow) and grid (cyan) colors, like its window colors
-  const feedColors = isFeedRoster();
-  const baseCallColor = feedColors ? "#00FFFF" : "#FFFF00";
-  const baseGridColor = feedColors ? "#FFFF00" : "#00FFFF";
+  // This roster's hunting colors (Settings -> Colors), read once per pass; the Feed Roster's defaults swap the
+  // callsign (yellow) and grid (cyan) colors, like its window colors
+  const baseCallColor = rosterColor("Callsign"), baseGridColor = rosterColor("Grid"), baseCallingColor = rosterColor("Calling"),
+    baseDxccColor = rosterColor("DXCC"), baseStateColor = rosterColor("State"), baseCntyColor = rosterColor("County"),
+    baseContColor = rosterColor("Cont"), basePotaColor = rosterColor("POTA"), baseCqzColor = rosterColor("CQz"),
+    baseItuzColor = rosterColor("ITUz"), baseWpxColor = rosterColor("PX"), baseDxmColor = rosterColor("DXM");
 
   for (const callHash in callRoster)
   {
@@ -126,9 +135,9 @@ function processRosterHunting(callRoster, rosterSettings)
     let callPointer = callObj.CQ ? "cursor:pointer" : "";
     let cntyPointer = (callObj.cnty && !callObj.cntyQual) ? "cursor: pointer;" : "";
     
-    let callColor = baseCallColor, gridColor = baseGridColor, callingColor = "#90EE90", dxccColor = "#FFA500",
-        stateColor = "#90EE90", cntyColor = "#CCDD00", contColor = "#00DDDD", potaColor = "#fbb6fc",
-        cqzColor = "#DDDDDD", ituzColor = "#DDDDDD", wpxColor = "#FFFF00", dxmColor = "#7398FF";
+    let callColor = baseCallColor, gridColor = baseGridColor, callingColor = baseCallingColor, dxccColor = baseDxccColor,
+        stateColor = baseStateColor, cntyColor = baseCntyColor, contColor = baseContColor, potaColor = basePotaColor,
+        cqzColor = baseCqzColor, ituzColor = baseItuzColor, wpxColor = baseWpxColor, dxmColor = baseDxmColor;
 
     let callBg = kRow, gridBg = kRow, callingBg = kRow, dxccBg = kRow, stateBg = kRow, cntyBg = kRow,
         contBg = kRow, potaBg = kRow, cqzBg = kRow, ituzBg = kRow, wpxBg = kRow, dxmBg = kRow;
@@ -887,15 +896,37 @@ function processWatchers(callObj, now)
           callObj.hunting.watcher = "hunted";
           callObj.watcherKey = key;
           
+          // Msg: a match past what the column shows (a long feed spot comment) is brought into view as
+          // "... text MATCH text ...": the shown text starts a few words before it (the column's ellipsis ends it)
+          let shown = sourceStr, lead = "";
+          if (watcher.source === "msg")
+          {
+            regex.lastIndex = 0;
+            const first = regex.exec(sourceStr);
+            const feed = isFeedRoster();
+            if (first && first.index + first[0].length > (feed ? MSG_VISIBLE_CHARS_FEED : MSG_VISIBLE_CHARS))
+            {
+              // Back to the start of the word there, so no word is cut in half
+              let start = Math.max(0, first.index - (feed ? MSG_LEAD_CHARS_FEED : MSG_LEAD_CHARS));
+              const space = sourceStr.lastIndexOf(" ", start);
+              start = space >= 0 ? space + 1 : 0;
+              if (start > 0)
+              {
+                shown = sourceStr.slice(start);
+                lead = "&hellip;";
+              }
+            }
+          }
+
           // Reset index AGAIN before executing replace
           regex.lastIndex = 0;
-          
+
           // Ultra-optimized Replacement:
           // We use $& (which represents the matched substring) instead of a JS callback
           // This keeps the entire regex string assembly in native C++
-          const highlightedMatch = sourceStr.replace(regex, "{span class='regexMatch'}$&{/span}");
-          
-          callObj[watcher.html] = bracesToHTML(htmlEntities(highlightedMatch));
+          const highlightedMatch = shown.replace(regex, "{span class='regexMatch'}$&{/span}");
+
+          callObj[watcher.html] = lead + bracesToHTML(htmlEntities(highlightedMatch));
           
           return true; 
         }

@@ -14,39 +14,52 @@ function dragStart(event)
   event.dataTransfer.dropEffect = "move";
 }
 
+// A column header, or a Settings -> Colors cell (dropping on its label, tick box or swatch counts)
+function columnDropTarget(target)
+{
+  if (target.draggable && target.nodeName === "TH") return target;
+  const cell = target.closest && target.closest(".rosterColorCell");
+  return (cell && cell.draggable) ? cell : null;
+}
+
 function onDrop(event)
 {
   event.preventDefault();
 
-  if (event.target.draggable && event.target.nodeName === "TH")
+  const target = columnDropTarget(event.target);
+  if (target)
   {
-    let dragName = event.dataTransfer.getData("Column");
-    // Reorder the full column order: Band and Mode can be shown without being enabled,
-    // and hidden columns keep their place
-    let columns = CR.rosterSettings.columnOrder.slice();
-    const movingColumn = columns.indexOf(dragName);
-    const targetColumn = columns.indexOf(event.target.attributes.name.nodeValue);
-    if (movingColumn === -1 || targetColumn === -1 || movingColumn === targetColumn) return;
-
-    if (movingColumn < targetColumn)
-    {
-      columns.splice(targetColumn + 1, 0, dragName);
-      columns.splice(movingColumn, 1);
-    }
-    else
-    {
-      columns.splice(movingColumn, 1);
-      columns.splice(targetColumn, 0, dragName);
-    }
-
-    changeRosterColumnOrder(columns);
+    moveRosterColumn(event.dataTransfer.getData("Column"), target.attributes.name.nodeValue);
   }
+}
+
+function moveRosterColumn(dragName, targetName)
+{
+  // Reorder the full column order: Band and Mode can be shown without being enabled,
+  // and hidden columns keep their place
+  let columns = CR.rosterSettings.columnOrder.slice();
+  const movingColumn = columns.indexOf(dragName);
+  const targetColumn = columns.indexOf(targetName);
+  if (movingColumn === -1 || targetColumn === -1 || movingColumn === targetColumn) return;
+
+  if (movingColumn < targetColumn)
+  {
+    columns.splice(targetColumn + 1, 0, dragName);
+    columns.splice(movingColumn, 1);
+  }
+  else
+  {
+    columns.splice(movingColumn, 1);
+    columns.splice(targetColumn, 0, dragName);
+  }
+
+  changeRosterColumnOrder(columns);
 }
 
 document.addEventListener("drop", onDrop);
 document.addEventListener("dragover", function(event)
 {
-  if (event.target.draggable && event.target.nodeName === "TH")
+  if (columnDropTarget(event.target))
   {
     event.preventDefault();
   }
@@ -196,13 +209,16 @@ function changeRosterColumnOrder(columns)
 {
   CR.rosterSettings.columnOrder = validateRosterColumnOrder(columns);
   viewRoster();
+  // Settings -> Colors lists the swatches in column order
+  if (colorsBoxDiv.style.display === "block") renderColorsTab();
 }
 
 function toggleColumn(target, column = null)
 {
   let label = column || target.label;
   CR.rosterSettings.columns[label] = target.checked;
-  CR.columnMembers[label].checked = target.checked;
+  // Settings -> Colors can list a column the header menu doesn't have yet
+  if (label in CR.columnMembers) CR.columnMembers[label].checked = target.checked;
   
   if (label === "Spot")
   {
@@ -211,4 +227,6 @@ function toggleColumn(target, column = null)
 
   viewRoster();
   resize();
+  // Keep Settings -> Colors' tick boxes in step with the header menu
+  if (colorsBoxDiv.style.display === "block") renderColorsTab();
 }

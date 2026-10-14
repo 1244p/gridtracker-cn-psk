@@ -663,18 +663,15 @@ function addFeedSpot(parts, now)
 
   // Kept raw like decoded messages: the roster escapes msg when it renders it
   let msg = parts[6].trim();
-  // Beacons can't be worked
-  if (msg.startsWith("BEACON") || msg.startsWith("NCDXF")) return false;
   // Every mode seen is kept for the Feed Roster's Mode selector, shown until the user unticks it
   const seenModes = GT.settings.feedRoster.feeds.modes;
   if (!(mode in seenModes)) seenModes[mode] = true;
-  // The POTA park can be anywhere in the comment, so it's looked for before shortening
-  const fullMsg = msg;
-  if (msg.length > 40) msg = msg.substring(0, 40) + "...";
+  // The whole comment is kept (Watchers, the POTA park and CQ look at all of it); the Msg column and the map hover
+  // shorten it on screen only
 
   // Calling CQ: the comment's first word is CQ (any case), except "CQ CONTEST"; shown in the Feed Roster's CQ column.
   // DXcall "CQ" also gets the hunting engine's CQ handling, like a decode
-  const isCQ = FEED_CQ_REGEXP.test(fullMsg) && !FEED_CQ_CONTEST_REGEXP.test(fullMsg);
+  const isCQ = FEED_CQ_REGEXP.test(msg) && !FEED_CQ_CONTEST_REGEXP.test(msg);
   const calling = isCQ ? "CQ" : "";
   const hash = DEcall + band + mode;
   let callObj = GT.feedCallsigns[hash];
@@ -738,7 +735,7 @@ function addFeedSpot(parts, now)
   {
     // A known park sticks: a later spot without one ("?-????" or none) doesn't erase it, and only newer
     // information replaces it, so a move to another park is picked up but a stale POTA spot can't undo it
-    const ref = feedPotaReference(DEcall, fullMsg);
+    const ref = feedPotaReference(DEcall, msg);
     const known = callObj.pota && callObj.pota !== "?-????";
     if (!known || (ref.park && ref.park !== "?-????" && ref.time >= callObj.potaTime))
     {

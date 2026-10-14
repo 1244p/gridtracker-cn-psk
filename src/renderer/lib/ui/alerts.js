@@ -1011,10 +1011,13 @@ function setVisualAudioAlerts()
   // settings tab, which has only Uses LoTW
   audioAlertRulesDiv.style.display = feed ? "none" : "";
   wantRRCQDiv.style.display = feed ? "none" : "";
-  // Feed Roster: Hide Self-Spotters, and its DXCC exceptions are for the spotted station ("DX DXCC")
+  // Feed Roster: Hide Self-Spot, Auto Band / Auto Mode, and its DXCC exceptions are for the spotted station ("DX DXCC")
   hideSelfSpotsDiv.style.display = feed ? "" : "none";
-  setI18nText(noMyDxccLabel, feed ? "roster.secondary.exceptions.noMyDXDXCC" : "roster.secondary.exceptions.noMyDXCC");
-  setI18nText(onlyMyDxccLabel, feed ? "roster.secondary.exceptions.onlyMyDXDXCC" : "roster.secondary.exceptions.onlyMyDXCC");
+  autoBandDiv.style.display = feed ? "" : "none";
+  autoModeDiv.style.display = feed ? "" : "none";
+  // ... and with LoTW off that tab is empty: remove "..."
+  moreExceptionsButton.style.display = (feed && !GT.settings.callsignLookups.lotwUseEnable) ? "none" : "";
+  setLogbookOptionLabels(referenceNeed, feed);
 
   if (roster.logbook.referenceNeed == LOGBOOK_AWARD_TRACKER)
   {
@@ -1082,6 +1085,8 @@ function applyExceptions()
   noMyDxcc.checked = exceptions.noMyDxcc;
   onlyMyDxcc.checked = exceptions.onlyMyDxcc;
   hideSelfSpots.checked = exceptions.hideSelfSpots === true;
+  autoBand.checked = exceptions.autoBand === true;
+  autoMode.checked = exceptions.autoMode === true;
   useseQSL.checked = exceptions.useseQSL;
   onlySpot.checked = exceptions.onlySpot;
   usesOQRS.checked = exceptions.usesOQRS;

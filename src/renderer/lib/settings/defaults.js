@@ -59,6 +59,28 @@ const k_valid_projections = [ "EPSG:3857", "AEQD" ];
 
 const k_max_aeqd_grid_in_miles = 11500.0;
 
+// Roster column colors (6-digit hex, no "#"), edited in each roster window's Settings -> Colors; each table lists
+// exactly the columns that roster has (Band and Mode use the band and mode colors instead). The hunting colors
+// (Callsign, Calling, Grid, POTA, DXCC, DXM, State, County, Cont, CQz, ITUz, PX) also tint a wanted entry's background.
+const k_callRosterColumnColors = {
+  Callsign: "FFFF00", Calling: "90EE90", Rig: "EEEEEE", Wanted: "EEEEEE", Grid: "00FFFF", Msg: "EEEEEE", POTA: "FBB6FC",
+  DXCC: "FFA500", DXM: "7398FF", State: "90EE90", County: "CCDD00", Cont: "00DDDD",
+  dB: "CCCCCC", Freq: "00FF00", DT: "5CAEFF", Dist: "00FFFF", Azim: "FFFF00",
+  CQz: "DDDDDD", ITUz: "DDDDDD", PX: "FFFF00",
+  LoTW: "00FF00", eQSL: "00FF00", OQRS: "00FF00",
+  Life: "EEEEEE", Spot: "EEEEEE", Age: "EEEEEE", UTC: "EEEEEE"
+};
+
+// The Feed Roster swaps the Call Roster's callsign (yellow) and grid (cyan) colors, like its window colors
+const k_feedRosterColumnColors = {
+  Callsign: "00FFFF", Spotter: "5CAEFF", CQ: "00FF00", Wanted: "EEEEEE", Grid: "FFFF00", Msg: "EEEEEE", POTA: "FBB6FC",
+  DXCC: "FFA500", DEDXCCv2: "80FFB0", DXM: "7398FF", State: "90EE90", County: "CCDD00", Cont: "00DDDD", DEContv2: "FF8080",
+  Freq: "00FF00", Dist: "00FFFF", Azim: "FFFF00",
+  CQz: "DDDDDD", ITUz: "DDDDDD", PX: "FFFF00",
+  LoTW: "00FF00", eQSL: "00FF00", OQRS: "00FF00",
+  Life: "EEEEEE", Age: "EEEEEE", UTC: "EEEEEE"
+};
+
 const def_settings = {
   defaultsApplied: true,
   app: {
@@ -81,7 +103,7 @@ const def_settings = {
     spottingEnable: true,
     // DX Feeds (DX Cluster / CW Skimmer spots), and the mode groups wanted from it (Settings -> Feeds)
     dxFeeds: false,
-    feedCW: true,
+    feedCW: false,
     feedDigital: true,
     feedPhone: true,
     // Seconds a feed spot is kept (shown on the map) after it was last spotted
@@ -569,13 +591,15 @@ const def_settings = {
       UTC: false
     },
     columnOrder: [
-      "Callsign", "Band", "Mode", "Calling", "Rig", "Wanted", "Grid", "Msg",
-      "POTA", "DXCC", "Flag", "DXM", "State", "County", "Cont",
+      "Callsign", "Band", "Mode", "Calling", "Grid", "DXCC", "Flag", "State", "County",
+      "POTA", "DXM", "Cont", "Msg",
       "dB", "Freq", "DT", "Dist", "Azim",
       "CQz", "ITUz", "PX",
-      "LoTW", "eQSL", "OQRS",
+      "Rig", "Wanted", "LoTW", "eQSL", "OQRS",
       "Life", "Spot", "Age", "UTC"
     ],
+    // Column colors, edited in the Call Roster's Settings -> Colors (column -> 6-digit hex)
+    colors: { ...k_callRosterColumnColors },
     // Window-wide (both roster tabs): displayFilters, realtime, controls, controlsExtended,
     // clearRosterOnBandChange, rosterAlwaysOnTop, rosterDelayOnFocus, rosterDelayTime, activeTab
     activeTab: "call",
@@ -623,6 +647,9 @@ const def_settings = {
       onlyMyDxcc: false,
       // Spots where the station spotted itself
       hideSelfSpots: false,
+      // Only spots on a band / in a mode one of the connected rigs (WSJT-X, JTDX, AC Log) is on
+      autoBand: false,
+      autoMode: false,
       cqOnly: false,
       usesLoTW: false,
       maxLoTW: 27,
@@ -659,13 +686,13 @@ const def_settings = {
       Grid: true,
       Msg: false,
       DXCC: true,
-      DEDXCC: false,
+      DEDXCCv2: true,
       Flag: true,
       State: true,
       County: false,
       POTA: false,
       Cont: false,
-      DECont: false,
+      DEContv2: true,
       Freq: true,
       Dist: false,
       Azim: false,
@@ -681,13 +708,15 @@ const def_settings = {
       UTC: false
     },
     columnOrder: [
-      "Callsign", "Spotter", "CQ", "Grid", "DXCC", "Flag", "State", "County", "Band", "Mode", "Wanted", "Msg",
-      "POTA", "DEDXCC", "DXM", "Cont", "DECont",
+      "Callsign", "Band", "Mode", "Spotter", "CQ", "Grid", "DXCC", "Flag", "State", "County", "Wanted", "Msg",
+      "POTA", "DEDXCCv2", "DXM", "Cont", "DEContv2",
       "Freq", "Dist", "Azim",
       "CQz", "ITUz", "PX",
       "LoTW", "eQSL", "OQRS",
       "Life", "Age", "UTC"
     ],
+    // Column colors, edited in the Feed Roster's Settings -> Colors, independent of the Call Roster's
+    colors: { ...k_feedRosterColumnColors },
     compact: false,
     compactEntity: "DXCC",
     sortColumn: "Age",
@@ -705,7 +734,7 @@ const def_settings = {
       hiddenBands: {},
       // Every mode seen in feed spots (mode: shown), for the Feed Roster's Settings -> Feeds -> Modes; false = unticked.
       // Starts with the common ones and only grows
-      modes: { CW: true, FT4: true, FT8: true, SSB: true }
+      modes: { CW: false, FT4: true, FT8: true, SSB: true }
     },
     // Feed Roster ignores, independent of the Call Roster's (the top-level ignored* keys), no CQ ignores;
     // spotter ignores are feed-only already and stay in the top-level ignoredSpotters
@@ -762,6 +791,12 @@ for (const key in def_settings.feedAudioAlerts.media)
 const def_rosterColumns = JSON.parse(JSON.stringify({
   call: { columns: def_settings.roster.columns, columnOrder: def_settings.roster.columnOrder },
   feed: { columns: def_settings.feedRoster.columns, columnOrder: def_settings.feedRoster.columnOrder }
+}));
+
+// Likewise each roster's default column colors, for "Reset Colors"
+const def_rosterColors = JSON.parse(JSON.stringify({
+  call: def_settings.roster.colors,
+  feed: def_settings.feedRoster.colors
 }));
 
 const def_mapMemory = {

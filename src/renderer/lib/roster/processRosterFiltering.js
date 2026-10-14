@@ -12,6 +12,10 @@ function processRosterFiltering(callRoster, rosterSettings)
   const viewHistoryTimeSec = GT.settings.reception.viewHistoryTimeSec;
   const myDxcc = GT.myDXCC;
 
+  // Feed Roster Auto Band / Auto Mode: the connected rigs' bands and modes, once per pass (no filtering without a rig)
+  let feedRigs = (rse.autoBand || rse.autoMode) ? feedRigBandModes() : null;
+  if (feedRigs && feedRigs.count === 0) feedRigs = null;
+
   const maxLotwDays = rse.maxLoTW < 27 ? rse.maxLoTW * 30 : Infinity;
   const maxDT = rse.maxDT;
   const minDb = rse.minDb;
@@ -142,6 +146,19 @@ function processRosterFiltering(callRoster, rosterSettings)
     {
       entry.tx = false;
       continue;
+    }
+
+    // Feed Roster: Auto Band / Auto Mode keep spots on a band / in a mode some rig is on; with both, one rig's band
+    // and mode together (like the ▲)
+    if (feedRigs)
+    {
+      const onRig = (rse.autoBand && rse.autoMode) ? ((callObj.band + "|" + callObj.mode) in feedRigs.bandModes)
+        : rse.autoBand ? (callObj.band in feedRigs.bands) : (callObj.mode in feedRigs.modes);
+      if (!onRig)
+      {
+        entry.tx = false;
+        continue;
+      }
     }
 
     let usesOneOf = 0;

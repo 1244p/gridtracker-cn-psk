@@ -70,7 +70,7 @@ CR.profiles = {
     ignores: () => GT.settings,
     // Entries from instances that are gone, or unticked in a multi-instance roster, are hidden
     filter: (callObj) => (callObj.instance in GT.instances) && !(GT.instanceCount > 1 && GT.instances[callObj.instance].crEnable === false),
-    excludedColumns: { Spotter: true, CQ: true, DEDXCC: true, DECont: true },
+    excludedColumns: { Spotter: true, CQ: true, DEDXCCv2: true, DEContv2: true },
     watchersTest: {},
     alertTimer: null
   },
@@ -124,6 +124,31 @@ for (const key of ["ignoredCalls", "ignoredCQ", "ignoredDxcc", "ignoredDeDxcc", 
 function isFeedRoster()
 {
   return CR.profile === CR.profiles.feed;
+}
+
+// A rig's mode as feed spots name it: AC Log reports the radio's sideband
+const FEED_RIG_MODE_ALIASES = { USB: "SSB", LSB: "SSB" };
+
+// The bands and modes the connected rigs are on (every WSJT-X / JTDX instance and AC Log): for the Feed Roster's
+// ▲ (a rig on the spot's band and mode) and its Auto Band / Auto Mode exceptions. count is 0 with no rig connected
+function feedRigBandModes()
+{
+  const rigs = { bands: {}, modes: {}, bandModes: {}, count: 0 };
+  for (const id in GT.instances)
+  {
+    const instance = GT.instances[id];
+    if (instance.valid && instance.open && instance.status)
+    {
+      const band = instance.status.Band;
+      const reported = String(instance.status.MO || "").toUpperCase();
+      const mode = FEED_RIG_MODE_ALIASES[reported] || reported;
+      rigs.bands[band] = true;
+      rigs.modes[mode] = true;
+      rigs.bandModes[band + "|" + mode] = true;
+      rigs.count++;
+    }
+  }
+  return rigs;
 }
 
 // Runs fn with profile as the current one, then restores the visible tab's profile
@@ -562,6 +587,8 @@ function updateFeedModes()
 function feedModeChange(checkbox, mode)
 {
   feedSettings().modes[mode] = checkbox.checked;
+  // CW follows Settings -> Feeds -> CW both ways (window.opener tells the server)
+  if (mode === "CW") window.opener.setFeedCW(checkbox.checked);
   viewRoster();
 }
 
@@ -926,6 +953,7 @@ function setVisual()
   }
 
   usesLoTWDiv.style.display = (GT.settings.callsignLookups.lotwUseEnable) ? "" : "none";
+  updateFeedExceptionsTab();
   useseQSLDiv.style.display = (GT.settings.callsignLookups.eqslUseEnable) ? "" : "none";
   usesOQRSDiv.style.display = (GT.settings.callsignLookups.oqrsUseEnable) ? "" : "none";
   onlySpotDiv.style.display = (CR.rosterSettings.columns.Spot) ? "" : "none";
@@ -1495,8 +1523,25 @@ function openWatcher()
   openInfoTab("watcherbox", "watcherBoxDiv", openWatchersTab);
 }
 
+// The Feed Roster's Exceptions settings tab holds only Uses LoTW (dB / DT / Freq are Call Roster only)
+function feedExceptionsTabEmpty()
+{
+  return isFeedRoster() && !GT.settings.callsignLookups.lotwUseEnable;
+}
+
+// Without LoTW the Feed Roster's Exceptions tab would be empty: remove "..." and the tab
+// (from setVisual(), as the LoTW setting can change, and from updateRosterTabControls() on a roster switch)
+function updateFeedExceptionsTab()
+{
+  const empty = feedExceptionsTabEmpty();
+  moreExceptionsButton.style.display = empty ? "none" : "";
+  exceptionsbox.style.display = empty ? "none" : "";
+  if (empty && exceptionsBoxDiv.style.display === "block") openInfoTab("feedsbox", "feedsBoxDiv", renderFeedsTab);
+}
+
 function openExceptions()
 {
+  if (feedExceptionsTabEmpty()) return;
   settingsDiv.style.display = "inline-block";
   openInfoTab("exceptionsbox", "exceptionsBoxDiv");
 }
@@ -1510,6 +1555,77 @@ function openIgnores()
 function closeSettings()
 {
   settingsDiv.style.display = "none";
+}
+
+// Settings -> Colors, for the roster showing (CR.visibleProfile: a background pass may have the other one in
+// CR.profile): one swatch per column it has, in that roster's column order (its default order until a column is
+// dragged; hidden columns keep their place). Band and Mode use the main window's band and mode colors. Each roster
+// keeps its own colors (defaults in defaults.js)
+function renderColorsTab()
+{
+  withProfile(CR.visibleProfile, () =>
+  {
+    const excluded = CR.profile.excludedColumns;
+    const colorColumns = window.opener.defaultRosterColors(CR.profile.name);
+    const order = CR.rosterSettings.columnOrder.slice();
+    // Any column the saved order lacks goes last, in the default order
+    for (const column of DEFAULT_COLUMN_ORDER) if (!order.includes(column)) order.push(column);
+    // Every column gets a cell so all can be moved; those without a color of their own show a fixed swatch:
+    // Band and Mode use the main window's band / mode colors (Band click: main Settings -> Colors; mode colors are fixed), Flag a flag
+    const bandColor = "#" + (GT.bandColors["20m"] || "FFFFFF");
+    const modeColor = "#" + (GT.modeColors.FT8 || "FFFFFF");
+    const fixedSwatches = {
+      Band: { color: bandColor, html: `<span class="rosterColorSample rosterColorLink" onclick="window.opener.openColorSettings()" style="color:${bandColor};">20m</span>` },
+      Mode: { color: modeColor, html: `<span class="rosterColorSample" style="color:${modeColor};">FT8</span>` },
+      Flag: { color: "", html: `<span class="rosterColorSample rosterColorFlag"><img src="img/flags/24/un.png" /></span>` }
+    };
+    rosterColorsDiv.innerHTML = order
+      .filter((column) => (column in ROSTER_COLUMNS) && !excluded[column])
+      .map((column) =>
+      {
+        const fixedSwatch = (column in colorColumns) ? null : fixedSwatches[column];
+        const color = fixedSwatch ? fixedSwatch.color : rosterColor(column);
+        const info = ROSTER_COLUMNS[column];
+        const label = (info && info.label) ? info.label() : column;
+        // Drag a cell onto another to move the column, like the headers; the tick box under the swatch shows / hides it.
+        // Callsign is always shown and stays first
+        const fixed = column === "Callsign";
+        const shown = fixed || CR.rosterSettings.columns[column] === true;
+        return `<div class="bandColorCell rosterColorCell" name="${column}"` +
+          (fixed ? "" : ` draggable="true" ondragstart="dragStart(event)"`) + `>` +
+          `<b id="rosterColorLabel_${column}"${color ? ` style="color:${color};"` : ""}>${label}</b><br />` +
+          (fixedSwatch ? fixedSwatch.html : `<input type="color" value="${color}" oninput="changeRosterColor('${column}', this)" />`) + `<br />` +
+          `<input type="checkbox"${shown ? " checked" : ""}${fixed ? " disabled" : ` onchange="toggleRosterColorColumn('${column}', this)"`} />` +
+          `</div>`;
+      }).join("");
+  });
+}
+
+function changeRosterColor(column, input)
+{
+  const hex = input.value.substring(1).toUpperCase();
+  const settings = CR.visibleProfile.settings();
+  if (!settings.colors) settings.colors = window.opener.defaultRosterColors(CR.visibleProfile.name);
+  settings.colors[column] = hex;
+  document.getElementById("rosterColorLabel_" + column).style.color = "#" + hex;
+
+  // Dragging in the picker fires many changes: redraw once it settles
+  nodeTimers.clearTimeout(CR.rosterColorsTimeout);
+  CR.rosterColorsTimeout = nodeTimers.setTimeout(() => window.opener.goProcessRoster(), 300);
+}
+
+// Settings -> Colors tick box: same as ticking the column in the header menu
+function toggleRosterColorColumn(column, input)
+{
+  toggleColumn(input, column);
+  logbookValuesChanged();
+}
+
+function resetRosterColors()
+{
+  CR.visibleProfile.settings().colors = window.opener.defaultRosterColors(CR.visibleProfile.name);
+  renderColorsTab();
+  window.opener.goProcessRoster();
 }
 
 function feedsActive()
@@ -1575,10 +1691,14 @@ function updateRosterTabControls()
   ignoreCqOption.style.display = feed ? "none" : "";
   watcherSpotterOption.style.display = feed ? "" : "none";
   watcherCallingOption.style.display = feed ? "none" : "";
-  // Feed Roster: Hide Self-Spotters, and its DXCC exceptions are for the spotted station ("DX DXCC")
+  // Feed Roster: Hide Self-Spot, Auto Band / Auto Mode, and its DXCC exceptions are for the spotted station ("DX DXCC")
   hideSelfSpotsDiv.style.display = feed ? "" : "none";
-  setI18nText(noMyDxccLabel, feed ? "roster.secondary.exceptions.noMyDXDXCC" : "roster.secondary.exceptions.noMyDXCC");
-  setI18nText(onlyMyDxccLabel, feed ? "roster.secondary.exceptions.onlyMyDXDXCC" : "roster.secondary.exceptions.onlyMyDXCC");
+  autoBandDiv.style.display = feed ? "" : "none";
+  autoModeDiv.style.display = feed ? "" : "none";
+  // Logbook: "Spots Band & Mode" etc. in the Feed Roster, "Live Band & Mode" in the Call Roster
+  setLogbookOptionLabels(referenceNeed, feed);
+  // Settings -> Colors open while switching rosters: show the other roster's colors
+  if (colorsBoxDiv.style.display === "block") renderColorsTab();
   // DXCC ignores: likewise DX DXCC and DE DXCC in the Feed Roster
   ignoreDeDxccOption.style.display = feed ? "" : "none";
   ignoreDeContOption.style.display = feed ? "" : "none";
@@ -1601,6 +1721,7 @@ function updateRosterTabControls()
   // centered
   wantRRCQDiv.style.display = feed ? "none" : "";
   exceptionTabDiv.classList.toggle("feedExceptions", feed);
+  updateFeedExceptionsTab();
 
   if ((!feed && (CR.ignoreType === "Spotter" || CR.ignoreType === "DEDXCC" || CR.ignoreType === "DECont")) || (feed && CR.ignoreType === "CQ"))
   {
@@ -1957,6 +2078,8 @@ function applyActiveRoster()
   noMyDxcc.checked = CR.activeExceptions.noMyDxcc;
   onlyMyDxcc.checked = CR.activeExceptions.onlyMyDxcc;
   hideSelfSpots.checked = CR.activeExceptions.hideSelfSpots === true;
+  autoBand.checked = CR.activeExceptions.autoBand === true;
+  autoMode.checked = CR.activeExceptions.autoMode === true;
 
   usesLoTW.checked = CR.activeExceptions.usesLoTW;
   useseQSL.checked = CR.activeExceptions.useseQSL;
@@ -2007,7 +2130,7 @@ function compactModeChanged()
   viewRoster();
 }
 
-// General tab "Reset Columns to Default": the visible roster's columns and their order only
+// Colors tab "Reset Column Order": the visible roster's columns (shown and order) only
 function resetRosterColumns()
 {
   const def = window.opener.defaultRosterColumns(CR.profile.name);
@@ -2020,6 +2143,7 @@ function resetRosterColumns()
   }
   setVisual();
   viewRoster();
+  renderColorsTab();
 }
 
 function compactEntityChanged()
