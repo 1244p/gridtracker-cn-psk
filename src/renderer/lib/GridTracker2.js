@@ -120,13 +120,12 @@ function loadAllSettings()
   {
     const feedRoster = GT.settings.feedRoster;
 
-    // CW is kept in step between Settings -> Feeds and the Feed Roster's Spots -> Modes (syncFeedRosterCW): settings
-    // from before that, with CW off in either place, have it off in both
-    if (feedRoster.feeds && feedRoster.feeds.modes && (GT.settings.app.feedCW === false || feedRoster.feeds.modes.CW === false))
-    {
-      GT.settings.app.feedCW = false;
-      feedRoster.feeds.modes.CW = false;
-    }
+    // Settings -> Feeds' CW / Digital / Phone are gone (Digital and Phone are always sent, CW follows the Feed Roster's
+    // Spots -> Modes -> CW): CW unticked there carries over to the Feed Roster
+    if (GT.settings.app.feedCW === false && feedRoster.feeds && feedRoster.feeds.modes) feedRoster.feeds.modes.CW = false;
+    delete GT.settings.app.feedCW;
+    delete GT.settings.app.feedDigital;
+    delete GT.settings.app.feedPhone;
 
     // DE DXCC and DE Cont columns became "DEDXCCv2" / "DEContv2" when they changed to shown by default: the old
     // on/off choice is dropped (the new key takes the default), and each keeps its place in the saved column order

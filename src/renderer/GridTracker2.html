@@ -1883,12 +1883,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <!-- The sources temp/feeds.js (the RTSN server's feeds worker) takes spots from; names stay English -->
       <div style="text-align:center; font-weight:bold; margin:4px 0 2px 0;"><span data-i18n="settings.feeds.dxFeeds.label">DX Feeds</span><br /><span style="font-weight:normal;">(G7VRD: DX Cluster / CW Skimmer, Spothole)</span></div>
       <div class="mapItem" style="padding:10px;">
-        <div class="mapItem feedGroups">
-          <div data-i18n="roster.feeds.modes.label">Modes</div>
-          <label class="feedGroup"><span data-i18n="roster.feeds.modes.CW">CW</span><input type="checkbox" id="feedCWEnable" onchange="changeFeedGroups()" /></label>
-          <label class="feedGroup"><span data-i18n="roster.feeds.modes.Digital">Digital</span><input type="checkbox" id="feedDigitalEnable" onchange="changeFeedGroups()" /></label>
-          <label class="feedGroup"><span data-i18n="roster.feeds.modes.Phone">Phone</span><input type="checkbox" id="feedPhoneEnable" onchange="changeFeedGroups()" /></label>
-        </div>
         <div class="mapItem feedGroups" id="feedMaxAgeDiv">
           <div data-i18n="settings.feeds.maxAge.label">Feed Spots Max Age</div>
           <input type="range" min="60" max="3600" value="300" step="60" class="slider" id="feedMaxAge"

@@ -587,8 +587,8 @@ function updateFeedModes()
 function feedModeChange(checkbox, mode)
 {
   feedSettings().modes[mode] = checkbox.checked;
-  // CW follows Settings -> Feeds -> CW both ways (window.opener tells the server)
-  if (mode === "CW") window.opener.setFeedCW(checkbox.checked);
+  // CW decides whether the server sends CW spots at all (window.opener tells it)
+  if (mode === "CW") window.opener.feedCWChanged();
   viewRoster();
 }
 

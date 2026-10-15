@@ -359,37 +359,6 @@ function feedsActive()
   return GT.settings.app.offAirServicesEnable == true && GT.settings.map.offlineMode == false && GT.settings.app.dxFeeds == true;
 }
 
-// A mode's feed group, as the RTSN server groups them: CW, Phone (phone in data/modes.json), anything else Digital
-function feedGroup(mode)
-{
-  if (mode == "CW") return "CW";
-  if (GT.modes_phone[mode]) return "Phone";
-  return "Digital";
-}
-
-const FEED_GROUP_SETTING = { CW: "feedCW", Digital: "feedDigital", Phone: "feedPhone" };
-
-// The mode's group is selected in Settings -> Feeds
-function feedGroupWanted(mode)
-{
-  return GT.settings.app[FEED_GROUP_SETTING[feedGroup(mode)]] == true;
-}
-
-// After a Settings -> Feeds group is unticked: its spots leave the Feed Roster and the map now, not when they age out
-function dropUnwantedFeedGroups()
-{
-  for (const hash in GT.feedCallsigns)
-  {
-    if (!feedGroupWanted(GT.feedCallsigns[hash].mode))
-    {
-      delete GT.feedCallsigns[hash];
-      delete GT.feedRoster[hash];
-    }
-  }
-  goProcessFeedRoster();
-  redrawDxcwSpots();
-}
-
 // Main button panel DX Feeds button: shows feed spots on the map
 function toggleDxcwFeed()
 {
@@ -652,8 +621,8 @@ function addFeedSpot(parts, now)
   let grid = parts[3].trim().toUpperCase();
 
   if (!CALLSIGN_REGEXP.test(DEcall) || !FEED_MODE_REGEXP.test(mode) || !FEED_SPOTTER_REGEXP.test(spotter)) return false;
-  // Only the mode groups selected in Settings -> Feeds (the server sends only those; this covers a change in flight)
-  if (!feedGroupWanted(mode)) return false;
+  // CW unticked in the Feed Roster: the server no longer sends it; this covers spots already in flight
+  if (mode == "CW" && !feedCWWanted()) return false;
   // Spotters the user ignored in the Feed Roster (by base callsign, so W3LPL covers W3LPL-#)
   if (spotter.split("-")[0] in GT.settings.ignoredSpotters) return false;
   if (band == "OOB" || !Object.prototype.hasOwnProperty.call(GT.bandColors, band)) return false;
@@ -1060,17 +1029,38 @@ function gtChatSendVersion()
   GT.gtState = ChatState.status;
 }
 
-// The feed mode groups wanted from the RTSN server: p (Phone), d (Digital), c (CW); none while DX Feeds is off.
+// The feed mode groups wanted from the RTSN server: p (Phone), d (Digital), c (CW) while DX Feeds is on, none while
+// it's off. CW only while the Feed Roster's Spots -> Modes -> CW is ticked: CW spots are most of the feed's traffic.
 // It answers with { t: "f", m: "p" | "d" | "c", f: "spot;spot;..." } per group
 function gtChatSendFeeds()
 {
-  const on = GT.settings.app.dxFeeds == true;
-  sendGtJson(JSON.stringify({
-    t: "f",
-    p: on && GT.settings.app.feedPhone ? 1 : 0,
-    d: on && GT.settings.app.feedDigital ? 1 : 0,
-    c: on && GT.settings.app.feedCW ? 1 : 0
-  }));
+  const on = GT.settings.app.dxFeeds == true ? 1 : 0;
+  sendGtJson(JSON.stringify({ t: "f", p: on, d: on, c: on && feedCWWanted() ? 1 : 0 }));
+}
+
+// The Feed Roster's Spots -> Modes -> CW is ticked (or not set yet)
+function feedCWWanted()
+{
+  const modes = GT.settings.feedRoster && GT.settings.feedRoster.feeds && GT.settings.feedRoster.feeds.modes;
+  return !modes || modes.CW !== false;
+}
+
+// From the Feed Roster's CW tick box: tell the server, and when unticked drop the CW spots held (roster and map) now
+// rather than when they age out
+function feedCWChanged()
+{
+  gtChatSendFeeds();
+  if (feedCWWanted()) return;
+  for (const hash in GT.feedCallsigns)
+  {
+    if (GT.feedCallsigns[hash].mode == "CW")
+    {
+      delete GT.feedCallsigns[hash];
+      delete GT.feedRoster[hash];
+    }
+  }
+  goProcessFeedRoster();
+  redrawDxcwSpots();
 }
 
 

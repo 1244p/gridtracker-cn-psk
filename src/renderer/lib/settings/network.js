@@ -53,10 +53,6 @@ function updateFeedViews()
   {
     openSettingsTab(generalbut, "generalSettingsDiv");
   }
-  feedCWEnable.checked = GT.settings.app.feedCW;
-  syncFeedRosterCW();
-  feedDigitalEnable.checked = GT.settings.app.feedDigital;
-  feedPhoneEnable.checked = GT.settings.app.feedPhone;
   feedMaxAge.value = GT.settings.app.feedMaxAge;
   feedMaxAgeTd.innerHTML = toDHMS(GT.settings.app.feedMaxAge);
 
@@ -77,39 +73,6 @@ function setFeedSettings()
   }
   gtChatSendFeeds();
   updateFeedViews();
-}
-
-// Settings -> Feeds: CW / Digital / Phone, the mode groups asked of the RTSN server
-function changeFeedGroups()
-{
-  GT.settings.app.feedCW = feedCWEnable.checked;
-  GT.settings.app.feedDigital = feedDigitalEnable.checked;
-  GT.settings.app.feedPhone = feedPhoneEnable.checked;
-  syncFeedRosterCW();
-  gtChatSendFeeds();
-  dropUnwantedFeedGroups();
-}
-
-// CW is kept in step between Settings -> Feeds and the Feed Roster's Spots -> Modes: CW spots are most of the
-// feed's traffic, so a user who doesn't want them in the roster doesn't receive them at all, and vice versa.
-// Settings -> Feeds decides (it's what the server sends)
-function syncFeedRosterCW()
-{
-  const modes = GT.settings.feedRoster && GT.settings.feedRoster.feeds && GT.settings.feedRoster.feeds.modes;
-  if (!modes || modes.CW === GT.settings.app.feedCW) return;
-  modes.CW = GT.settings.app.feedCW;
-  if (GT.callRosterWindowInitialized && GT.callRosterWindowHandle && typeof GT.callRosterWindowHandle.window.updateFeedModes === "function")
-  {
-    GT.callRosterWindowHandle.window.updateFeedModes();
-  }
-}
-
-// From the Feed Roster's Spots -> Modes CW tick box
-function setFeedCW(enabled)
-{
-  if (GT.settings.app.feedCW === enabled) return;
-  feedCWEnable.checked = enabled;
-  changeFeedGroups();
 }
 
 function changeFeedMaxAge()

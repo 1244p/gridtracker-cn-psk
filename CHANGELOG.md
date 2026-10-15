@@ -22,7 +22,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New "Auto Band" and "Auto Mode" exceptions (in the Feed Roster and Settings -> Audio Alerts -> Feed Roster): only spots on a band / in a mode one of your rigs is on (WSJT-X, JTDX or AC Log); with both, a rig on the spot's band and mode
   - With no rig connected they show everything
 - The "Feeds" settings tab is now called "Spots"
-  - Its CW mode tick box is kept in step with Settings -> Feeds -> CW, both ways: unticking either stops CW spots being sent at all, saving bandwidth
 - Logbook choices say "Spots" instead of "Live" (e.g. "Spots Band & Mode"), in the Feed Roster and Settings -> Audio Alerts -> Feed Roster
 - "DE DXCC" and "DE Cont" columns are now shown by default
 
@@ -49,11 +48,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
       <li>With no rig connected they show everything</li>
     </ul>
   </li>
-  <li>The "Feeds" settings tab is now called "Spots"
-    <ul>
-      <li>Its CW mode tick box is kept in step with Settings -&gt; Feeds -&gt; CW, both ways: unticking either stops CW spots being sent at all, saving bandwidth</li>
-    </ul>
-  </li>
+  <li>The "Feeds" settings tab is now called "Spots"</li>
   <li>Logbook choices say "Spots" instead of "Live" (e.g. "Spots Band &amp; Mode"), in the Feed Roster and Settings -&gt; Audio Alerts -&gt; Feed Roster</li>
   <li>"DE DXCC" and "DE Cont" columns are now shown by default</li>
 </ul>
