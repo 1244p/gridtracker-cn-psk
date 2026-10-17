@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
-## [v2.261017.0]
+## [v2.261017.1]
 
 ### MD Markup Format
 #### Call Roster / Feed Roster

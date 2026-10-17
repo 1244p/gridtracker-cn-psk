@@ -294,27 +294,54 @@ function potaSpotFromDecode(callObj)
 }
 
 
-function leftClickPota(parkId)
+// A POTA spot as a feed spot's fields, for feedSpotInstance / acLogWorkSpot: its frequency in Hz (the spot's is MHz,
+// processPotaSpots), and its grid (the activator's, else the park's; 6 characters when known)
+function potaSpotCallObj(spot, key)
 {
-  if (parkId in GT.pota.parkSpots)
+  const park = GT.pota.parks[key];
+  let grid = String(spot.activatorGrid || "").toUpperCase();
+  if (!/^[A-R]{2}[0-9]{2}([A-X]{2})?$/.test(grid)) grid = String((park && park.grid) || "").toUpperCase();
+  if (!/^[A-R]{2}[0-9]{2}([A-X]{2})?$/.test(grid)) grid = "";
+  return { DEcall: spot.activator, band: spot.band, mode: spot.mode, freq: Math.round(Number(spot.frequency) * 1000000) || 0, grid: grid.substring(0, 4), fullGrid: grid };
+}
+
+// Map left-click on a park (or parks grouped at this zoom): a spot a rig is already on the band and mode of goes to that
+// rig (WSJT-X / JTDX: its call and grid; AC Log: its entry tab). Otherwise a connected AC Log gets the first spot the
+// tooltip lists (with Enable Rig Control, the rig tuned to it)
+function leftClickPota(feature)
+{
+  const keys = feature.parkKeys || [feature.key];
+  // In the tooltip's order: one park's spots as listed, several parks' newest first
+  const spots = [];
+  for (const key of keys)
   {
-    for (parkCaller in GT.pota.parkSpots[parkId])
+    for (const call in GT.pota.parkSpots[key] || {})
     {
-      let obj = GT.pota.parkSpots[parkId][parkCaller];
-      let call = obj.activator;
-      let grid = obj.activatorGrid;
-      let band = obj.band;
-      let mode = obj.mode;
-      for (let instance in GT.instances)
-      {
-        if (GT.instances[instance].valid && GT.instances[instance].status.Band == band && GT.instances[instance].status.MO == mode)
-        {
-          setCallAndGrid(call, grid, instance);
-          return;
-        }
-      }
+      const spot = GT.pota.parkSpots[key][call];
+      if (validateMapBandAndMode(spot.band, spot.mode)) spots.push({ key, spot });
     }
   }
+  if (keys.length > 1) spots.sort((a, b) => b.spot.spotTime - a.spot.spotTime);
+  if (spots.length == 0) return;
+
+  for (const { key, spot } of spots)
+  {
+    const callObj = potaSpotCallObj(spot, key);
+    const instance = feedSpotInstance(callObj);
+    if (instance == GT.acLogInstanceId)
+    {
+      acLogWorkSpot(callObj);
+      return;
+    }
+    if (instance != null)
+    {
+      setCallAndGrid(callObj.DEcall, callObj.grid, instance);
+      return;
+    }
+  }
+
+  const first = potaSpotCallObj(spots[0].spot, spots[0].key);
+  if (acLogCanWork(first)) acLogWorkSpot(first);
 }
 
 function reportPotaQSO(record)

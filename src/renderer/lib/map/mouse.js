@@ -910,7 +910,7 @@ function mouseDownEvent(event)
         }
         else
         {
-          leftClickPota(feature.key);
+          leftClickPota(feature);
         }
         shouldReturn = true;
       }
