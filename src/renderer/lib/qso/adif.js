@@ -1331,21 +1331,23 @@ function sendUdpMessage(msg, length, port, address)
   });
 }
 
-function sendTcpMessage(msg, length, port, address)
+// onSent: called once the message is written, or the connection failed
+function sendTcpMessage(msg, length, port, address, onSent = null)
 {
   const net = window.require("net");
   let client = new net.Socket();
   client.setTimeout(30000);
-  
+
   // MUST HAVE THIS to prevent app crashes when external loggers are closed/unreachable!
   client.on("error", function (err) {
     console.error("TCP Logger Connection Error:", err.message);
     client.destroy();
+    if (onSent) onSent();
   });
 
   client.connect(port, address, function ()
   {
-    client.write(Buffer.from(msg, "utf-8"));
+    client.write(Buffer.from(msg, "utf-8"), onSent);
   });
 
   client.on("close", function () {});
@@ -1534,6 +1536,20 @@ function sendToLogger(ADIF)
     {
       record.POTA_REF = GT.liveCallsigns[localHash].pota;
     }
+  }
+
+  // SOTA Chasing: the summit from a Feed Roster spot of this call on this band (WSJT-X doesn't know it); a SOTA_REF
+  // the logger already sent is kept
+  if (sotaActive() && !record.SOTA_REF)
+  {
+    const summit = feedSotaForCall(record.CALL, record.BAND);
+    if (summit) record.SOTA_REF = summit;
+  }
+  // The station was on that summit: its square, not the grid the logger sent (often the activator's home)
+  if (sotaActive() && record.SOTA_REF)
+  {
+    const summitGrid = sotaSummitGrid(record.SOTA_REF.toUpperCase());
+    if (summitGrid) record.GRIDSQUARE = summitGrid;
   }
 
   if ("TX_PWR" in record)
@@ -2141,8 +2157,16 @@ function acLogLoggerChanged()
   GT.settings.acLog.startup = acLogStartupCheckbox.checked;
   GT.settings.acLog.connect = acLogConnectCheckbox.checked;
   GT.settings.acLog.qsl = acLogQsl.value;
+  if (GT.settings.acLog.rigControl != acLogRigControlCheckbox.checked)
+  {
+    GT.settings.acLog.rigControl = acLogRigControlCheckbox.checked;
+    // The Feed Roster's workable spots (▲) change with it
+    goProcessRoster();
+  }
 
   acLogQslSpan.style.display = (acLogMenuCheckbox.checked || acLogStartupCheckbox.checked) ? "" : "none";
+  acLogRigControlSpan.style.display = (acLogConnectCheckbox.checked) ? "" : "none";
+  updateAcLogConnectStatus();
   buttonAcLogCheckBoxDiv.style.display = (acLogMenuCheckbox.checked) ? "" : "none";
 }
 
@@ -2841,7 +2865,8 @@ function sendACLogMessage(record, port, address)
 
   report += aclAction("ENTER") + "\r\n\r\n";
 
-  sendTcpMessage(report, report.length, port, address);
+  // In AC Log's request queue (acLog.js): not sent while GridTracker waits on another reply from AC Log
+  acLogRequest((done) => sendTcpMessage(report, report.length, port, address, done));
 }
 
 function sendDXKeeperLogMessage(newMessage, port, address)
@@ -3094,13 +3119,22 @@ function sendTcpMessageGetResponse(msg, port, address, callback = null)
 function grabAcLog(count = 0)
 {
   AcLogImg.style.webkitFilter = "invert(100%)";
-  
+
   let countString = count > 0 ? ("<VALUE>" + count + "</VALUE>") : "";
 
   let cmd = valueToXmlField("CMD", "<OPINFO>") + "\r\n";
   cmd += valueToXmlField("CMD", "<LIST><INCLUDEALL>" + countString) + "\r\n\r\n";
 
-  sendTcpMessageGetResponse(cmd, GT.settings.acLog.port, GT.settings.acLog.ip, acLogCallback);
+  // In AC Log's request queue (acLog.js): sent once nothing else is waiting on AC Log, the next one once this
+  // download is in (a whole log can take a while: up to the connection's 30 second idle timeout and more)
+  acLogRequest((done) =>
+  {
+    sendTcpMessageGetResponse(cmd, GT.settings.acLog.port, GT.settings.acLog.ip, (buffer) =>
+    {
+      acLogCallback(buffer);
+      done();
+    });
+  }, null, 120000);
 }
 
 function acLogCallback(buffer)

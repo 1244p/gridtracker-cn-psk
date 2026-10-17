@@ -870,5 +870,15 @@
 	"roster.controls.logbook.spotsBandMixMode": "Spots Band, Mix Modes",
 	"roster.controls.logbook.spotsBandDigiMode": "Spots Band, Digi Modes",
 	"roster.controls.logbook.mixBandSpotsMode": "Mix Band, Spots Modes",
-	"roster.columns.tab.label": "Spalten"
+	"roster.columns.tab.label": "Spalten",
+	"settings.SOTA.chasing.label": "SOTA-Jagd",
+	"settings.SOTA.chasing.hover": "Summits on the Air-Aktivierer aus den DX-Feeds: SOTA-Spalte und Gesucht in der Feed-Liste",
+	"roster.secondary.wanted.sota": "SOTA",
+	"rosterColumns.Wanted.sota": "SOTA",
+	"rosterColumns.SOTA.points": "Punkte: {0}",
+	"settings.map.sotaMap.hover": "Summits on the Air-Spots umschalten",
+	"gt.potaSpot.title": "POTA-Spot",
+	"gt.sotaSpot.title": "SOTA-Spot",
+	"settings.logging.N3FJP.rigControl.label": "Rig-Steuerung Aktivieren",
+	"settings.logging.N3FJP.rigControl.hover": "Ein Klick auf ein Rufzeichen in der Feed-Liste stimmt das Rig über AC Log auf die Frequenz des Spots ab. Erfordert eine eingerichtete Rig-Steuerung in AC Log."
 }

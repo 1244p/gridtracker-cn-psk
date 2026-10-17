@@ -5,7 +5,7 @@ directories:
   buildResources: build
 files:
   - '!**/.vscode/*'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CLAUDE.md,HISTORY.md,README.md,notes}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CLAUDE.md,HISTORY.md,README.md,SVG Image Notes}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!tools{,/**/*}'
 asar: true

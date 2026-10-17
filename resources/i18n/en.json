@@ -869,5 +869,15 @@
 	"roster.controls.logbook.spotsBandMixMode": "Spots Band, Mix Modes",
 	"roster.controls.logbook.spotsBandDigiMode": "Spots Band, Digi Modes",
 	"roster.controls.logbook.mixBandSpotsMode": "Mix Band, Spots Mode",
-	"roster.columns.tab.label": "Columns"
+	"roster.columns.tab.label": "Columns",
+	"settings.SOTA.chasing.label": "SOTA Chasing",
+	"settings.SOTA.chasing.hover": "Summits on the Air activators from DX Feeds: the Feed Roster's SOTA column and Wanted",
+	"roster.secondary.wanted.sota": "SOTA",
+	"rosterColumns.Wanted.sota": "SOTA",
+	"rosterColumns.SOTA.points": "Points: {0}",
+	"settings.map.sotaMap.hover": "Toggle Summits on the Air Spots",
+	"gt.potaSpot.title": "POTA Spot",
+	"gt.sotaSpot.title": "SOTA Spot",
+	"settings.logging.N3FJP.rigControl.label": "Enable Rig Control",
+	"settings.logging.N3FJP.rigControl.hover": "Clicking a Feed Roster callsign tunes the rig to the spot's frequency through AC Log. Needs rig control set up in AC Log."
 }

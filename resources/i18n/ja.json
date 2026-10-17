@@ -869,5 +869,15 @@
 	"roster.controls.logbook.spotsBandMixMode": "スポットバンド、ミックスモード",
 	"roster.controls.logbook.spotsBandDigiMode": "スポットバンド、デジタルモード",
 	"roster.controls.logbook.mixBandSpotsMode": "ミックスバンド、スポットモード",
-	"roster.columns.tab.label": "列"
+	"roster.columns.tab.label": "列",
+	"settings.SOTA.chasing.label": "SOTAチェイス",
+	"settings.SOTA.chasing.hover": "DXフィードからのSummits on the Airアクティベーター: フィードロースターのSOTA列とウォンテッド",
+	"roster.secondary.wanted.sota": "SOTA",
+	"rosterColumns.Wanted.sota": "SOTA",
+	"rosterColumns.SOTA.points": "ポイント: {0}",
+	"settings.map.sotaMap.hover": "Summits on the Airのスポットを切り替え",
+	"gt.potaSpot.title": "POTAスポット",
+	"gt.sotaSpot.title": "SOTAスポット",
+	"settings.logging.N3FJP.rigControl.label": "リグ制御を有効にする",
+	"settings.logging.N3FJP.rigControl.hover": "フィードロースターのコールサインをクリックすると、AC Log 経由でリグをスポットの周波数に合わせます。AC Log でリグ制御の設定が必要です。"
 }

@@ -70,7 +70,7 @@ CR.profiles = {
     ignores: () => GT.settings,
     // Entries from instances that are gone, or unticked in a multi-instance roster, are hidden
     filter: (callObj) => (callObj.instance in GT.instances) && !(GT.instanceCount > 1 && GT.instances[callObj.instance].crEnable === false),
-    excludedColumns: { Spotter: true, CQ: true, DEDXCCv2: true, DEContv2: true },
+    excludedColumns: { Spotter: true, CQ: true, DEDXCCv2: true, DEContv2: true, SOTA: true },
     watchersTest: {},
     alertTimer: null
   },
@@ -342,6 +342,12 @@ function processRoster()
 {
   processProfile(CR.profiles.call);
   processProfile(CR.profiles.feed);
+}
+
+// From the main window: a rig status that doesn't affect the Feed Roster
+function processCallRoster()
+{
+  processProfile(CR.profiles.call);
 }
 
 // From the main window: new DX Cluster / CW Skimmer spots
@@ -958,6 +964,7 @@ function setVisual()
   usesOQRSDiv.style.display = (GT.settings.callsignLookups.oqrsUseEnable) ? "" : "none";
   onlySpotDiv.style.display = (CR.rosterSettings.columns.Spot) ? "" : "none";
   huntingMatrixPotaDiv.style.display = (GT.settings.app.potaFeatureEnabled && !GT.settings.map.offlineMode) ? "" : "none";
+  huntingMatrixSotaDiv.style.display = (isFeedRoster() && sotaActive()) ? "" : "none";
   rosterBody.style.display = "block";
    
   resize();
@@ -1633,6 +1640,12 @@ function feedsActive()
   return window.opener.feedsActive();
 }
 
+// SOTA Chasing is on and DX Feeds is running
+function sotaActive()
+{
+  return window.opener.sotaActive();
+}
+
 // From the main window when feed settings change: the Feed Roster tab exists only while a feed is on
 function updateFeedsTab()
 {
@@ -2014,7 +2027,8 @@ function addControls()
     call: I18N("rosterColumns.Wanted.call"),
     watcher: I18N("roster.watcher.label"),
     oams: I18N("rosterColumns.Wanted.oams"),
-    pota: I18N("rosterColumns.Wanted.pota")
+    pota: I18N("rosterColumns.Wanted.pota"),
+    sota: I18N("rosterColumns.Wanted.sota")
   };
 
   window.opener.setRosterSpot(CR.rosterSettings.columns.Spot);

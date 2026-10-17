@@ -127,6 +127,14 @@ function loadAllSettings()
     delete GT.settings.app.feedDigital;
     delete GT.settings.app.feedPhone;
 
+    // The SOTA column (SOTA Chasing) goes right after POTA in a saved column order
+    if (Array.isArray(feedRoster.columnOrder) && !feedRoster.columnOrder.includes("SOTA"))
+    {
+      const indexOfPOTA = feedRoster.columnOrder.indexOf("POTA");
+      if (indexOfPOTA > -1) feedRoster.columnOrder.splice(indexOfPOTA + 1, 0, "SOTA");
+      else feedRoster.columnOrder.push("SOTA");
+    }
+
     // DE DXCC and DE Cont columns became "DEDXCCv2" / "DEContv2" when they changed to shown by default: the old
     // on/off choice is dropped (the new key takes the default), and each keeps its place in the saved column order
     for (const [oldKey, newKey, after] of [["DEDXCC", "DEDXCCv2", "DXCC"], ["DECont", "DEContv2", "Cont"]])
@@ -765,7 +773,7 @@ function startupEventsAndTimers()
   nodeTimers.setInterval(displayTime, 1000);
   nodeTimers.setInterval(reportDecodes, 60000);
   nodeTimers.setInterval(oamsBandActivityCheck, 300000);
-  nodeTimers.setInterval(goProcessRoster, 5000);
+  nodeTimers.setInterval(rosterTimer, 5000);
 }
 
 function postInit()

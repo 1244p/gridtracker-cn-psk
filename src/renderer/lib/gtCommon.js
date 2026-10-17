@@ -311,11 +311,11 @@ function initQSOdata() {
   GT.tracker = {
     worked: {
       call: {}, grid: {}, dxcc: {}, cqz: {}, dxm: {},
-      ituz: {}, state: {}, px: {}, cnty: {}, cont: {}, pota: {}
+      ituz: {}, state: {}, px: {}, cnty: {}, cont: {}, pota: {}, sota: {}
     },
     confirmed: {
       call: {}, grid: {}, dxcc: {}, cqz: {}, dxm: {},
-      ituz: {}, state: {}, px: {}, cnty: {}, cont: {}, pota: {}
+      ituz: {}, state: {}, px: {}, cnty: {}, cont: {}, pota: {}, sota: {}
     }
   };
 }
@@ -368,7 +368,7 @@ function applyTracking(tracker, isWorked, details, isCurrentYear, currentYear, w
 }
 
 function trackQSO(details, currentYear, currentDay, currentSecond) {
-  const { DEcall, time, dxcc, pota, confirmed, band, mode } = details;
+  const { DEcall, time, dxcc, pota, sota, confirmed, band, mode } = details;
 
   const qsoDate = new Date(time * 1000);
   const isCurrentYear = (qsoDate.getUTCFullYear() === currentYear);
@@ -407,6 +407,13 @@ function trackQSO(details, currentYear, currentDay, currentSecond) {
       }
       wPota[p] = true;
     }
+  }
+
+  // Process SOTA (Worked Only): the summit, and "<day>.<summit>" for the QSO's own UTC day (a summit counts once
+  // per day). Every day is kept, not just today's: the app can stay open past midnight
+  if (sota) {
+    worked.sota[sota] = true;
+    worked.sota[~~(time / 86400) + "." + sota] = true;
   }
 
   // Process CONFIRMED

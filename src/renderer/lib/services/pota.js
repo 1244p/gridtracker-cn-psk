@@ -151,10 +151,14 @@ function redrawParks()
     GT.pota.mapParks = {};
     makeParkFeatures();
   }
+  // DX Feeds spots the POTA layer shows aren't drawn twice: redraw them with it (rtsn.js)
+  scheduleDxcwRedraw();
 }
 
 function makeParkFeatures()
 {
+  // Every park's marker, then the ones that overlap at this zoom grouped into one (see below)
+  const parkFeatures = [];
   try
   {
     let now = timeNowSec();
@@ -192,10 +196,15 @@ function makeParkFeatures()
             }
             parkObj.feature = iconFeature(ol.proj.fromLonLat([Number(GT.pota.parks[park].longitude), Number(GT.pota.parks[park].latitude)]), parkIcon, zIndex, "parkFlag");
             parkObj.feature.key = park;
+            parkObj.feature.parkKeys = [park];
             parkObj.feature.size = 22;
+            parkObj.feature.rank = zIndex;
+            parkObj.feature.parkIcon = parkIcon;
+            // Grouped only with parks in the same DXCC entity
+            parkObj.feature.dxcc = Number(GT.pota.parks[park].entityId);
 
             GT.pota.mapParks[park] = parkObj;
-            GT.layerSources.pota.addFeature(parkObj.feature);
+            parkFeatures.push(parkObj.feature);
           }
         }
       }
@@ -203,9 +212,29 @@ function makeParkFeatures()
   }
   catch (e)
   {
-    console.error("exception: makeParkFeature " + park);
+    console.error("exception: makeParkFeatures");
     console.error(e);
   }
+
+  // Parks that overlap at this zoom: one marker (a park on a rig's band and mode first) in the middle of the group; its
+  // tooltip lists them all, left-click goes to the one shown
+  for (const overlapping of groupOverlappingFeatures(parkFeatures))
+  {
+    const lead = overlapping[0];
+    if (overlapping.length > 1)
+    {
+      lead.parkKeys = overlapping.map((feature) => feature.key);
+      centerGroupMarker(overlapping);
+    }
+    GT.layerSources.pota.addFeature(lead);
+  }
+}
+
+// A redraw of the POTA layer soon, coalescing several requests (parks are regrouped as a whole)
+function scheduleParksRedraw()
+{
+  nodeTimers.clearTimeout(GT.pota.redrawTimeout);
+  GT.pota.redrawTimeout = nodeTimers.setTimeout(redrawParks, 250);
 }
 
 function potaSpotFromDecode(callObj)
@@ -353,48 +382,14 @@ function spotFromCallObj(callObj, park, inCount, rbnTime)
   return callSpot;
 }
 
+// A decode updated or added this park's spot (already in GT.pota.parkSpots): a park not on the map yet is added by
+// redrawing the layer, which regroups the overlapping parks
 function addParkSpotFeature(park, report)
 {
-  var parkObj = Object.assign({}, GT.parkTemplate);
-  if (park in GT.pota.mapParks)
+  const parkObj = GT.pota.mapParks[park];
+  if ((!parkObj || parkObj.feature == null) && validateMapBandAndMode(report.band, report.mode))
   {
-    parkObj = GT.pota.mapParks[park];
-  }
-  else
-  {
-    GT.pota.mapParks[park] = parkObj;
-  }
-
-  if (parkObj.feature == null && validateMapBandAndMode(report.band, report.mode))
-  {
-    let parkIcon = GT.gtParkOffInstance;
-    let zIndex = 1;
-
-    let now = timeNowSec();
-    let day = parseInt(now / 86400);
-    let dayAsString = String(day);
-
-    for (let instance in GT.instances)
-    {
-      if (GT.instances[instance].valid && GT.instances[instance].status.Band == report.band && GT.instances[instance].status.MO == report.mode)
-      {
-        let hash = dayAsString + "." + park + "." + report.band + report.mode;
-        if (hash in GT.tracker.worked.pota)
-        {
-          parkIcon = GT.gtParkWorkedOnInstance;
-        }
-        else
-        {
-          parkIcon = GT.gtParkOnInstance;
-        }
-        zIndex = 2;
-        break;
-      }
-    }
-    parkObj.feature = iconFeature(ol.proj.fromLonLat([Number(GT.pota.parks[park].longitude), Number(GT.pota.parks[park].latitude)]), parkIcon, zIndex, "parkFlag");
-    parkObj.feature.key = park;
-    parkObj.feature.size = 22;
-    GT.layerSources.pota.addFeature(parkObj.feature);
+    scheduleParksRedraw();
   }
 }
 
@@ -657,24 +652,97 @@ function mouseOutPark(feature)
   myParktip.style.zIndex = -1;
 }
 
+// Right-click a park marker: its tooltip pops out into the popup window, like a grid's (map/mouse.js)
+function popOutParkTip(feature)
+{
+  createParkTipTable(feature);
+  // Measured for the popup's size: shown, but behind the map until hovered
+  myParktip.style.display = "block";
+  renderTooltipWindow(feature, myParktip);
+  mouseOutPark(feature);
+}
+
+// The park the marker shows, or (when parks overlap at this zoom, feature.parkKeys) all their spots in one table
 function createParkTipTable(toolElement)
 {
-  const key = toolElement.key;
+  const keys = toolElement.parkKeys || [toolElement.key];
+  myParktip.innerHTML = keys.length > 1 ? parkGroupTipHtml(keys) : parkTipHtml(keys[0]);
+}
+
+// A spot's 4-character grid: the activator's when the spot gives one, else the park's main grid, else "-"
+function potaSpotGrid(spot, park)
+{
+  if (spot.activatorGrid && spot.activatorGrid.length >= 4) return spot.activatorGrid.substring(0, 4).toUpperCase();
+  return (park && park.grid && park.grid.length >= 4) ? park.grid.substring(0, 4).toUpperCase() : "-";
+}
+
+// Several parks under one marker: no park headers, just "POTA Spot × n" and one row per spot with its park after the
+// grid, newest first
+function parkGroupTipHtml(keys)
+{
+  const now = Date.now();
+  const spots = [];
+  for (const key of keys)
+  {
+    for (const call in GT.pota.parkSpots[key] || {})
+    {
+      const spot = GT.pota.parkSpots[key][call];
+      if (validateMapBandAndMode(spot.band, spot.mode)) spots.push({ key, spot });
+    }
+  }
+  spots.sort((a, b) => b.spot.spotTime - a.spot.spotTime);
+
+  let rows = "";
+  for (const { key, spot } of spots)
+  {
+    const { activator, spotter, frequency, count, spotTime, source, comments, band, mode } = spot;
+    const grid = potaSpotGrid(spot, GT.pota.parks[key]);
+    rows += `<tr><td style='color:yellow'>${lookupCallHtml(activator, grid == "-" ? "" : grid)}</td><td style='color:lightgreen'>${grid}</td>` +
+      `<td style='color:#fbb6fc'>${key}</td>` +
+      `<td style='color:cyan'>${spotter === activator ? "Self" : lookupCallHtml(spotter)}</td>` +
+      `<td style='color:lightgreen'>${formatMhz(frequency)} <font color='yellow'>(${band})</font></td><td style='color:orange'>${mode}</td>` +
+      `<td>${count}</td><td style='color:lightblue'>${toDHMS(~~((now - spotTime) / 1000))}</td><td>${source}</td><td>${comments}</td></tr>`;
+  }
+  return `<table id='potaSpotsTable' class='darkTable' style='margin: 0 auto;'>
+    <tr><th colspan=10 style='color:#fbb6fc'>${I18N("gt.potaSpot.title")} &times; ${spots.length}</th></tr>
+    <tr><th>Activator</th><th>${I18N("gt.callsignBox.Grid")}</th><th>POTA</th><th>Spotter</th><th>Freq</th><th>Mode</th><th>Count</th><th>When</th><th>Source</th><th>Comment</th></tr>
+    ${rows}
+  </table>`;
+}
+
+// One park's section: its header, then its spots, each with a 4-character grid (the activator's when the spot gives one,
+// else the park's main grid)
+function parkTipHtml(key)
+{
   const park = GT.pota.parks[key];
 
-  if (!park) return;  // This should never happen, we're here because we have a park on the map with at least on spot
+  if (!park) return "";  // This should never happen, we're here because we have a park on the map with at least on spot
 
-  const now = Date.now(); 
+  const now = Date.now();
 
   const { name, entityId, locationDesc } = park;
- 
-  const altName = GT.dxccToAltName[+entityId] || "Unknown"; 
 
-  let html = `<div style='background-color:#000;color:lightgreen;font-weight:bold;font-size:12px;border:1px solid gray;margin:0px' class='roundBorder'>
-    ${key} : <font color='cyan'>${name} (<font color='yellow'>${altName}</font>)</font><br>
-    <font color='lightblue'>${locationDesc}</font></div>
+  const altName = GT.dxccToAltName[+entityId] || "Unknown";
+
+  // Header like the SOTA summit tooltip's: the park; where it is; distance and bearing (when it has a position). The grid
+  // is in the spot rows
+  const where = [locationDesc && locationDesc != "??-??" ? `<font color='lightblue'>${htmlEntities(locationDesc)}</font>` : "",
+    `<font color='yellow'>${altName}</font>`].filter((part) => part).join(", ");
+  const lat = Number(park.latitude);
+  const lon = Number(park.longitude);
+  let position = "";
+  if (Number.isFinite(lat) && Number.isFinite(lon) && (lat != 0 || lon != 0))
+  {
+    const bearing = parseInt(MyCircle.bearing(GT.myLat, GT.myLon, lat, lon));
+    const dist = parseInt(MyCircle.distance(GT.myLat, GT.myLon, lat, lon) * MyCircle.validateRadius(distanceUnit.value));
+    position = `<font color='cyan'>${dist}${distanceUnit.value.toLowerCase()}</font> <font color='yellow'>${bearing}&deg;</font>`;
+  }
+
+  let html = `<div style='background-color:#000;color:#fbb6fc;font-weight:bold;font-size:12px;border:1px solid gray;margin:0px' class='roundBorder'>
+    ${key} : <font color='cyan'>${htmlEntities(name)}</font><br>
+    ${where}${position ? "<br>" + position : ""}</div>
     <table id='potaSpotsTable' class='darkTable' style='margin: 0 auto;'>
-    <tr><th>Activator</th><th>Spotter</th><th>Freq</th><th>Mode</th><th>Count</th><th>When</th><th>Source</th><th>Comment</th></tr>`;
+    <tr><th>Activator</th><th>${I18N("gt.callsignBox.Grid")}</th><th>Spotter</th><th>Freq</th><th>Mode</th><th>Count</th><th>When</th><th>Source</th><th>Comment</th></tr>`;
 
   const spots = GT.pota.parkSpots[key];
   for (const i in spots) {
@@ -685,9 +753,12 @@ function createParkTipTable(toolElement)
       const { activator, spotter, frequency, count, spotTime, source, comments } = spot;
       const spotterDisplay = (spotter === activator) ? "Self" : spotter;
       const secondsAgo = ~~((now - spotTime) / 1000);
-      html += `<tr><td style='color:yellow'>${activator}</td><td style='color:cyan'>${spotterDisplay}</td><td style='color:lightgreen'>${formatMhz(frequency)} <font color='yellow'>(${band})</font></td><td style='color:orange'>${mode}</td><td>${count}</td><td style='color:lightblue'>${toDHMS(secondsAgo)}</td><td>${source}</td><td>${comments}</td></tr>`;
+      const grid = potaSpotGrid(spot, park);
+      // Callsigns look up when clicked, also popped out (lookupCallHtml, map/mouse.js)
+      html += `<tr><td style='color:yellow'>${lookupCallHtml(activator, grid == "-" ? "" : grid)}</td><td style='color:lightgreen'>${grid}</td>` +
+        `<td style='color:cyan'>${spotterDisplay == "Self" ? spotterDisplay : lookupCallHtml(spotter)}</td><td style='color:lightgreen'>${formatMhz(frequency)} <font color='yellow'>(${band})</font></td><td style='color:orange'>${mode}</td><td>${count}</td><td style='color:lightblue'>${toDHMS(secondsAgo)}</td><td>${source}</td><td>${comments}</td></tr>`;
     }
   }
   html += "</table>";
-  myParktip.innerHTML = html;
+  return html;
 }

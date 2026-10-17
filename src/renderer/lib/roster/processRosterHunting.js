@@ -10,7 +10,7 @@ function createEmptyAudioAlerts()
 {
   return {
     huntCallsign: 0, huntGrid: 0, huntDXCC: 0, huntState: 0, huntCounty: 0, 
-    huntPOTA: 0, huntCQz: 0, huntITUz: 0, huntPX: 0, huntCont: 0, 
+    huntPOTA: 0, huntSOTA: 0, huntCQz: 0, huntITUz: 0, huntPX: 0, huntCont: 0, 
     huntWatcher: 0, huntAward: 0, huntDXM: 0 
   };
 }
@@ -41,6 +41,8 @@ function processRosterHunting(callRoster, rosterSettings)
   const zYearStr = "z" + currentYear;
   
   const potaFeatureEnabled = (GT.settings.app.potaFeatureEnabled && GT.settings.map.offlineMode === false);
+  // SOTA Chasing: Feed Roster spots only (a summit comes from the spot's note)
+  const sotaFeatureEnabled = sotaActive();
   const isAwardTracker = (CR.activeRoster.logbook.referenceNeed === LOGBOOK_AWARD_TRACKER);
   const AAW = CR.activeAudioAlerts.wanted;
 
@@ -65,7 +67,8 @@ function processRosterHunting(callRoster, rosterSettings)
   // callsign (yellow) and grid (cyan) colors, like its window colors
   const baseCallColor = rosterColor("Callsign"), baseGridColor = rosterColor("Grid"), baseCallingColor = rosterColor("Calling"),
     baseDxccColor = rosterColor("DXCC"), baseStateColor = rosterColor("State"), baseCntyColor = rosterColor("County"),
-    baseContColor = rosterColor("Cont"), basePotaColor = rosterColor("POTA"), baseCqzColor = rosterColor("CQz"),
+    baseContColor = rosterColor("Cont"), basePotaColor = rosterColor("POTA"), baseSotaColor = rosterColor("SOTA"),
+    baseCqzColor = rosterColor("CQz"),
     baseItuzColor = rosterColor("ITUz"), baseWpxColor = rosterColor("PX"), baseDxmColor = rosterColor("DXM");
 
   for (const callHash in callRoster)
@@ -99,7 +102,7 @@ function processRosterHunting(callRoster, rosterSettings)
     let rwActive = CR.activeRoster.wanted;
     if (isAwardTracker)
     {
-      rwActive = { huntCallsign: false, huntGrid: false, huntDXCC: false, huntCQz: false, huntDXM: false, huntState: false, huntCounty: false, huntPOTA: false, huntITUz: false, huntPX: false, huntCont: false, huntWatcher: false };
+      rwActive = { huntCallsign: false, huntGrid: false, huntDXCC: false, huntCQz: false, huntDXM: false, huntState: false, huntCounty: false, huntPOTA: false, huntSOTA: false, huntITUz: false, huntPX: false, huntCont: false, huntWatcher: false };
       if (callObj.awardType in AWT_MAP)
       {
         rwActive[AWT_MAP[callObj.awardType]] = true;
@@ -137,13 +140,13 @@ function processRosterHunting(callRoster, rosterSettings)
     
     let callColor = baseCallColor, gridColor = baseGridColor, callingColor = baseCallingColor, dxccColor = baseDxccColor,
         stateColor = baseStateColor, cntyColor = baseCntyColor, contColor = baseContColor, potaColor = basePotaColor,
-        cqzColor = baseCqzColor, ituzColor = baseItuzColor, wpxColor = baseWpxColor, dxmColor = baseDxmColor;
+        sotaColor = baseSotaColor, cqzColor = baseCqzColor, ituzColor = baseItuzColor, wpxColor = baseWpxColor, dxmColor = baseDxmColor;
 
     let callBg = kRow, gridBg = kRow, callingBg = kRow, dxccBg = kRow, stateBg = kRow, cntyBg = kRow,
-        contBg = kRow, potaBg = kRow, cqzBg = kRow, ituzBg = kRow, wpxBg = kRow, dxmBg = kRow;
-        
+        contBg = kRow, potaBg = kRow, sotaBg = kRow, cqzBg = kRow, ituzBg = kRow, wpxBg = kRow, dxmBg = kRow;
+
     let callConf = "", gridConf = "", callingConf = "", dxccConf = "", stateConf = "", cntyConf = "",
-        contConf = "", potaConf = "", cqzConf = "", ituzConf = "", wpxConf = "", dxmConf = "";
+        contConf = "", potaConf = "", sotaConf = "", cqzConf = "", ituzConf = "", wpxConf = "", dxmConf = "";
 
     // Global Tracker Evaluation
     if (hash in trackerWorked.call)
@@ -167,6 +170,15 @@ function processRosterHunting(callRoster, rosterSettings)
       {
         let potaHash = `${dayAsStr}.${callsign}.${callObj.pota}.${callObj.band}${callObj.mode}`;
         if (potaHash in trackerWorked.pota)
+        {
+          entry.tx = false;
+          continue;
+        }
+      }
+      // A worked call on a summit not chased today is still new
+      else if (sotaFeatureEnabled && callObj.sota && (rwActive.huntSOTA || AAW.huntSOTA))
+      {
+        if (`${dayAsStr}.${callObj.sota}` in trackerWorked.sota)
         {
           entry.tx = false;
           continue;
@@ -544,6 +556,27 @@ function processRosterHunting(callRoster, rosterSettings)
       }
     }
 
+    // Hunting for SOTA summits: a summit counts once per UTC day (SOTA chaser points), whoever activates it.
+    // Never chased: full color; chased before but not today: lighter; chased today: outlined only
+    if (sotaFeatureEnabled && (rwActive.huntSOTA || AAW.huntSOTA) && callObj.sota)
+    {
+      if (!(`${dayAsStr}.${callObj.sota}` in trackerWorked.sota))
+      {
+        if (AAW.huntSOTA) { AH.huntSOTA++; hasAudioAlert = true; }
+        if (rwActive.huntSOTA)
+        {
+          shouldRosterAlert = true;
+          callObj.hunting.sota = "hunted";
+          sotaBg = `${sotaColor}${(callObj.sota in trackerWorked.sota) ? kLayeredUnconfAlpha : kInversionAlpha};`;
+          sotaColor = kBold;
+        }
+      }
+      else
+      {
+        sotaConf = `${kUnconf}${sotaColor}${kInversionAlpha};`;
+      }
+    }
+
     // Hunting for CQ Zones
     if ((rwActive.huntCQz || AAW.huntCQz) && callObj.cqz)
     {
@@ -787,6 +820,7 @@ function processRosterHunting(callRoster, rosterSettings)
     styleObj.state = makeStyle(stateConf, stateBg, stateColor);
     styleObj.cnty = makeStyle(cntyConf, cntyBg, cntyColor, cntyPointer);
     styleObj.pota = makeStyle(potaConf, potaBg, potaColor);
+    styleObj.sota = makeStyle(sotaConf, sotaBg, sotaColor);
     styleObj.cont = makeStyle(contConf, contBg, contColor);
     styleObj.cqz = makeStyle(cqzConf, cqzBg, cqzColor);
     styleObj.ituz = makeStyle(ituzConf, ituzBg, ituzColor);

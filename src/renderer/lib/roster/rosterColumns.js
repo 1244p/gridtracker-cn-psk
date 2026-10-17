@@ -1,6 +1,6 @@
 const DEFAULT_COLUMN_ORDER = [
   "Callsign", "Band", "Mode", "Calling", "Spotter", "CQ", "Rig", "Wanted", "Grid", "Msg",
-  "POTA", "DXCC", "DEDXCCv2", "Flag", "DXM", "State", "County", "Cont", "DEContv2",
+  "POTA", "SOTA", "DXCC", "DEDXCCv2", "Flag", "DXM", "State", "County", "Cont", "DEContv2",
   "dB", "Freq", "DT", "Dist", "Azim",
   "CQz", "ITUz", "PX",
   "LoTW", "eQSL", "OQRS",
@@ -23,7 +23,7 @@ function rosterColor(column)
 // Feed Roster: ▲ before the callsign when a rig on the spot's band and mode can work it
 function markWorkableFeed(callObj, html)
 {
-  return (isFeedRoster() && !callObj.readOnly) ? "&#9650;" + html : html;
+  return (isFeedRoster() && callObj.onRig) ? "&#9650;" + html : html;
 }
 
 const getterSimpleComparer = (getter) => (a, b) =>
@@ -483,6 +483,17 @@ const ROSTER_COLUMNS = {
     })
   },
 
+  // Feed Roster only, while SOTA Chasing is on: the summit from the spot's note
+  SOTA: {
+    compare: callObjSimpleComparer("sota"),
+    tableData: (callObj) => ({
+      name: "SOTA",
+      rawAttrs: callObj.style.sota,
+      title: sotaColumnHover(callObj),
+      html: callObj.sota || "&nbsp;"
+    })
+  },
+
   Wanted: {
     compare: (a, b) => wantedColumnComparer(a.callObj, b.callObj),
     tableData: (callObj) => ({
@@ -517,7 +528,16 @@ function potaColumnHover(callObj)
   
   return value;
 }
-WANTED_ORDER = ["call", "qrz", "watcher", "cont", "dxcc", "cqz", "ituz", "dxm", "state", "pota", "grid", "cnty", "wpx"];
+// Like the POTA hover: "W7O/NC-039 - Clatskanie Mountain" then "2080 ft, Points: 1" (from SOTA's summit list; the height
+// in the main window's distance units)
+function sotaColumnHover(callObj)
+{
+  const summit = callObj.sota && GT.sota.summits[callObj.sota];
+  if (!summit) return "";
+  return callObj.sota + " - " + summit.name + "\n" + window.opener.sotaHeightText(summit.alt) + ", " + I18N("rosterColumns.SOTA.points").replace("{0}", summit.points);
+}
+
+WANTED_ORDER = ["call", "qrz", "watcher", "cont", "dxcc", "cqz", "ituz", "dxm", "state", "pota", "sota", "grid", "cnty", "wpx"];
 WANTED_LABELS = {};
 
 function wantedColumnParts(callObj, options)

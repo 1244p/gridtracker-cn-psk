@@ -73,7 +73,7 @@ const k_callRosterColumnColors = {
 
 // The Feed Roster swaps the Call Roster's callsign (yellow) and grid (cyan) colors, like its window colors
 const k_feedRosterColumnColors = {
-  Callsign: "00FFFF", Spotter: "5CAEFF", CQ: "00FF00", Wanted: "EEEEEE", Grid: "FFFF00", Msg: "EEEEEE", POTA: "FBB6FC",
+  Callsign: "00FFFF", Spotter: "5CAEFF", CQ: "00FF00", Wanted: "EEEEEE", Grid: "FFFF00", Msg: "EEEEEE", POTA: "FBB6FC", SOTA: "40FFD8",
   DXCC: "FFA500", DEDXCCv2: "80FFB0", DXM: "7398FF", State: "90EE90", County: "CCDD00", Cont: "00DDDD", DEContv2: "FF8080",
   Freq: "00FF00", Dist: "00FFFF", Azim: "FFFF00",
   CQz: "DDDDDD", ITUz: "DDDDDD", PX: "FFFF00",
@@ -133,6 +133,8 @@ const def_settings = {
     oamsBandActivityNeighbors: false,
     pathWidthWeight: 1.0,
     potaFeatureEnabled: true,
+    // SOTA Chasing (Settings -> Features -> Online): SOTA activators from DX Feeds spots in the Feed Roster
+    sotaFeatureEnabled: false,
     potaMapEnabled: false,
     pushPinMode: false,
     qrzPathWidthWeight: 1.2,
@@ -207,6 +209,8 @@ const def_settings = {
     equator: false,
     equatorColor: 0,
     dxcwFeed: false,
+    // Button panel SOTA button (shown while SOTA Chasing runs): summits with activators on the map
+    sotaMap: true,
     trafficDecode: true,
     usRadar: false,
     timezonesEnable: 0,
@@ -347,7 +351,8 @@ const def_settings = {
     menu: false,
     startup: false,
     qsl: "A",
-    connect: false
+    connect: false,
+    rigControl: false
   },
   trustedQsl: {
     stationFile: "",
@@ -416,6 +421,8 @@ const def_settings = {
       huntCont: false,
       huntPX: false,
       huntPOTA: false,
+      // Feed Roster only (SOTA Chasing); listed here so Settings -> Audio Alerts builds its row
+      huntSOTA: false,
       huntWatcher: false,
       huntAward: false,
       huntMultiple: false,
@@ -432,6 +439,7 @@ const def_settings = {
       huntContType: "tts",
       huntPXType: "tts",
       huntPOTAType: "tts",
+      huntSOTAType: "tts",
       huntWatcherType: "tts",
       huntAwardType: "tts",
       huntMultipleType: "tts",
@@ -447,6 +455,7 @@ const def_settings = {
       huntContFileSingle: "none",
       huntPXFileSingle: "none",
       huntPOTAFileSingle: "none",
+      huntSOTAFileSingle: "none",
 
       huntWatcherFileSingle: "none",
       huntAwardFileSingle: "none",
@@ -463,6 +472,7 @@ const def_settings = {
       huntContFileMulti: "none",
       huntPXFileMulti: "none",
       huntPOTAFileMulti: "none",
+      huntSOTAFileMulti: "none",
 
       huntWatcherFileMulti: "none",
       huntAwardFileMulti: "none",
@@ -479,6 +489,7 @@ const def_settings = {
       huntContSpeechSingle: "Wanted Continent",
       huntPXSpeechSingle: "Wanted Prefix",
       huntPOTASpeechSingle: "Wanted Park",
+      huntSOTASpeechSingle: "Wanted Summit",
 
       huntWatcherSpeechSingle: "Wanted Watcher",
       huntAwardSpeechSingle: "Wanted Award",
@@ -495,6 +506,7 @@ const def_settings = {
       huntContSpeechMulti: "Many Continents",
       huntPXSpeechMulti: "Many Prefixes",
       huntPOTASpeechMulti: "Many Parks",
+      huntSOTASpeechMulti: "Many Summits",
 
       huntWatcherSpeechMulti: "Many Watchers",
       huntAwardSpeechMulti: "Many Awards",
@@ -671,6 +683,7 @@ const def_settings = {
       huntCont: false,
       huntPX: false,
       huntPOTA: false,
+      huntSOTA: false,
       huntWatcher: false,
       huntDXM: false,
     },
@@ -689,6 +702,8 @@ const def_settings = {
       State: true,
       County: false,
       POTA: false,
+      // Shown only while SOTA Chasing is on
+      SOTA: true,
       Cont: false,
       DEContv2: true,
       Freq: true,
@@ -707,7 +722,7 @@ const def_settings = {
     },
     columnOrder: [
       "Callsign", "Band", "Mode", "Spotter", "CQ", "Grid", "DXCC", "Flag", "State", "County", "Wanted", "Msg",
-      "POTA", "DEDXCCv2", "DXM", "Cont", "DEContv2",
+      "POTA", "SOTA", "DEDXCCv2", "DXM", "Cont", "DEContv2",
       "Freq", "Dist", "Azim",
       "CQz", "ITUz", "PX",
       "LoTW", "eQSL", "OQRS",
@@ -766,6 +781,7 @@ const def_settings = {
       huntCont: false,
       huntPX: false,
       huntPOTA: false,
+      huntSOTA: false,
       huntWatcher: false,
       huntAward: false,
       huntMultiple: false,

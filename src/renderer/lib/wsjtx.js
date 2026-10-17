@@ -22,10 +22,13 @@ function handleInstanceStatus(newMessage)
   let instanceKey = null;
   if (newMessage.DEcall && newMessage.DEgrid) instanceKey = `${newMessage.DEcall}|${newMessage.Band}|${newMessage.MO}|${newMessage.DEgrid}`;
 
+  // The rig's call, band, mode or grid changed: the Feed Roster (▲, Auto Band / Mode) needs reprocessing too
+  let rigChanged = false;
   if (instanceKey != GT.instances[newMessage.instance].instanceKey )
   {
     GT.instances[newMessage.instance].instanceKey = instanceKey;
     GT.gtLiveStatusUpdate = true;
+    rigChanged = true;
   }
   
   if (GT.callRosterWindowInitialized)
@@ -149,7 +152,10 @@ function handleInstanceStatus(newMessage)
     }
 
     GT.settings.app.myRawFreq = newMessage.Frequency;
-    frequency.innerHTML = "<font color='lightgreen'>" + formatMhz(Number(newMessage.Frequency / 1000)) + " Hz </font><font color='yellow'>(" + GT.settings.app.myBand + ")</font>";
+    // AC Log without a rig interface has no frequency: just the band
+    const showFrequency = newMessage.Id != GT.acLogInstanceId || newMessage.Frequency > 0;
+    frequency.innerHTML = (showFrequency ? "<font color='lightgreen'>" + formatMhz(Number(newMessage.Frequency / 1000)) + " Hz </font>" : "") +
+      "<font color='yellow'>(" + GT.settings.app.myBand + ")</font>";
     
 
     GT.settings.app.myRawCall = newMessage.DEcall.trim();
@@ -408,7 +414,9 @@ function handleInstanceStatus(newMessage)
 
   if (newMessage.Decoding == 0)
   {
-    goProcessRoster();
+    // Every status (AC Log's 5 second polls, WSJT-X's many) would otherwise rebuild the whole Feed Roster as well
+    if (rigChanged) goProcessRoster();
+    else goProcessCallRoster();
   }
 }
 
@@ -1536,6 +1544,8 @@ function LiveCallsign(DEcall, DXcall, grid, mode, band, msg, dxcc, time) {
   this.zone = null;
   this.cont = null;
   this.pota = null;
+  // SOTA summit, feed spots only (rtsn.js)
+  this.sota = null;
   this.state = null;
   this.cnty = null;
   this.zipcode = null;

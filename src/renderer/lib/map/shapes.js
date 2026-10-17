@@ -59,6 +59,74 @@ function iconFeature(center, iconObj, zIndex, propName)
   return feature;
 }
 
+// Point markers whose icons would overlap at the current zoom, grouped (POTA parks, SOTA summits, DX Feeds spots): an array of groups,
+// each an array of features, the first being the one to show (highest feature.rank). radiusPx: centers closer than
+// this, in screen pixels, count as overlapping. Only markers with the same feature.dxcc are grouped: spots from
+// different DXCC entities stay apart
+function groupOverlappingFeatures(features, radiusPx = 22)
+{
+  const resolution = GT.mapView ? GT.mapView.getResolution() : 0;
+  const sorted = features.slice().sort((a, b) => (b.rank || 0) - (a.rank || 0));
+  if (!(resolution > 0)) return sorted.map((feature) => [feature]);
+
+  const radius = radiusPx * resolution;
+  // Markers bucketed in cells one radius wide, so each is only compared with those in its own and the 8 cells around
+  // (DX Feeds can have thousands)
+  const coords = sorted.map((feature) => feature.getGeometry().getCoordinates());
+  const cells = new Map();
+  const cellKey = (cx, cy) => cx + "," + cy;
+  coords.forEach(([x, y], i) =>
+  {
+    const key = cellKey(Math.floor(x / radius), Math.floor(y / radius));
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push(i);
+  });
+
+  const groups = [];
+  const taken = new Uint8Array(sorted.length);
+  for (let i = 0; i < sorted.length; i++)
+  {
+    if (taken[i]) continue;
+    taken[i] = 1;
+    const [x, y] = coords[i];
+    const cx = Math.floor(x / radius);
+    const cy = Math.floor(y / radius);
+    const members = [];
+    for (let dx = -1; dx <= 1; dx++)
+    {
+      for (let dy = -1; dy <= 1; dy++)
+      {
+        for (const j of cells.get(cellKey(cx + dx, cy + dy)) || [])
+        {
+          if (!taken[j] && sorted[j].dxcc === sorted[i].dxcc && Math.hypot(coords[j][0] - x, coords[j][1] - y) <= radius)
+          {
+            taken[j] = 1;
+            members.push(j);
+          }
+        }
+      }
+    }
+    // The lead first, then the rest in rank order
+    members.sort((a, b) => a - b);
+    groups.push([sorted[i], ...members.map((j) => sorted[j])]);
+  }
+  return groups;
+}
+
+// A group's marker (its first feature) goes to the middle of the group: the average of all their positions
+function centerGroupMarker(group)
+{
+  if (group.length < 2) return;
+  let x = 0, y = 0;
+  for (const feature of group)
+  {
+    const [fx, fy] = feature.getGeometry().getCoordinates();
+    x += fx;
+    y += fy;
+  }
+  group[0].getGeometry().setCoordinates([x / group.length, y / group.length]);
+}
+
 function lineGeometry(points, steps)
 {
   // Map coords into lat lngs

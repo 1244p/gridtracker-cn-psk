@@ -862,5 +862,15 @@
   "roster.controls.logbook.spotsBandMixMode": "Banda del spot, Modo mixto",
   "roster.controls.logbook.spotsBandDigiMode": "Banda del spot, Modo Dig.",
   "roster.controls.logbook.mixBandSpotsMode": "Banda mixta, Modo del spot",
-  "roster.columns.tab.label": "Columnas"
+  "roster.columns.tab.label": "Columnas",
+  "settings.SOTA.chasing.label": "Caza de SOTA",
+  "settings.SOTA.chasing.hover": "Activadores de Summits on the Air desde DX Feeds: columna SOTA y Buscados en la lista de fuentes",
+  "roster.secondary.wanted.sota": "SOTA",
+  "rosterColumns.Wanted.sota": "SOTA",
+  "rosterColumns.SOTA.points": "Puntos: {0}",
+  "settings.map.sotaMap.hover": "Alternar spots de Summits on the Air",
+  "gt.potaSpot.title": "Spot de POTA",
+  "gt.sotaSpot.title": "Spot de SOTA",
+  "settings.logging.N3FJP.rigControl.label": "Activar Control Del Equipo",
+  "settings.logging.N3FJP.rigControl.hover": "Al hacer clic en un indicativo de la Lista de fuentes, el equipo se sintoniza en la frecuencia del spot a través de AC Log. Requiere el control del equipo configurado en AC Log."
 }

@@ -583,6 +583,12 @@
                 <label data-i18n="roster.secondary.wanted.pota" for="huntPOTA" title="Parks On The Air">POTA</label>
                 <label></label>
               </div>
+              <!-- Feed Roster only, while SOTA Chasing is on -->
+              <div id="huntingMatrixSotaDiv">
+                <input type="checkbox" id="huntSOTA" onchange="wantedChanged(this);" />
+                <label data-i18n="roster.secondary.wanted.sota" for="huntSOTA" title="Summits on the Air">SOTA</label>
+                <label></label>
+              </div>
               <div>
                 <input type="checkbox" id="huntCQz" onchange="wantedChanged(this);" />
                 <label data-i18n="roster.secondary.wanted.cqzone" for="huntCQz" title="CQ Zones">CQz</label>

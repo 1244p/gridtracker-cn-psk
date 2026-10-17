@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <script src="./lib/map/grayline.js" type="text/javascript"></script>
   <script src="./lib/services/rtsn.js" type="text/javascript"></script>
   <script src="./lib/services/pota.js" type="text/javascript"></script>
+  <script src="./lib/services/sota.js" type="text/javascript"></script>
   <script src="./lib/services/pstrotator.js" type="text/javascript"></script>
   <script src="./lib/qso/acLog.js" type="text/javascript"></script>
   <script src="./lib/map/tropo.js" type="text/javascript"></script>
@@ -628,6 +629,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </div>
         <div id="dxcwFeedButton" onclick="toggleDxcwFeed();" class="iconButton" style="display:none;" title="Toggle DX Feed Spots" data-i18n="settings.map.dxcwFeed.hover">
           <img id="dxcwFeedImg" src="img/feed_menu.png" class="buttonImg" />
+        </div>
+        <!-- Shown while SOTA Chasing runs (DX Feeds on) -->
+        <div id="sotaMapButton" onclick="toggleSotaMap();" class="iconButton" style="display:none;" title="Toggle Summits on the Air Spots" data-i18n="settings.map.sotaMap.hover">
+          <img id="sotaMapImg" src="img/sota_menu.png" class="buttonImg" />
         </div>
       </div>
       <div id="trafficDiv" class="roundBorder" style="
@@ -1234,6 +1239,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <td data-i18n="settings.feeds.dxFeeds.label" for="dxFeedsEnable">DX Feeds</td>
             <td>
               <input data-i18n="settings.feeds.dxFeeds.hover" title="DX Cluster and CW Skimmer spots in the Feed Roster and on the map" type="checkbox" id="dxFeedsEnable" onclick="setFeedSettings();" />
+            </td>
+          </tr>
+          <!-- Shown while DX Feeds is on: SOTA activators come from its spots -->
+          <tr id="sotaChasingTr">
+            <td data-i18n="settings.SOTA.chasing.label" for="sotaFeatureEnabled">SOTA Chasing</td>
+            <td>
+              <input data-i18n="settings.SOTA.chasing.hover" title="Summits on the Air activators from DX Feeds: the Feed Roster's SOTA column and Wanted" type="checkbox" id="sotaFeatureEnabled" onclick="changeSotaEnable();" />
             </td>
           </tr>
           </table>
@@ -2397,7 +2409,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <tr>
             <td data-i18n="settings.logging.N3FJP.source">N3FJP Loggers</td>
             <td>
-              <input type="checkbox" id="acLogConnectCheckbox" onclick="acLogLoggerChanged()" />
+              <input type="checkbox" id="acLogConnectCheckbox" onclick="acLogLoggerChanged()" /><span id="acLogConnectStatus"></span>
             </td>
             <td>
               <input type="checkbox" id="acLogMenuCheckbox" onclick="acLogLoggerChanged()" />
@@ -2426,6 +2438,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                   <option value="Q">QRZ.com</option>
                   <option value="B">Clublog</option>
                 </select>
+              </span>
+              <span id="acLogRigControlSpan" data-i18n="settings.logging.N3FJP.rigControl.hover"
+                title="Clicking a Feed Roster callsign tunes the rig to the spot's frequency through AC Log. Needs rig control set up in AC Log.">
+                <br />
+                <input type="checkbox" id="acLogRigControlCheckbox" onclick="acLogLoggerChanged()" />
+                <label data-i18n="settings.logging.N3FJP.rigControl.label" for="acLogRigControlCheckbox">Enable Rig Control</label>
               </span>
             </td>
             <td></td>
@@ -2561,6 +2579,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <label data-i18n="roster.secondary.wanted.pota" for="huntPOTA" title="Parks On The Air">POTA</label>
              </td>
               </tr>
+            <!-- Feed Roster only, while SOTA Chasing is on -->
+            <tr id="huntingMatrixSotaRow">
+              <td>
+                <input type="checkbox" id="huntSOTA" onchange="wantedChanged(this);" />
+              </td>
+              <td>
+                <label data-i18n="roster.secondary.wanted.sota" for="huntSOTA" title="Summits on the Air">SOTA</label>
+              </td>
+            </tr>
             <tr>
               <td>
                 <input type="checkbox" id="huntCQz" onchange="wantedChanged(this);" />

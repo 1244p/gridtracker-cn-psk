@@ -45,6 +45,7 @@ function updateFeedViews()
   const show = GT.settings.app.offAirServicesEnable == true && GT.settings.map.offlineMode == false;
   dxFeedsTr.style.display = show ? "" : "none";
   dxFeedsEnable.checked = GT.settings.app.dxFeeds;
+  updateSotaViews();
 
   // Settings -> Feeds tab: only while DX Feeds is on (if it's the open tab when it goes, General opens instead)
   const active = feedsActive();

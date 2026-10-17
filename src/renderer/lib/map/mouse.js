@@ -4,11 +4,32 @@
 
 // Map mouse handling: clicks, hover dispatch (GT.hoverFunctors), tooltips, right-drag grid selection (moved from GridTracker2.js)
 
+// A callsign in a map tooltip that looks it up when clicked, like the grid tooltip's, also once popped out
+// (gt_popup.html passes startLookup on to the main window). A spotter's skimmer suffix (W1NT-#) isn't looked up
+function lookupCallHtml(call, grid = "")
+{
+  if (!call) return "";
+  const lookup = call.split("-")[0];
+  return `<div style='display:inline-table;cursor:pointer' onclick='startLookup("${lookup}","${grid || ""}");'>${formatCallsign(call)}</div>`;
+}
+
 function createTooltTipTable(toolElement)
 {
   if ("spot" in toolElement)
   {
     return createSpotTipTable(toolElement);
+  }
+
+  // A SOTA summit on the DX Feeds layer: the summit and all its spots (sota.js)
+  if ("summitRef" in toolElement)
+  {
+    return createSummitTipTable(toolElement);
+  }
+
+  // DX Feeds spots that overlap at this zoom share a marker: all of them
+  if (toolElement.feedHashes && toolElement.feedHashes.length > 1)
+  {
+    return createFeedGroupTipTable(toolElement);
   }
 
   if ("feedHash" in toolElement)
@@ -291,7 +312,7 @@ function onRightClickGridSquare(feature)
     }
     else if ("feedHash" in feature)
     {
-      leftClickFeedSpot(feature.feedHash);
+      leftClickFeedSpot(feature);
     }
   }
   return false;
@@ -352,7 +373,7 @@ function createSpotTipTable(toolElement)
       myTooltip.innerHTML = `
         <table id='tooltipTable' class='darkTable'>
           <tr><th colspan=2 style='color:cyan'>Rx Spot</th></tr>
-          <tr><td>Call</td><td style='color:#ff0'>${formatCallsign(report.call)}</td></tr>
+          <tr><td>Call</td><td style='color:#ff0'>${lookupCallHtml(report.call, report.grid)}</td></tr>
           <tr><td>dB</td><td style='color:#DD44DD'>${formatSignalReport(Number(report.snr))}</td></tr>
           <tr><td>Age</td><td>${toDHMS(Number(now - report.when))}</td></tr>
           ${report.dxcc > 0 ? `<tr><td>DXCC</td><td style='color:orange;'>${GT.dxccToAltName[report.dxcc]} <font color='lightgreen'>(${GT.dxccInfo[report.dxcc].pp})</font></td>` : ""}
@@ -385,9 +406,9 @@ function createFeedTipTable(toolElement)
   if (!callObj) return 0;
 
   const now = timeNowSec();
-  // No grid: placed at its DXCC entity's center, so distance and azimuth are to there
+  // Distance and azimuth to where the marker is: its summit or park, its grid, or with no grid its DXCC entity's center
   const hasGrid = callObj.fullGrid.length >= 4;
-  const LL = hasGrid ? squareToCenter(callObj.fullGrid) : dxccCenter(callObj.dxcc);
+  const LL = feedSpotPosition(callObj);
   const bearing = LL ? parseInt(MyCircle.bearing(GT.myLat, GT.myLon, LL.a, LL.o)) : 0;
   const dist = LL ? parseInt(MyCircle.distance(GT.myLat, GT.myLon, LL.a, LL.o) * MyCircle.validateRadius(distanceUnit.value)) : 0;
   const freq = callObj.freq > 0 ? formatMhz(callObj.freq / 1000) + " " : "";
@@ -395,17 +416,51 @@ function createFeedTipTable(toolElement)
   myTooltip.innerHTML = `
     <table id='tooltipTable' class='darkTable'>
       <tr><th colspan=2 style='color:cyan'>${I18N("gt.feedSpot.title")}</th></tr>
-      <tr><td>${I18N("gt.newCallList.Call")}</td><td style='color:#ff0'>${formatCallsign(callObj.DEcall)}</td></tr>
-      <tr><td>${I18N("rosterColumns.Spotter.header")}</td><td style='color:#5caeff'>${formatCallsign(callObj.spotter)}</td></tr>
+      <tr><td>${I18N("gt.newCallList.Call")}</td><td style='color:#ff0'>${lookupCallHtml(callObj.DEcall, callObj.grid)}</td></tr>
+      <tr><td>${I18N("rosterColumns.Spotter.header")}</td><td style='color:#5caeff'>${lookupCallHtml(callObj.spotter)}</td></tr>
       <tr><td>${I18N("gt.feedSpot.age")}</td><td>${toDHMS(now - callObj.age)}</td></tr>
       ${callObj.dxcc > 0 ? `<tr><td>${I18N("gt.newCallList.DXCC")}</td><td style='color:orange;'>${GT.dxccToAltName[callObj.dxcc]} <font color='lightgreen'>(${GT.dxccInfo[callObj.dxcc].pp})</font></td></tr>` : ""}
-      ${hasGrid ? `<tr><td>${I18N("gt.callsignBox.Grid")}</td><td style='${lookupGridCellStyle(callObj.grid, callObj.band, callObj.mode)}'>${callObj.fullGrid}</td></tr>` : ""}
+      <tr><td>${I18N("gt.callsignBox.Grid")}</td>${hasGrid ? `<td style='${lookupGridCellStyle(callObj.grid, callObj.band, callObj.mode)}'>${callObj.fullGrid}</td>` : "<td>-</td>"}</tr>
       <tr><td>${I18N("gt.newCallList.Freq")}</td><td style='color:lightgreen'>${freq}<font color='yellow'>(${callObj.band})</font></td></tr>
       <tr><td>${I18N("gt.newCallList.Mode")}</td><td style='color:orange'>${callObj.mode}</td></tr>
       ${LL ? `<tr><td>${I18N("gt.feedSpot.dist")}</td><td style='color:cyan'>${dist}${distanceUnit.value.toLowerCase()}</td></tr>
       <tr><td>${I18N("gt.feedSpot.azim")}</td><td style='color:yellow'>${bearing}&deg;</td></tr>` : ""}
       <tr><td>${I18N("gt.newCallList.Time")}</td><td>${userTimeString(callObj.time * 1000)}</td></tr>
       <tr><td>${I18N("gt.newCallList.LastMsg")}</td><td style='white-space:normal;max-width:300px;'>${htmlEntities(callObj.msg)}</td></tr>
+    </table>`;
+  return 10;
+}
+
+// Several DX Feeds spots under one marker: one row each (call, 4-character grid, entity, spotter, frequency, mode, age,
+// comment), newest first, under the count
+function createFeedGroupTipTable(toolElement)
+{
+  const now = timeNowSec();
+  const spots = toolElement.feedHashes.map((hash) => GT.feedCallsigns[hash]).filter((callObj) => callObj);
+  if (spots.length == 0) return 0;
+  spots.sort((a, b) => b.age - a.age);
+
+  let rows = "";
+  for (const callObj of spots)
+  {
+    const freq = callObj.freq > 0 ? formatMhz(callObj.freq / 1000) + " " : "";
+    const dxcc = callObj.dxcc > 0 ? GT.dxccToAltName[callObj.dxcc] : "";
+    rows += `<tr><td style='color:#ff0'>${lookupCallHtml(callObj.DEcall, callObj.grid)}</td>` +
+      `<td style='color:lightgreen'>${callObj.grid || "-"}</td>` +
+      `<td style='color:orange'>${dxcc}</td>` +
+      `<td style='color:#5caeff'>${lookupCallHtml(callObj.spotter)}</td>` +
+      `<td style='color:lightgreen'>${freq}<font color='yellow'>(${callObj.band})</font></td>` +
+      `<td style='color:orange'>${callObj.mode}</td>` +
+      `<td style='color:lightblue'>${toDHMS(now - callObj.age)}</td>` +
+      `<td style='white-space:normal;max-width:260px;'>${htmlEntities(callObj.msg)}</td></tr>`;
+  }
+
+  myTooltip.innerHTML = `
+    <table id='tooltipTable' class='darkTable'>
+      <tr><th colspan=8 style='color:cyan'>${I18N("gt.feedSpot.title")} &times; ${spots.length}</th></tr>
+      <tr><th>${I18N("gt.newCallList.Call")}</th><th>${I18N("gt.callsignBox.Grid")}</th><th>${I18N("gt.newCallList.DXCC")}</th><th>${I18N("rosterColumns.Spotter.header")}</th>` +
+    `<th>${I18N("gt.newCallList.Freq")}</th><th>${I18N("gt.newCallList.Mode")}</th><th>${I18N("gt.feedSpot.age")}</th><th>${I18N("gt.newCallList.LastMsg")}</th></tr>
+      ${rows}
     </table>`;
   return 10;
 }
@@ -826,6 +881,8 @@ function mouseDownEvent(event)
   {
     features = features.reverse();
     let finalGridFeature = null;
+    let parkPoppedOut = false;
+    const rightButton = event.originalEvent && event.originalEvent.button == 2;
     for (let i = 0; i < features.length; i++)
     {
       const feature = features[i];
@@ -845,10 +902,21 @@ function mouseDownEvent(event)
       }
       if (feature.size == 22)
       {
-        leftClickPota(feature.key);
+        if (rightButton)
+        {
+          // Right-click a park: its tooltip (every park when grouped) pops out, like a grid's
+          if (!parkPoppedOut) popOutParkTip(feature);
+          parkPoppedOut = true;
+        }
+        else
+        {
+          leftClickPota(feature.key);
+        }
         shouldReturn = true;
       }
     }
+    // A park popped out: not the grid square under it as well
+    if (parkPoppedOut) finalGridFeature = null;
     if (finalGridFeature)
     {
       onRightClickGridSquare(finalGridFeature);

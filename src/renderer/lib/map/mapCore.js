@@ -341,8 +341,11 @@ function renderMap()
   createGlobalMapLayer("pskFlights");
   createGlobalMapLayer("pskSpots");
   createGlobalMapLayer("pskHop");
-  createGlobalMapLayer("pota");
+  // Layers draw in the order they're created here (zIndex): POTA parks over the DX Feeds spots, and SOTA summits
+  // (activators from DX Feeds spots, sota.js) over both
   createGlobalMapLayer("dxcwSpots");
+  createGlobalMapLayer("pota");
+  createGlobalMapLayer("sotaSpots");
   createGlobalMapLayer("flight");
   createGlobalMapLayer("transmit");
   createGlobalMapLayer("gtflags");
@@ -362,6 +365,14 @@ function renderMap()
     zoom: GT.settings.map.zoom * 0.333,
     projection: GT.settings.map.projection,
     showFullExtent: true
+  });
+
+  // POTA parks, SOTA summits and DX Feeds spots that overlap at this zoom are drawn as one marker: regroup after a zoom
+  // (redrawParks also redraws the feed spot layers)
+  GT.mapView.on("change:resolution", () =>
+  {
+    nodeTimers.clearTimeout(GT.regroupMarkersTimeout);
+    GT.regroupMarkersTimeout = nodeTimers.setTimeout(redrawParks, 300);
   });
 
   GT.shadowVector = new ol.layer.Vector({ zIndex: 0 });
@@ -386,8 +397,10 @@ function renderMap()
       GT.layerVectors.pskFlights,
       GT.layerVectors.pskSpots,
       GT.layerVectors.pskHop,
-      GT.layerVectors.pota,
+      // POTA parks over the DX Feeds spots; SOTA summits over both
       GT.layerVectors.dxcwSpots,
+      GT.layerVectors.pota,
+      GT.layerVectors.sotaSpots,
       GT.layerVectors.flight,
       GT.layerVectors.transmit,
       GT.layerVectors.gtflags,

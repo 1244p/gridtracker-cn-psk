@@ -871,5 +871,15 @@
   "roster.controls.logbook.spotsBandMixMode": "報告波段, 混合模式",
   "roster.controls.logbook.spotsBandDigiMode": "報告波段, 數字模式",
   "roster.controls.logbook.mixBandSpotsMode": "報告模式, 混合波段",
-  "roster.columns.tab.label": "欄位"
+  "roster.columns.tab.label": "欄位",
+  "settings.SOTA.chasing.label": "SOTA追逐",
+  "settings.SOTA.chasing.hover": "來自 DX Feeds 的 Summits on the Air 啟用者：資料來源清單中的 SOTA 欄和想要的",
+  "roster.secondary.wanted.sota": "SOTA",
+  "rosterColumns.Wanted.sota": "SOTA",
+  "rosterColumns.SOTA.points": "分數：{0}",
+  "settings.map.sotaMap.hover": "切換 Summits on the Air 報告",
+  "gt.potaSpot.title": "POTA報告",
+  "gt.sotaSpot.title": "SOTA報告",
+  "settings.logging.N3FJP.rigControl.label": "啟用電台控制",
+  "settings.logging.N3FJP.rigControl.hover": "在資料來源清單中點擊呼號時，透過 AC Log 將電台調到該 spot 的頻率。需要在 AC Log 中設定電台控制。"
 }

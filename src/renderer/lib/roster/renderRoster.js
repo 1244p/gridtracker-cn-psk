@@ -45,6 +45,8 @@ function renderRoster(callRoster, rosterSettings)
 
   columnOverrides.Band = showBands;
   columnOverrides.Mode = showModes;
+  // The Feed Roster's SOTA column only while SOTA Chasing is on
+  if (!sotaActive()) columnOverrides.SOTA = false;
   const rosterColumns = rosterColumnList(CR.rosterSettings.columns, columnOverrides);
 
   if (CR.rosterSettings.compact)
@@ -75,7 +77,10 @@ function renderRoster(callRoster, rosterSettings)
 
     if (feedRoster)
     {
-      callObj.readOnly = !((callObj.band + "|" + callObj.mode) in workableFeeds);
+      // ▲: a rig is on the spot's band and mode. Other spots go to a connected AC Log, else Gen Msgs on the active
+      // WSJT-X / JTDX, so those can be clicked as well, without the ▲
+      callObj.onRig = (callObj.band + "|" + callObj.mode) in workableFeeds;
+      callObj.readOnly = !callObj.onRig && !window.opener.feedSpotClickable(callObj);
       if (!callObj.readOnly)
       {
         rowTitle = I18N("renderRoster.feedSpotted").replace("{spotter}", callObj.spotter);

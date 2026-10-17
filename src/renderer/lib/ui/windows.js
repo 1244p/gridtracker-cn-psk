@@ -32,13 +32,15 @@ function initPopupWindow()
   }
 }
 
-function renderTooltipWindow(feature)
+// Pops a tooltip out into the popup window; tooltip is the map tooltip element it was built in (POTA parks have
+// their own, myParktip)
+function renderTooltipWindow(feature, tooltip = myTooltip)
 {
   if (GT.popupWindowInitialized)
   {
-    let positionInfo = myTooltip.getBoundingClientRect();
+    let positionInfo = tooltip.getBoundingClientRect();
     GT.popupWindowHandle.window.resizeTo(parseInt(positionInfo.width + 20), parseInt(positionInfo.height + 40));
-    GT.popupWindowHandle.window.adifTable.innerHTML = myTooltip.innerHTML;
+    GT.popupWindowHandle.window.adifTable.innerHTML = tooltip.innerHTML;
     electron.ipcRenderer.send("showWin", "gt_popup");
   }
 }

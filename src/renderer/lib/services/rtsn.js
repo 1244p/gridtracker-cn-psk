@@ -340,7 +340,7 @@ function handleFeed(jsmesg)
   if (added)
   {
     scheduleFeedRosterUpdate();
-    if (GT.settings.map.dxcwFeed) scheduleDxcwRedraw();
+    if (GT.settings.map.dxcwFeed || (GT.settings.map.sotaMap && sotaActive())) scheduleDxcwRedraw();
   }
 }
 
@@ -394,12 +394,38 @@ function dxccCenter(dxcc)
   return (Number.isFinite(info.lon) && Number.isFinite(info.lat)) ? { o: info.lon, a: info.lat } : null;
 }
 
+// Where a feed spot goes on the map, as { o: lon, a: lat }, or null: on a known SOTA summit or POTA park, exactly there
+// (lined up with the summit / park marker; the spot's grid is that square, but its center can be kilometers off); else
+// its grid's center; with no grid, its DXCC entity's center
+function feedSpotPosition(callObj)
+{
+  const summit = callObj.summitPlaced && GT.sota.summits[callObj.sota];
+  if (summit) return { o: summit.lon, a: summit.lat };
+
+  const park = callObj.pota && GT.pota.parks[callObj.pota];
+  if (park)
+  {
+    const lat = Number(park.latitude);
+    const lon = Number(park.longitude);
+    if (Number.isFinite(lat) && Number.isFinite(lon) && (lat != 0 || lon != 0)) return { o: lon, a: lat };
+  }
+
+  return callObj.fullGrid.length >= 4 ? squareToCenter(callObj.fullGrid) : dxccCenter(callObj.dxcc);
+}
+
+// Draws both feed spot layers: DX Feeds (button panel DX Feeds button) and, while SOTA Chasing runs, the SOTA layer
+// (its own button). A spot the SOTA or POTA layer shows (its summit / park marker) isn't drawn again on the DX Feeds
+// layer while that layer is on; with it off, it's an ordinary DX Feeds spot
 function redrawDxcwSpots()
 {
   GT.dxcwRedrawTimeout = null;
   GT.layerSources.dxcwSpots.clear();
+  GT.layerSources.sotaSpots.clear();
 
-  if (!GT.settings.map.dxcwFeed || !feedsActive()) return;
+  const sota = sotaActive();
+  const showFeed = GT.settings.map.dxcwFeed == true;
+  const showSota = sota && GT.settings.map.sotaMap == true;
+  if ((!showFeed && !showSota) || !feedsActive()) return;
 
   const onBand = {};
   const onBandMode = {};
@@ -413,47 +439,142 @@ function redrawDxcwSpots()
     }
   }
 
+  // SOTA Chasing: spots on a known summit share one marker there (summitRef -> { hashes, level, best })
+  const summits = {};
+  // DX Feeds spot markers, grouped where they overlap before they're added
+  const feedFeatures = [];
+
+  // While the POTA layer shows, a DX Feeds spot it already shows isn't drawn again: same call + band + mode (the feed
+  // spot's hash) as one of its POTA spots
+  const potaShown = {};
+  if (showFeed && GT.settings.app.potaFeatureEnabled && GT.settings.app.potaMapEnabled && GT.settings.map.offlineMode == false)
+  {
+    const nowMs = Date.now();
+    for (const park in GT.pota.parkSpots)
+    {
+      if (!(park in GT.pota.parks)) continue;
+      for (const call in GT.pota.parkSpots[park])
+      {
+        const report = GT.pota.parkSpots[park][call];
+        if (nowMs < report.expire && validateMapBandAndMode(report.band, report.mode)) potaShown[call + report.band + report.mode] = true;
+      }
+    }
+  }
+
+  // A summit's spots are kept as long as the Feed Roster keeps them (its Max Age), so every SOTA spot in the roster is
+  // on its summit's marker; SOTA activators are spotted rarely and stay on a summit for up to an hour. Other spots use
+  // the map's Feed Spots Max Age
+  const mapMaxAge = GT.settings.app.feedMaxAge;
+  const sotaMaxAge = Math.max(mapMaxAge, Number(GT.settings.feedRoster.rosterTime) || 0);
+
   const now = timeNowSec();
   for (const hash in GT.feedCallsigns)
   {
     const callObj = GT.feedCallsigns[hash];
-    if (now - callObj.age > GT.settings.app.feedMaxAge) continue;
+    const age = now - callObj.age;
+    const onSummit = showSota && callObj.sota && callObj.sota in GT.sota.summits;
+    if (age > (onSummit ? sotaMaxAge : mapMaxAge)) continue;
     // Map shows all bands and modes: only the map's own Band / Mode filter applies (the Feeds tab lists are roster-only)
     if (!validateMapBandAndMode(callObj.band, callObj.mode)) continue;
 
-    // No grid: the center of its DXCC entity (the spot's grid stays empty, e.g. in the Feed Roster)
-    const LL = callObj.fullGrid.length >= 4 ? squareToCenter(callObj.fullGrid) : dxccCenter(callObj.dxcc);
+    // 0 no rig on its band, 1 a rig on its band, 2 a rig on its band and mode
+    const level = ((callObj.band + "|" + callObj.mode) in onBandMode) ? 2 : (callObj.band in onBand) ? 1 : 0;
+
+    if (onSummit)
+    {
+      const group = summits[callObj.sota] || (summits[callObj.sota] = { hashes: [], level: -1, best: null });
+      group.hashes.push(hash);
+      // Its icon shows the spot a rig is closest to, the newest of those
+      if (level > group.level || (level == group.level && callObj.age > GT.feedCallsigns[group.best].age))
+      {
+        group.level = level;
+        group.best = hash;
+      }
+      // Shown by its summit marker, so not drawn again on the DX Feeds layer (like spots the POTA layer shows)
+      continue;
+    }
+    if (!showFeed || hash in potaShown) continue;
+
+    // Its summit or park, else its grid, else its DXCC entity's center (the spot's grid stays empty, e.g. in the Feed Roster)
+    const LL = feedSpotPosition(callObj);
     if (!LL || isNaN(LL.a)) continue;
 
-    let icon = GT.feedIdleIcon;
-    let zIndex = 1;
-    if ((callObj.band + "|" + callObj.mode) in onBandMode)
-    {
-      icon = GT.feedTargetIcon;
-      zIndex = 3;
-    }
-    else if (callObj.band in onBand)
-    {
-      icon = GT.feedOnBandIcon;
-      zIndex = 2;
-    }
-
-    const feature = iconFeature(ol.proj.fromLonLat([LL.o, LL.a]), icon, zIndex, "feed");
+    const icon = [GT.feedIdleIcon, GT.feedOnBandIcon, GT.feedTargetIcon][level];
+    const feature = iconFeature(ol.proj.fromLonLat([LL.o, LL.a]), icon, level + 1, "feed");
     feature.feedHash = hash;
+    // The spots it shows: more than one when they overlap at this zoom (see below)
+    feature.feedHashes = [hash];
+    // In a group, the spot a rig is closest to leads, the newest of those
+    feature.rank = level * 1e10 + callObj.age;
+    feature.level = level;
+    // Grouped only with spots of the same DXCC entity
+    feature.dxcc = callObj.dxcc;
     // Same click handling as RX spots: left-click sets the call, right-click shows the tooltip
     feature.size = 6;
-    GT.layerSources.dxcwSpots.addFeature(feature);
+    feedFeatures.push(feature);
+  }
+
+  // Spots that overlap at this zoom: one marker, the best of them, in the middle of the group; its tooltip lists them all
+  for (const overlapping of groupOverlappingFeatures(feedFeatures))
+  {
+    const lead = overlapping[0];
+    if (overlapping.length > 1)
+    {
+      lead.feedHashes = overlapping.map((feature) => feature.feedHash);
+      centerGroupMarker(overlapping);
+    }
+    GT.layerSources.dxcwSpots.addFeature(lead);
+  }
+
+  // One marker per summit, at the summit; its icon shows the best of its spots, its tooltip lists them all
+  const summitFeatures = [];
+  for (const ref in summits)
+  {
+    const group = summits[ref];
+    const summit = GT.sota.summits[ref];
+    const icon = [GT.sotaIdleIcon, GT.sotaOnBandIcon, GT.sotaTargetIcon][group.level];
+    const feature = iconFeature(ol.proj.fromLonLat([summit.lon, summit.lat]), icon, group.level + 1, "feed");
+    feature.feedHash = group.best;
+    feature.summitRef = ref;
+    feature.summitHashes = group.hashes;
+    // The summits it shows (more than one when they overlap at this zoom, see below): [{ ref, hashes }]
+    feature.summitGroups = [{ ref, hashes: group.hashes }];
+    feature.rank = group.level;
+    // Grouped only with summits activated from the same DXCC entity (its activator's)
+    feature.dxcc = GT.feedCallsigns[group.best].dxcc;
+    feature.size = 6;
+    summitFeatures.push(feature);
+  }
+
+  // Summits that overlap at this zoom: one marker, the best of them, in the middle of the group; its tooltip lists them all
+  for (const overlapping of groupOverlappingFeatures(summitFeatures))
+  {
+    const lead = overlapping[0];
+    if (overlapping.length > 1)
+    {
+      lead.summitGroups = overlapping.flatMap((feature) => feature.summitGroups);
+      lead.summitHashes = overlapping.flatMap((feature) => feature.summitHashes);
+      centerGroupMarker(overlapping);
+    }
+    GT.layerSources.sotaSpots.addFeature(lead);
   }
 }
 
-// Map left-click on a feed spot, like an RX spot: a rig on its band and mode if there is one, otherwise the active rig
-function leftClickFeedSpot(hash)
+// Map left-click on a DX Feeds or SOTA marker: worked like a Feed Roster click (workFeedCallObj). A marker standing for
+// several spots (grouped, or a summit's) works the first one its tooltip lists, the newest
+function leftClickFeedSpot(feature)
 {
-  const callObj = GT.feedCallsigns[hash];
-  if (callObj)
+  let hashes = feature.feedHashes || [feature.feedHash];
+  if (feature.summitGroups) hashes = feature.summitGroups.flatMap((group) => group.hashes);
+  else if (feature.summitHashes) hashes = feature.summitHashes;
+
+  let first = null;
+  for (const hash of hashes)
   {
-    setCallAndGrid(callObj.DEcall, callObj.grid, feedSpotInstance(callObj));
+    const callObj = GT.feedCallsigns[hash];
+    if (callObj && (first == null || callObj.age > first.age)) first = callObj;
   }
+  if (first) workFeedCallObj(first);
 }
 
 function feedBandAllowed(callObj)
@@ -519,19 +640,37 @@ function feedSpotInstance(callObj)
   return null;
 }
 
+// Feed Roster callsign click
 function workFeedSpot(hash)
 {
   const entry = GT.feedRoster[hash];
-  if (!entry) return;
+  if (entry) workFeedCallObj(entry.callObj);
+}
 
-  const instance = feedSpotInstance(entry.callObj);
-  if (instance == null) return;
+// A feed spot clicked (Feed Roster or map): a rig already on the spot's band and mode (WSJT-X, JTDX or AC Log) takes it;
+// otherwise a connected AC Log takes it, on any band and mode (with Enable Rig Control it tunes the rig to it);
+// otherwise Gen Msgs on the active WSJT-X / JTDX
+function workFeedCallObj(callObj)
+{
+  let instance = feedSpotInstance(callObj);
+  if (instance == null && acLogCanWork(callObj)) instance = GT.acLogInstanceId;
+  if (instance == null)
+  {
+    setCallAndGrid(callObj.DEcall, callObj.grid, null);
+    return;
+  }
 
   if (GT.settings.map.focusRig && GT.activeInstance != instance)
   {
     setRig(instance);
   }
-  setCallAndGrid(entry.DEcall, entry.callObj.grid, instance);
+  // AC Log isn't a WSJT-X instance: its own API (acLog.js)
+  if (instance == GT.acLogInstanceId)
+  {
+    acLogWorkSpot(callObj);
+    return;
+  }
+  setCallAndGrid(callObj.DEcall, callObj.grid, instance);
 }
 
 // Gen Msgs on a feed spot: a rig on the spot's band and mode if there is one, otherwise the active rig
@@ -541,6 +680,21 @@ function genFeedMessages(hash)
   if (!entry) return;
 
   setCallAndGrid(entry.DEcall, entry.callObj.grid, feedSpotInstance(entry.callObj));
+}
+
+// The WSJT-X / JTDX that Gen Msgs on a feed spot off its band and mode goes to (setCallAndGrid): the active rig, if it's
+// one (AC Log has no Gen Msgs)
+function feedGenMsgsInstance()
+{
+  const id = GT.activeInstance;
+  return (id && id in GT.instances && GT.instances[id].valid && GT.instances[id].remote) ? id : null;
+}
+
+// A Feed Roster callsign click does something (workFeedSpot) even off every rig's band and mode: through a connected AC
+// Log, else Gen Msgs on the active WSJT-X / JTDX
+function feedSpotClickable(callObj)
+{
+  return acLogCanWork(callObj) || feedGenMsgsInstance() != null;
 }
 
 // Feed text ends up in roster innerHTML and onClick attributes, so anything unexpected is rejected
@@ -716,6 +870,19 @@ function addFeedSpot(parts, now)
   {
     callObj.pota = null;
   }
+  if (sotaActive())
+  {
+    // The summit named in the note (feeds.js adds "SOTA <ref>" to Spothole's SOTA spots); a later spot without one
+    // keeps the known summit
+    const summit = feedSotaReference(msg);
+    if (summit) callObj.sota = summit;
+  }
+  else
+  {
+    callObj.sota = null;
+  }
+  // On a known summit: placed there, its grid the summit's
+  placeFeedSpotAtSummit(callObj);
   callObj.gridQualified = callObj.grid.length > 0;
   // Audio alerts with "every decode" re-fire when UTC changes, so each spot gets its own time
   callObj.UTC = toColonHMS(now % 86400);
@@ -730,13 +897,13 @@ function addFeedSpot(parts, now)
     }
   }
 
-  // Same state/county lookups as decodes
-  if (GT.settings.callsignLookups.ulsUseEnable == true && isKnownCallsignUSplus(callObj.dxcc) && (callObj.state == null || callObj.cnty == null))
+  // Same state/county lookups as decodes; not for a spot on a summit (those give the activator's home)
+  if (!callObj.summitPlaced && GT.settings.callsignLookups.ulsUseEnable == true && isKnownCallsignUSplus(callObj.dxcc) && (callObj.state == null || callObj.cnty == null))
   {
     lookupKnownCallsign(callObj);
   }
 
-  if (callObj.state == null && callObj.dxcc == 1 && GT.settings.callsignLookups.cacUseEnable && callObj.DEcall in GT.cacCallsigns)
+  if (!callObj.summitPlaced && callObj.state == null && callObj.dxcc == 1 && GT.settings.callsignLookups.cacUseEnable && callObj.DEcall in GT.cacCallsigns)
   {
     callObj.state = "CA-" + GT.cacCallsigns[callObj.DEcall];
   }

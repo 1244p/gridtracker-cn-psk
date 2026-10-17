@@ -144,11 +144,23 @@ function pruneRosterEntries(roster, maxAge, now)
     }
 }
 
+// When the Feed Roster was last reprocessed (ms), for rosterTimer
+GT.feedRosterProcessedAt = 0;
+
+// Every 5 seconds: both rosters age (expired entries, Max Age). The Feed Roster is skipped when new spots reprocessed
+// it within that time anyway, as they usually have: each pass rebuilds its whole table
+function rosterTimer()
+{
+  if (Date.now() - GT.feedRosterProcessedAt >= 4500) goProcessRoster();
+  else goProcessCallRoster();
+}
+
 // Reprocesses both rosters (Call Roster and Feed Roster): worked status, settings and instances affect both
 function goProcessRoster() {
     const now = timeNowSec();
     pruneRosterEntries(GT.callRoster, 300, now);
     pruneRosterEntries(GT.feedRoster, FEED_KEEP_SECONDS, now);
+    GT.feedRosterProcessedAt = Date.now();
 
     if (GT.callRosterWindowInitialized) {
         try {
@@ -159,12 +171,26 @@ function goProcessRoster() {
     }
 }
 
-// New DX Cluster / CW Skimmer spots: only the Feed Roster needs reprocessing
+// A rig status with nothing the Feed Roster uses changed: only the Call Roster needs reprocessing
+function goProcessCallRoster() {
+    pruneRosterEntries(GT.callRoster, 300, timeNowSec());
+
+    if (GT.callRosterWindowInitialized) {
+        try {
+            GT.callRosterWindowHandle.window.processCallRoster();
+        } catch (e) {
+            console.log("[goProcessCallRoster] IPC Error:", e);
+        }
+    }
+}
+
+// New DX Cluster / CW Skimmer spots: only the Feed Roster needs reprocessing. Spots arrive in a steady stream and each
+// pass rebuilds the whole (often several hundred row) table, so they're gathered for a second
 function scheduleFeedRosterUpdate()
 {
   if (GT.feedRosterUpdateTimer == null)
   {
-    GT.feedRosterUpdateTimer = nodeTimers.setTimeout(goProcessFeedRoster, 150);
+    GT.feedRosterUpdateTimer = nodeTimers.setTimeout(goProcessFeedRoster, 1000);
   }
 }
 
@@ -172,6 +198,7 @@ function goProcessFeedRoster()
 {
     GT.feedRosterUpdateTimer = null;
     pruneRosterEntries(GT.feedRoster, FEED_KEEP_SECONDS, timeNowSec());
+    GT.feedRosterProcessedAt = Date.now();
 
     if (GT.callRosterWindowInitialized) {
         try {

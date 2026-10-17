@@ -1,0 +1,130 @@
+<!-- feed_idle.png -->
+<svg viewBox="0 0 100 100" xmlns="http://w3.org">
+  <polygon points="50,15 15,85 85,85" fill="#777" stroke="#000000" stroke-width="8" />
+</svg>
+
+<!-- feed_target.png -->
+<svg viewBox="0 0 100 100" xmlns="http://w3.org">
+  <!-- Bounding Target Box -->
+  <rect x="5" y="5" width="90" height="90" fill="none" stroke="#00b347" stroke-width="5" stroke-dasharray="10 5" />
+  <!-- Inner Target Triangle -->
+  <polygon points="50,16.7 14.9,87 85.1,87" fill="#00FF66" fill-opacity="0.5" stroke="#00b347" stroke-width="6" />
+  <!-- Center Radar Dot -->
+  <circle cx="50" cy="64" r="5.5" fill="#000cb3" />
+</svg>
+
+<!-- feed_menu.png -->
+<svg xmlns="http://w3.org" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background Container (Deep Tactical Gray/Black) -->
+  <rect width="512" height="512" rx="40" fill="#101418" stroke="#1A2229" stroke-width="12"/>
+
+  <!-- Ultra-Bold Military Point-Up Triangle: the outer edge of its 32-wide stroke
+       spans 22..490 both ways (16-unit margin inside the 6-unit border), so the centerline is shrunk to fit -->
+  <polygon points="256,58 48,474 464,474" fill="#00FF66" fill-opacity="0.1" stroke="#00FF66" stroke-width="32" stroke-linejoin="miter"/>
+
+  <!-- Core Target Center Dot (near the triangle's center) -->
+  <circle cx="256" cy="337" r="28" fill="#00d4db"/>
+
+</svg>
+
+
+<!-- feed_on_band.png -->
+<svg viewBox="0 0 100 100" xmlns="http://w3.org">
+  <!-- Inner Target Triangle -->
+  <polygon points="50,25 25,75 75,75" fill="#006669" stroke="#00d4db" stroke-width="6" />
+  <!-- Center Radar Dot -->
+  <circle cx="50" cy="58" r="4" fill="#00d4db" />
+</svg>
+
+<!-- pota.png (256x256): the button panel's POTA button, POTA below the tree and picnic table like the SOTA button -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <g fill="#1FD200">
+    <!-- Bushy tree crown -->
+    <circle cx="112" cy="92" r="56" />
+    <circle cx="170" cy="66" r="56" />
+    <circle cx="222" cy="102" r="50" />
+    <circle cx="78" cy="150" r="50" />
+    <circle cx="150" cy="140" r="66" />
+    <circle cx="218" cy="160" r="44" />
+    <!-- Trunk, widening to the ground -->
+    <polygon points="132,170 162,170 176,352 100,352" />
+    <!-- Picnic table: top, bench, legs -->
+    <rect x="252" y="226" width="168" height="26" rx="13" />
+    <rect x="226" y="286" width="228" height="24" rx="12" />
+  </g>
+  <g stroke="#1FD200" stroke-width="24" stroke-linecap="round" fill="none">
+    <line x1="296" y1="244" x2="262" y2="346" />
+    <line x1="376" y1="244" x2="410" y2="346" />
+    <!-- Ground -->
+    <line x1="40" y1="356" x2="472" y2="356" />
+  </g>
+  <!-- POTA, bold white with a black outline, like the SOTA button -->
+  <text x="256" y="470" text-anchor="middle" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900"
+    font-size="170" textLength="452" lengthAdjust="spacingAndGlyphs"
+    fill="#FFFFFF" stroke="#000000" stroke-width="18" stroke-linejoin="round" paint-order="stroke">POTA</text>
+</svg>
+
+<!-- SOTA summits: a double peak (the left higher), each snow-capped. The map's three states (grey, then orange), like the
+     DX Feeds icons (no rig on the band / a rig on the band / a rig on the band and mode), 64x64, one mountain size and
+     map scale for all three; and sota_menu.png, the button panel's SOTA button with SOTA across it like the POTA
+     button, 128x128. PNGs in src/renderer/img -->
+
+<!-- sota_menu.png -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background Container (Deep Tactical Gray/Black), as feed_menu.png -->
+  <rect width="512" height="512" rx="40" fill="#101418" stroke="#1A2229" stroke-width="12"/>
+  <g transform="translate(36,0) scale(4.4)">
+    <!-- Double peak -->
+    <polygon points="8,85 40,15 55,45 68,32 92,85" fill="#FF9900" fill-opacity="0.15" />
+    <!-- Snow caps -->
+    <polygon points="40,15 24.9,48 30,43 35,50 41,42 47,47 55,45" fill="#FFFFFF" />
+    <polygon points="68,32 55,45 59,44 63,49 68,45 72,50 76.2,50" fill="#FFFFFF" />
+    <!-- Outline over all -->
+    <polygon points="8,85 40,15 55,45 68,32 92,85" fill="none" stroke="#FF9900" stroke-width="7" stroke-linejoin="round" />
+  </g>
+  <!-- SOTA, bold white with a black outline, like the POTA button's lettering -->
+  <text x="256" y="470" text-anchor="middle" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900"
+    font-size="170" textLength="452" lengthAdjust="spacingAndGlyphs"
+    fill="#FFFFFF" stroke="#000000" stroke-width="18" stroke-linejoin="round" paint-order="stroke">SOTA</text>
+</svg>
+
+<!-- sota_idle.png -->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(13.1,13.1) scale(0.738)">
+    <!-- Double peak -->
+    <polygon points="92,85 60,15 45,45 32,32 8,85" fill="#000000" />
+    <!-- Snow caps -->
+    <polygon points="60,15 75.1,48 70,43 65,50 59,42 53,47 45,45" fill="#FFFFFF" />
+    <polygon points="32,32 45,45 41,44 37,49 32,45 28,50 23.8,50" fill="#FFFFFF" />
+    <!-- Outline over all -->
+    <polygon points="92,85 60,15 45,45 32,32 8,85" fill="none" stroke="#FF9900" stroke-width="10.8" stroke-linejoin="round" />
+  </g>
+</svg>
+
+<!-- sota_on_band.png -->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(13.1,13.1) scale(0.738)">
+    <!-- Double peak -->
+    <polygon points="8,85 40,15 55,45 68,32 92,85" fill="#8A3F00" />
+    <!-- Snow caps -->
+    <polygon points="40,15 24.9,48 30,43 35,50 41,42 47,47 55,45" fill="#FFFFFF" />
+    <polygon points="68,32 55,45 59,44 63,49 68,45 72,50 76.2,50" fill="#FFFFFF" />
+    <!-- Outline over all -->
+    <polygon points="8,85 40,15 55,45 68,32 92,85" fill="none" stroke="#FF9933" stroke-width="8.1" stroke-linejoin="round" />
+  </g>
+</svg>
+
+<!-- sota_target.png -->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bounding Target Box -->
+  <rect x="5" y="5" width="90" height="90" fill="none" stroke="#E67300" stroke-width="5" stroke-dasharray="10 5" />
+  <g transform="translate(13.1,13.1) scale(0.738)">
+    <!-- Double peak -->
+    <polygon points="8,85 40,15 55,45 68,32 92,85" fill="#FFA500" fill-opacity="0.6" />
+    <!-- Snow caps -->
+    <polygon points="40,15 24.9,48 30,43 35,50 41,42 47,47 55,45" fill="#FFFFFF" />
+    <polygon points="68,32 55,45 59,44 63,49 68,45 72,50 76.2,50" fill="#FFFFFF" />
+    <!-- Outline over all -->
+    <polygon points="8,85 40,15 55,45 68,32 92,85" fill="none" stroke="#E67300" stroke-width="8.1" stroke-linejoin="round" />
+  </g>
+</svg>

@@ -19,7 +19,8 @@ function openSite(address)
 function getBuffer(file_url, callback, flag, mode, port, cache = null, onError = null)
 {
   let http = window.require(mode);
-  let fileBuffer = null;
+  // The reply's chunks, joined once at the end: joining on every chunk copied a large download over and over
+  const chunks = [];
   let options = null;
   // for logging: drop the query string, which can hold logins and passwords (e.g. QRZ/HamQTH sign-in)
   const logUrl = file_url.split("?")[0];
@@ -46,11 +47,12 @@ function getBuffer(file_url, callback, flag, mode, port, cache = null, onError =
     const encoding = res.headers['content-encoding'];
     res.on("data", function (data)
       {
-        if (fileBuffer == null) fileBuffer = Buffer.from(data);
-        else fileBuffer = Buffer.concat([fileBuffer, data]);
+        chunks.push(data);
       })
       .on("end", function ()
       {
+        // null when nothing came, as before
+        let fileBuffer = chunks.length > 0 ? Buffer.concat(chunks) : null;
         if (encoding === 'gzip') {
           try { fileBuffer = window.require('zlib').gunzipSync(fileBuffer); }
           catch (e) { console.error("getBuffer gunzip " + logUrl, e.message); fail("could not read the reply"); return; }

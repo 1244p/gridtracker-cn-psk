@@ -869,5 +869,15 @@
   "roster.controls.logbook.spotsBandMixMode": "Pasmo Spotów, Mix Emisji",
   "roster.controls.logbook.spotsBandDigiMode": "Pasmo Spotów, Digi Emisje",
   "roster.controls.logbook.mixBandSpotsMode": "Mix Pasm, Emisja Spotów",
-  "roster.columns.tab.label": "Kolumny"
+  "roster.columns.tab.label": "Kolumny",
+  "settings.SOTA.chasing.label": "Polowanie SOTA",
+  "settings.SOTA.chasing.hover": "Aktywatorzy Summits on the Air z DX Feeds: kolumna SOTA i Poszukiwane na Liście kanałów",
+  "roster.secondary.wanted.sota": "SOTA",
+  "rosterColumns.Wanted.sota": "SOTA",
+  "rosterColumns.SOTA.points": "Punkty: {0}",
+  "settings.map.sotaMap.hover": "Przełącz spoty Summits on the Air",
+  "gt.potaSpot.title": "Spot POTA",
+  "gt.sotaSpot.title": "Spot SOTA",
+  "settings.logging.N3FJP.rigControl.label": "Włącz Sterowanie Radiem",
+  "settings.logging.N3FJP.rigControl.hover": "Kliknięcie znaku na Liście kanałów dostraja radio do częstotliwości spotu przez AC Log. Wymaga skonfigurowanego sterowania radiem w AC Log."
 }

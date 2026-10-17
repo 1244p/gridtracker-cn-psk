@@ -869,5 +869,15 @@
 	"roster.controls.logbook.spotsBandMixMode": "Bande du spot, Mixte",
 	"roster.controls.logbook.spotsBandDigiMode": "Bande du spot, Numériques",
 	"roster.controls.logbook.mixBandSpotsMode": "Bande Mixte, Mode du spot",
-	"roster.columns.tab.label": "Colonnes"
+	"roster.columns.tab.label": "Colonnes",
+	"settings.SOTA.chasing.label": "Chasse au SOTA",
+	"settings.SOTA.chasing.hover": "Activateurs Summits on the Air depuis DX Feeds : colonne SOTA et Recherché dans la liste des flux",
+	"roster.secondary.wanted.sota": "SOTA",
+	"rosterColumns.Wanted.sota": "SOTA",
+	"rosterColumns.SOTA.points": "Points : {0}",
+	"settings.map.sotaMap.hover": "Basculer les spots Summits on the Air",
+	"gt.potaSpot.title": "Spot POTA",
+	"gt.sotaSpot.title": "Spot SOTA",
+	"settings.logging.N3FJP.rigControl.label": "Activer Le Contrôle Du Poste",
+	"settings.logging.N3FJP.rigControl.hover": "Un clic sur un indicatif de la Liste des flux accorde le poste sur la fréquence du spot via AC Log. Nécessite le contrôle du poste configuré dans AC Log."
 }

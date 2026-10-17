@@ -343,6 +343,9 @@ function onAdiLoadComplete(task) {
           qso.pota = object.SIG_INFO.toUpperCase();
         }
 
+        const sota = adifSotaRef(object);
+        if (sota) qso.sota = sota;
+
         lastHash = addQSO(qso);
         rows++;
       }
@@ -387,9 +390,17 @@ const def_qso = {
   cqz: null, DEcall: "", delta: -1, digital: false, DXcall: "", dxcc: -1,
   grid: "", grid4: "", IOTA: null, ituz: null, mode: "", msg: "-", phone: false,
   pota: null, propMode: "", px: null, qso: true, cntyQual: false, RSTrecv: "",
-  RSTsent: "", state: null, time: 0, vucc_grids: [], worked: true, zipcode: null,
+  RSTsent: "", sota: null, state: null, time: 0, vucc_grids: [], worked: true, zipcode: null,
   zone: null
 };
+
+// The SOTA summit the worked station was on: SOTA_REF, or SIG "SOTA" with SIG_INFO; null if neither (then qso.sota
+// is left unset, so merging a duplicate QSO doesn't erase a summit it has)
+function adifSotaRef(object) {
+  if (object.SOTA_REF && object.SOTA_REF.length > 2) return object.SOTA_REF.trim().toUpperCase();
+  if (object.SIG && object.SIG.toUpperCase() == "SOTA" && object.SIG_INFO && object.SIG_INFO.length > 2) return object.SIG_INFO.trim().toUpperCase();
+  return null;
+}
 
 function manualMerge(target, source) {
   for (const key in source) {
@@ -415,6 +426,7 @@ function addQSO(qso) {
     }
     
     if (qso.pota) details.pota = qso.pota;
+    if (qso.sota) details.sota = qso.sota;
     if (canWrite === false) return;
     
     // Fast merge instead of deepmerge
@@ -456,7 +468,7 @@ GT.strictAdif = {
     FREQ: false, PROP_MODE: false, CONT: false, CNTY: false, MODE: false, SUBMODE: false, COMMENT: true,
     QSLMSG: true, QSLMSG_INTL: true, DXCC: false, STATE: false, CQZ: false, ITUZ: false, IOTA: false,
     APP_QRZLOG_STATUS: false, QSL_RCVD: false, LOTW_QSL_RCVD: false, EQSL_QSL_RCVD: false, POTA: false,
-    POTA_REF: false, OPERATOR: false, APP_PSKREP_SNR: false, SIG: false, SIG_INFO: false
+    POTA_REF: false, SOTA_REF: false, OPERATOR: false, APP_PSKREP_SNR: false, SIG: false, SIG_INFO: false
 };
 
 
@@ -682,7 +694,10 @@ function parseAcLog(task)
           {
             qso.pota = object.SIG_INFO.toUpperCase();
           }
-        
+
+          const sota = adifSotaRef(object);
+          if (sota) qso.sota = sota;
+
           lastHash = addQSO(qso);
           rows++;
         }

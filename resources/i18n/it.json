@@ -869,5 +869,15 @@
 	"roster.controls.logbook.spotsBandMixMode": "Banda dello spot, Modo misto",
 	"roster.controls.logbook.spotsBandDigiMode": "Banda dello spot, digitale",
 	"roster.controls.logbook.mixBandSpotsMode": "Banda Mista, Modo dello spot",
-	"roster.columns.tab.label": "Colonne"
+	"roster.columns.tab.label": "Colonne",
+	"settings.SOTA.chasing.label": "Caccia al SOTA",
+	"settings.SOTA.chasing.hover": "Attivatori Summits on the Air da DX Feeds: colonna SOTA e Ricercato nell'elenco dei feed",
+	"roster.secondary.wanted.sota": "SOTA",
+	"rosterColumns.Wanted.sota": "SOTA",
+	"rosterColumns.SOTA.points": "Punti: {0}",
+	"settings.map.sotaMap.hover": "Alterna spot Summits on the Air",
+	"gt.potaSpot.title": "Spot POTA",
+	"gt.sotaSpot.title": "Spot SOTA",
+	"settings.logging.N3FJP.rigControl.label": "Abilita Controllo Radio",
+	"settings.logging.N3FJP.rigControl.hover": "Un clic su un nominativo dell'Elenco feed sintonizza la radio sulla frequenza dello spot tramite AC Log. Richiede il controllo radio configurato in AC Log."
 }
