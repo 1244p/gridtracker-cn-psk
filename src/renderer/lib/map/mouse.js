@@ -882,6 +882,8 @@ function mouseDownEvent(event)
     features = features.reverse();
     let finalGridFeature = null;
     let parkPoppedOut = false;
+    // The topmost POTA park or spot marker (SOTA, DX Feeds, RX spot): features run bottom to top here
+    let topMarker = null;
     const rightButton = event.originalEvent && event.originalEvent.button == 2;
     for (let i = 0; i < features.length; i++)
     {
@@ -890,6 +892,7 @@ function mouseDownEvent(event)
       if (feature.size == 6)
       {
         finalGridFeature = feature;
+        topMarker = feature;
       }
       if (feature.size == 4 && finalGridFeature == null)
       {
@@ -910,13 +913,20 @@ function mouseDownEvent(event)
         }
         else
         {
-          leftClickPota(feature);
+          topMarker = feature;
         }
         shouldReturn = true;
       }
     }
     // A park popped out: not the grid square under it as well
     if (parkPoppedOut) finalGridFeature = null;
+    // Left-click on stacked markers (a park, a summit, DX Feeds or RX spots): only the topmost one is worked
+    if (!rightButton && topMarker && topMarker.size == 22)
+    {
+      leftClickPota(topMarker);
+      // Not a summit or spot under it as well (a grid square's own left-click stays as it was)
+      if (finalGridFeature && finalGridFeature.size == 6) finalGridFeature = null;
+    }
     if (finalGridFeature)
     {
       onRightClickGridSquare(finalGridFeature);
