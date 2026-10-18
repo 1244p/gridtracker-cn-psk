@@ -311,7 +311,9 @@ function initQSOdata() {
   GT.tracker = {
     worked: {
       call: {}, grid: {}, dxcc: {}, cqz: {}, dxm: {},
-      ituz: {}, state: {}, px: {}, cnty: {}, cont: {}, pota: {}, sota: {}
+      ituz: {}, state: {}, px: {}, cnty: {}, cont: {}, pota: {}, sota: {},
+      // Distinct summits chased per SOTA association ("W7O") and region ("W7O/NC"): counts, for the SOTA column hover
+      sotaAssoc: {}, sotaRegion: {}
     },
     confirmed: {
       call: {}, grid: {}, dxcc: {}, cqz: {}, dxm: {},
@@ -367,6 +369,12 @@ function applyTracking(tracker, isWorked, details, isCurrentYear, currentYear, w
   if (cnty) mark(tracker.cnty, cnty, true, false, details, bandMode, bandDg, bandPh);
 }
 
+// A SOTA reference's association and region: "W7O/NC-039" -> { assoc: "W7O", region: "W7O/NC" }, or null
+function sotaRefParts(ref) {
+  const match = /^([A-Z0-9]+)\/([A-Z0-9]+)-\d+$/.exec(String(ref || "").toUpperCase());
+  return match ? { assoc: match[1], region: match[1] + "/" + match[2] } : null;
+}
+
 function trackQSO(details, currentYear, currentDay, currentSecond) {
   const { DEcall, time, dxcc, pota, sota, confirmed, band, mode } = details;
 
@@ -412,6 +420,14 @@ function trackQSO(details, currentYear, currentDay, currentSecond) {
   // Process SOTA (Worked Only): the summit, and "<day>.<summit>" for the QSO's own UTC day (a summit counts once
   // per day). Every day is kept, not just today's: the app can stay open past midnight
   if (sota) {
+    // A summit chased for the first time counts once toward its association and region
+    if (!(sota in worked.sota)) {
+      const parts = sotaRefParts(sota);
+      if (parts) {
+        worked.sotaAssoc[parts.assoc] = (worked.sotaAssoc[parts.assoc] || 0) + 1;
+        worked.sotaRegion[parts.region] = (worked.sotaRegion[parts.region] || 0) + 1;
+      }
+    }
     worked.sota[sota] = true;
     worked.sota[~~(time / 86400) + "." + sota] = true;
   }

@@ -176,26 +176,45 @@ function getBandSlots()
   `;
 }
 
+// DX Marathon: DXCCs and CQ zones worked in the last 5 years (the current year and the 4 before it), newest first. The
+// tracker only keeps the current year (GT.tracker.worked.dxm, for the rosters), so the years are counted here from the
+// log, the way trackQSO counts them (the same QSOs skipped)
+const DX_MARATHON_PAST_YEARS = 4;
+
 function getDXMarathon()
 {
-  let workedDxm = GT.tracker.worked.dxm;
-  let cCount = keysThatContain(workedDxm, "c" + GT.currentYear);
-  let zCount = keysThatContain(workedDxm, "z" + GT.currentYear);
-  let tCount = keysThatContain(workedDxm, GT.currentYear);
+  const firstYear = GT.currentYear - DX_MARATHON_PAST_YEARS;
+  const years = {};
+  for (let year = firstYear; year <= GT.currentYear; year++) years[year] = { dxcc: new Set(), cqz: new Set() };
+  const currentSecond = timeNowSec();
+  for (const hash in GT.QSOhash)
+  {
+    const qso = GT.QSOhash[hash];
+    const counts = years[new Date(qso.time * 1000).getUTCFullYear()];
+    if (!counts) continue;
+    // As trackQSO: an older 3-character US call (not A.., ..X) isn't counted
+    if (qso.DEcall.length === 3 && qso.DEcall.charCodeAt(0) !== 65 && qso.DEcall.charCodeAt(2) !== 88 &&
+      isKnownCallsignUS(qso.dxcc) && (currentSecond - qso.time) > K_15_DAYS_IN_SECONDS) continue;
+    if (qso.cqz) counts.cqz.add(qso.cqz);
+    if (qso.dxcc > 0) counts.dxcc.add(qso.dxcc);
+  }
 
-  return `<h1>${I18N("rosterColumns.Wanted.dxm")} ${GT.currentYear}</h1>
+  const rows = [];
+  for (let year = GT.currentYear; year >= firstYear; year--)
+  {
+    const counts = years[year];
+    rows.push(`<tr><td style='color:white;'>${year}</td><td style='color:white;'>${counts.dxcc.size}</td><td style='color:white;'>${counts.cqz.size}</td><td style='font-weight:bold;color:white;'>${counts.dxcc.size + counts.cqz.size}</td></tr>`);
+  }
+
+  return `<h1>${I18N("rosterColumns.Wanted.dxm")}</h1>
     <table class='darkTable' align=center>
-      <tr><th><font color='orange'>${I18N("gt.viewInfo.worldGeoData")}</font></th>
+      <tr><th><font color='lightgreen'>${I18N("gt.statBox.year")}</font></th>
+      <th><font color='orange'>${I18N("gt.viewInfo.worldGeoData")}</font></th>
       <th><font color='cyan'>${I18N("gt.viewInfo.cqZones")}</font></th>
       <th><font color='yellow'>Total</font></th></tr>
-      <tr><td style='color:white;'>${cCount}</td><td style='color:white;'>${zCount}</td><td style='font-weight:bold;color:white;'>${tCount}</td></tr>
+      ${rows.join("")}
     </table>`;
 }
-
-function keysThatContain(obj, text)
-{
-  return Object.keys(obj).filter(key => key.includes(text)).length;
-};
 
 function showZonesBox()
 {
@@ -544,7 +563,7 @@ function showStatBox(resize)
   {
     setStatsDiv(
       "statViewDiv",
-      "&nbsp;<br>" + I18N("gt.statBox.NoEntries") + "<br>&nbsp;"
+      "<h1 style='color:yellow'>" + I18N("gt.statBox.calculating") + "</h1>"
     );
     setStatsDivHeight("statViewDiv", "auto");
     GT.statBoxTimer = nodeTimers.setTimeout(renderStatsBox, 250);

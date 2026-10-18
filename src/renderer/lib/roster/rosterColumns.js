@@ -479,18 +479,23 @@ const ROSTER_COLUMNS = {
       name: "POTA",
       rawAttrs: callObj.style.pota,
       title: potaColumnHover(callObj),
+      // Feed Roster: log the QSO by hand, as for a summit (roster/sotaLogDialog.js)
+      onclick: callObj.pota && sotaLogOffered(callObj) ? `openSotaLogDialog("${callObj.hash}")` : null,
       html: potaColumnRef(callObj)
     })
   },
 
-  // Feed Roster only, while SOTA Chasing is on: the summit from the spot's note
+  // While SOTA Chasing is on: the summit from a feed spot's note, or the one a decoded activator is spotted on
   SOTA: {
     compare: callObjSimpleComparer("sota"),
     tableData: (callObj) => ({
       name: "SOTA",
       rawAttrs: callObj.style.sota,
       title: sotaColumnHover(callObj),
-      html: callObj.sota || "&nbsp;"
+      // Feed Roster: log the chase by hand while no logger is connected and no WSJT-X / JTDX is on its band and mode
+      // (roster/sotaLogDialog.js)
+      onclick: callObj.sota && sotaLogOffered(callObj) ? `openSotaLogDialog("${callObj.hash}")` : null,
+      html: callObj.sota ? sotaColumnRef(callObj.sota) : "&nbsp;"
     })
   },
 
@@ -525,16 +530,44 @@ function potaColumnHover(callObj)
   {
     value += callObj.pota + " - " + GT.pota.parks[callObj.pota].name + "\n";
   }
-  
+  if (callObj.pota && sotaLogOffered(callObj)) value += I18N("sotaLog.hint");
+
   return value;
 }
+
+// A summit reference with dots for what it's worth to you (from Matt's SOTA work): before it, two dots for an
+// association you've chased no summit in, one for an association with one; after it, a dot for a region you've chased
+// no summit in. A reference that doesn't parse gets none
+function sotaColumnRef(ref)
+{
+  const parts = window.opener.sotaRefParts(ref);
+  const worked = GT.tracker.worked;
+  if (!parts || !worked.sotaAssoc) return ref;
+  const assocChased = worked.sotaAssoc[parts.assoc] || 0;
+  const regionChased = worked.sotaRegion[parts.region] || 0;
+  const dots = (count) => count > 0 ? `<span class='sotaMark'>${"<i></i>".repeat(count)}</span>` : "";
+  const assocDots = dots(assocChased == 0 ? 2 : assocChased == 1 ? 1 : 0);
+  const regionDots = dots(regionChased == 0 ? 1 : 0);
+  return (assocDots ? assocDots + " " : "") + ref + (regionDots ? " " + regionDots : "");
+}
+
 // Like the POTA hover: "W7O/NC-039 - Clatskanie Mountain" then "2080 ft, Points: 1" (from SOTA's summit list; the height
-// in the main window's distance units)
+// in the main window's distance units), then how many summits you've chased in its association and region
 function sotaColumnHover(callObj)
 {
   const summit = callObj.sota && GT.sota.summits[callObj.sota];
   if (!summit) return "";
-  return callObj.sota + " - " + summit.name + "\n" + window.opener.sotaHeightText(summit.alt) + ", " + I18N("rosterColumns.SOTA.points").replace("{0}", summit.points);
+  let text = callObj.sota + " - " + summit.name + "\n" + window.opener.sotaHeightText(summit.alt) + ", " + I18N("rosterColumns.SOTA.points").replace("{0}", summit.points);
+  const parts = window.opener.sotaRefParts(callObj.sota);
+  const worked = GT.tracker.worked;
+  if (parts && worked.sotaAssoc)
+  {
+    text += "\n" + I18N("rosterColumns.SOTA.chased")
+      .replace("{0}", worked.sotaAssoc[parts.assoc] || 0).replace("{1}", parts.assoc)
+      .replace("{2}", worked.sotaRegion[parts.region] || 0).replace("{3}", parts.region);
+  }
+  if (sotaLogOffered(callObj)) text += "\n" + I18N("sotaLog.hint");
+  return text;
 }
 
 WANTED_ORDER = ["call", "qrz", "watcher", "cont", "dxcc", "cqz", "ituz", "dxm", "state", "pota", "sota", "grid", "cnty", "wpx"];

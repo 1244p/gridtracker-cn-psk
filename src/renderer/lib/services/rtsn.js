@@ -386,6 +386,21 @@ function scheduleDxcwRedraw()
   GT.dxcwRedrawTimeout = nodeTimers.setTimeout(redrawDxcwSpots, 250);
 }
 
+// The markers are redrawn when spots arrive. When the feed goes quiet (a lost connection, the PC asleep), this
+// catches up: every 30 seconds, a redraw once a marker drawn has passed its max age (GT.dxcwNextExpiry, from
+// redrawDxcwSpots), and the Feed Roster re-filtered by age if nothing has processed it meanwhile. Idle otherwise
+// (from Matt's SOTA work)
+GT.dxcwNextExpiry = 0;
+const FEED_EXPIRY_CHECK_MS = 30000;
+
+function feedExpiryCheck()
+{
+  if (!feedsActive()) return;
+  if (GT.dxcwNextExpiry > 0 && timeNowSec() >= GT.dxcwNextExpiry) redrawDxcwSpots();
+  if (Date.now() - GT.feedRosterProcessedAt >= FEED_EXPIRY_CHECK_MS) goProcessFeedRoster();
+}
+nodeTimers.setInterval(feedExpiryCheck, FEED_EXPIRY_CHECK_MS);
+
 // A DXCC entity's center as { o: lon, a: lat } (like squareToCenter) from the DXCC geo data (data/dxcc.json);
 // its lat / lon from data/dxcc-base.json (the same point) if the geo data ever has no center; null if unknown
 function dxccCenter(dxcc)
@@ -427,6 +442,7 @@ function redrawDxcwSpots()
   GT.dxcwRedrawTimeout = null;
   GT.layerSources.dxcwSpots.clear();
   GT.layerSources.sotaSpots.clear();
+  GT.dxcwNextExpiry = 0;
 
   const sota = sotaActive();
   const showFeed = GT.settings.map.dxcwFeed == true;
@@ -471,7 +487,7 @@ function redrawDxcwSpots()
   // on its summit's marker; SOTA activators are spotted rarely and stay on a summit for up to an hour. Other spots use
   // the map's Feed Spots Max Age
   const mapMaxAge = GT.settings.app.feedMaxAge;
-  const sotaMaxAge = Math.max(mapMaxAge, Number(GT.settings.feedRoster.rosterTime) || 0);
+  const sotaMaxAge = sotaSpotMaxAge();
 
   const now = timeNowSec();
   for (const hash in GT.feedCallsigns)
@@ -482,6 +498,9 @@ function redrawDxcwSpots()
     if (age > (onSummit ? sotaMaxAge : mapMaxAge)) continue;
     // The bands and modes ticked in Settings -> Feeds (as in the Feed Roster), then the map's own Band / Mode filter
     if (!feedSpotShown(callObj) || !validateMapBandAndMode(callObj.band, callObj.mode)) continue;
+    // When the first marker drawn expires (feedExpiryCheck redraws then)
+    const expires = callObj.age + (onSummit ? sotaMaxAge : mapMaxAge) + 1;
+    if (GT.dxcwNextExpiry == 0 || expires < GT.dxcwNextExpiry) GT.dxcwNextExpiry = expires;
 
     // 0 no rig on its band, 1 a rig on its band, 2 a rig on its band and mode
     const level = ((callObj.band + "|" + callObj.mode) in onBandMode) ? 2 : (callObj.band in onBand) ? 1 : 0;
@@ -491,7 +510,7 @@ function redrawDxcwSpots()
       const group = summits[callObj.sota] || (summits[callObj.sota] = { hashes: [], level: -1, best: null });
       group.hashes.push(hash);
       // Its icon shows the spot a rig is closest to, the newest of those
-      if (level > group.level || (level == group.level && callObj.age > GT.feedCallsigns[group.best].age))
+      if (level > group.level || (level == group.level && callObj.age > summitSpotObj(group.best).age))
       {
         group.level = level;
         group.best = hash;
@@ -521,7 +540,28 @@ function redrawDxcwSpots()
 
   // A marker with a spot of a call in a rig's DX Call is ringed
   const selected = rigDXcallSet();
-  const hasSelected = (hashes) => hashes.some((hash) => GT.feedCallsigns[hash] && GT.feedCallsigns[hash].DEcall in selected);
+  // Activators you're decoding: on their summit's marker too (not drawn as DX Feeds spots, not in the Feed Roster)
+  if (showSota)
+  {
+    for (const hash in GT.sotaDecodeSpots)
+    {
+      const callObj = GT.sotaDecodeSpots[hash];
+      if (!(callObj.sota in GT.sota.summits) || now - callObj.age > sotaMaxAge) continue;
+      if (!feedSpotShown(callObj) || !validateMapBandAndMode(callObj.band, callObj.mode)) continue;
+      const expires = callObj.age + sotaMaxAge + 1;
+      if (GT.dxcwNextExpiry == 0 || expires < GT.dxcwNextExpiry) GT.dxcwNextExpiry = expires;
+      const level = ((callObj.band + "|" + callObj.mode) in onBandMode) ? 2 : (callObj.band in onBand) ? 1 : 0;
+      const group = summits[callObj.sota] || (summits[callObj.sota] = { hashes: [], level: -1, best: null });
+      group.hashes.push(hash);
+      if (level > group.level || (level == group.level && callObj.age > summitSpotObj(group.best).age))
+      {
+        group.level = level;
+        group.best = hash;
+      }
+    }
+  }
+
+  const hasSelected = (hashes) => hashes.some((hash) => summitSpotObj(hash) && summitSpotObj(hash).DEcall in selected);
 
   // Spots that overlap at this zoom: one marker, the best of them, in the middle of the group; its tooltip lists them all.
   // Added to the layer in one go (one index update and render, not one per marker)
@@ -554,7 +594,7 @@ function redrawDxcwSpots()
     feature.summitGroups = [{ ref, hashes: group.hashes }];
     feature.rank = group.level;
     // Grouped only with summits activated from the same DXCC entity (its activator's)
-    feature.dxcc = GT.feedCallsigns[group.best].dxcc;
+    feature.dxcc = summitSpotObj(group.best).dxcc;
     feature.size = 6;
     summitFeatures.push(feature);
   }
@@ -600,7 +640,7 @@ function leftClickFeedSpot(feature)
   let first = null;
   for (const hash of hashes)
   {
-    const callObj = GT.feedCallsigns[hash];
+    const callObj = summitSpotObj(hash);
     if (callObj && (first == null || callObj.age > first.age)) first = callObj;
   }
   if (first) workFeedCallObj(first);
@@ -645,6 +685,8 @@ function clearFeedCallsigns()
   const removed = Object.keys(GT.feedRoster).length > 0;
   GT.feedRoster = {};
   GT.feedCallsigns = {};
+  GT.sotaActivators = {};
+  GT.sotaDecodeSpots = {};
   if (removed) goProcessFeedRoster();
   redrawDxcwSpots();
 }
@@ -684,27 +726,33 @@ function workFeedSpot(hash)
   if (entry) workFeedCallObj(entry.callObj);
 }
 
-// A feed spot clicked (Feed Roster or map): a rig already on the spot's band and mode (WSJT-X, JTDX or AC Log) takes it;
-// otherwise a connected AC Log takes it, on any band and mode (with Enable Rig Control it tunes the rig to it);
-// otherwise Gen Msgs on the active WSJT-X / JTDX
+// A feed spot clicked (Feed Roster or map): a rig already on the spot's band and mode (WSJT-X, JTDX, AC Log or Log4OM)
+// takes it; otherwise a connected AC Log, else a connected Log4OM, takes it, on any band and mode (with Enable Rig
+// Control it tunes the rig to it); otherwise Gen Msgs on the active WSJT-X / JTDX
 function workFeedCallObj(callObj)
 {
   let instance = feedSpotInstance(callObj);
   if (instance == null && acLogCanWork(callObj)) instance = GT.acLogInstanceId;
+  if (instance == null && log4OMCanWork(callObj)) instance = GT.log4OMInstanceId;
   if (instance == null)
   {
     setCallAndGrid(callObj.DEcall, callObj.grid, null);
     return;
   }
 
-  if (GT.settings.map.focusRig && GT.activeInstance != instance)
+  if (GT.settings.map.focusRig && GT.activeInstance != instance && instance in GT.instances)
   {
     setRig(instance);
   }
-  // AC Log isn't a WSJT-X instance: its own API (acLog.js)
+  // AC Log and Log4OM aren't WSJT-X instances: their own APIs (acLog.js, log4om.js)
   if (instance == GT.acLogInstanceId)
   {
     acLogWorkSpot(callObj);
+    return;
+  }
+  if (instance == GT.log4OMInstanceId)
+  {
+    log4OMWorkSpot(callObj);
     return;
   }
   setCallAndGrid(callObj.DEcall, callObj.grid, instance);
@@ -728,10 +776,10 @@ function feedGenMsgsInstance()
 }
 
 // A Feed Roster callsign click does something (workFeedSpot) even off every rig's band and mode: through a connected AC
-// Log, else Gen Msgs on the active WSJT-X / JTDX
+// Log or Log4OM, else Gen Msgs on the active WSJT-X / JTDX
 function feedSpotClickable(callObj)
 {
-  return acLogCanWork(callObj) || feedGenMsgsInstance() != null;
+  return acLogCanWork(callObj) || log4OMCanWork(callObj) || feedGenMsgsInstance() != null;
 }
 
 // Feed text ends up in roster innerHTML and onClick attributes, so anything unexpected is rejected
@@ -811,18 +859,27 @@ function addFeedSpot(parts, now)
   const offset = parts[4].trim();
   let grid = parts[3].trim().toUpperCase();
 
+  // No frequency (so no band): not a spot to show. For a SOTA activator it means they've gone QRT, whatever else the
+  // spot says (sota.js), so that's checked before the mode and spotter are
+  if (band == "OOB" || !Object.prototype.hasOwnProperty.call(GT.bandColors, band))
+  {
+    if (sotaActive() && CALLSIGN_REGEXP.test(DEcall)) endSotaActivationOnQrt(DEcall, parts[6].trim(), true);
+    return false;
+  }
+
   if (!CALLSIGN_REGEXP.test(DEcall) || !FEED_MODE_REGEXP.test(mode) || !FEED_SPOTTER_REGEXP.test(spotter)) return false;
   // CW unticked in the Feed Roster: the server no longer sends it; this covers spots already in flight
   if (mode == "CW" && !feedCWWanted()) return false;
   // Spotters the user ignored in the Feed Roster (by base callsign, so W3LPL covers W3LPL-#)
   if (spotter.split("-")[0] in GT.settings.ignoredSpotters) return false;
-  if (band == "OOB" || !Object.prototype.hasOwnProperty.call(GT.bandColors, band)) return false;
   // The roster works in 4-character grids; the map places spots with the full 4 or 6
   const fullGrid = FEED_GRID_REGEXP.test(grid) ? grid : "";
   grid = fullGrid.substring(0, 4);
 
   // Kept raw like decoded messages: the roster escapes msg when it renders it
   let msg = parts[6].trim();
+  // A SOTA activator spotted QRT has finished: their spots on that summit go (sota.js), and this one isn't added
+  if (sotaActive() && endSotaActivationOnQrt(DEcall, msg)) return false;
   // Every mode seen is kept for Settings -> Feeds -> Modes, shown until the user unticks it
   const seenModes = GT.settings.app.feeds.modes;
   if (!(mode in seenModes))
@@ -914,9 +971,12 @@ function addFeedSpot(parts, now)
   if (sotaActive())
   {
     // The summit named in the note (feeds.js adds "SOTA <ref>" to Spothole's SOTA spots); a later spot without one
-    // keeps the known summit
-    const summit = feedSotaReference(msg);
+    // keeps the known summit. A spot naming none (a skimmer's, another band or mode) of an activator on a summit gets
+    // that summit, as decodes do (from Matt's SOTA work)
+    const summit = feedSotaReference(msg) || (callObj.sota ? null : sotaActivatorSummit(DEcall));
     if (summit) callObj.sota = summit;
+    // Decodes of this activator (any form of the call) get the summit too
+    noteSotaActivator(callObj);
   }
   else
   {
@@ -965,6 +1025,15 @@ function pruneFeedCallsigns(now)
     {
       delete GT.feedCallsigns[hash];
     }
+  }
+  // Activators no longer spotted on a summit, nor decoded (sota.js)
+  for (const call in GT.sotaActivators)
+  {
+    if (now - GT.sotaActivators[call].age > FEED_KEEP_SECONDS) delete GT.sotaActivators[call];
+  }
+  for (const hash in GT.sotaDecodeSpots)
+  {
+    if (now - GT.sotaDecodeSpots[hash].age > FEED_KEEP_SECONDS) delete GT.sotaDecodeSpots[hash];
   }
 }
 

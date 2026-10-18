@@ -8,7 +8,7 @@ GT.confSrcNames = {
   e: "eQSL",
   L: "LoTW",
   A: "N3FJP",
-  Q: "QRZ.com",
+  Q: "QRZ",
   O: "Other"
 };
 
@@ -1493,6 +1493,35 @@ GT.adifLookupMap = {
 
 GT.lastADIFrx = "";
 
+// QSOs handled in the last minute (call|band|mode -> when), so a logger that broadcasts back a QSO GridTracker just
+// sent it (ADIF UDP) doesn't get it logged and sent out again: the logger reformats the record, so it isn't caught as
+// a repeat of the same text (GT.lastADIFrx)
+GT.recentLoggedQsos = new Map();
+const QSO_ECHO_WINDOW_MS = 60000;
+
+function qsoEchoKey(record)
+{
+  if (!record || !record.CALL || !record.BAND || !record.MODE) return null;
+  const mode = (record.MODE == "MFSK" && record.SUBMODE) ? record.SUBMODE : record.MODE;
+  return record.CALL.toUpperCase() + "|" + record.BAND.toLowerCase() + "|" + mode.toUpperCase();
+}
+
+function forgetOldLoggedQsos(now)
+{
+  for (const [key, at] of GT.recentLoggedQsos)
+  {
+    if (now - at >= QSO_ECHO_WINDOW_MS) GT.recentLoggedQsos.delete(key);
+  }
+}
+
+function isEchoOfLoggedQso(record)
+{
+  const key = qsoEchoKey(record);
+  if (key == null) return false;
+  forgetOldLoggedQsos(Date.now());
+  return GT.recentLoggedQsos.has(key);
+}
+
 function sendToLogger(ADIF)
 {
   let regex = new RegExp("<EOH>", "i");
@@ -1517,6 +1546,10 @@ function sendToLogger(ADIF)
   {
     localMode = record.SUBMODE;
   }
+
+  // Remembered for a minute, so a logger's broadcast of it back is ignored (isEchoOfLoggedQso)
+  const echoKey = qsoEchoKey(record);
+  if (echoKey) GT.recentLoggedQsos.set(echoKey, Date.now());
 
   // Fixed for MSHV
   record.BAND = record.BAND.toLowerCase();
@@ -1545,8 +1578,9 @@ function sendToLogger(ADIF)
     const summit = feedSotaForCall(record.CALL, record.BAND);
     if (summit) record.SOTA_REF = summit;
   }
-  // The station was on that summit: its square, not the grid the logger sent (often the activator's home)
-  if (sotaActive() && record.SOTA_REF)
+  // The station was on that summit: with no grid logged, its square. A grid the logger sent (the one the station
+  // transmitted) always stands
+  if (sotaActive() && record.SOTA_REF && (!("GRIDSQUARE" in record) || record.GRIDSQUARE.length == 0))
   {
     const summitGrid = sotaSummitGrid(record.SOTA_REF.toUpperCase());
     if (summitGrid) record.GRIDSQUARE = summitGrid;
@@ -2146,6 +2180,15 @@ function log4OMLoggerChanged()
   GT.settings.log4OM.enable = buttonLog4OMCheckBox.checked;
   GT.settings.log4OM.ip = log4OMIpInput.value;
   GT.settings.log4OM.port = log4OMPortInput.value;
+  // Remote control (log4om.js): connectToLog4OM opens or closes it on its next tick
+  GT.settings.log4OM.connect = log4OMConnectCheckbox.checked;
+  if (GT.settings.log4OM.rigControl != log4OMRigControlCheckbox.checked)
+  {
+    GT.settings.log4OM.rigControl = log4OMRigControlCheckbox.checked;
+    goProcessRoster();
+  }
+  log4OMRigControlSpan.style.display = GT.settings.log4OM.connect ? "" : "none";
+  updateLog4OMConnectStatus();
 }
 
 function acLogLoggerChanged()
@@ -3123,8 +3166,8 @@ function grabAcLog(count = 0)
   acLogRequest((done) => acLogDownload(count, () => done()), null, 120000);
 }
 
-// Downloads AC Log's newest count QSOs (0: the whole log) into the log; finished(true) once they're in, finished(false)
-// if the download failed. Called from a queued request (grabAcLog, acLogQsoEntered)
+// Downloads AC Log's newest count QSOs (0: the whole log) into the log; finished(true, the reply) once they're in,
+// finished(false) if the download failed. Called from a queued request (grabAcLog, acLogQsoEntered)
 function acLogDownload(count, finished)
 {
   AcLogImg.style.webkitFilter = "invert(100%)";
@@ -3140,7 +3183,7 @@ function acLogDownload(count, finished)
     if (called) return;
     called = true;
     acLogCallback(buffer);
-    finished(buffer != null);
+    finished(buffer != null, buffer);
   });
 }
 
@@ -3253,7 +3296,11 @@ function updateAdifBroadcast(port)
     let message =  String(incoming);
     if (message.indexOf("FLDIGI_TEST") == -1)
     {
-      sendToLogger("<EOH>" + message.replaceAll("<eor>", "<EOR>"));
+      message = message.replaceAll("<eor>", "<EOR>");
+      // A QSO GridTracker handled in the last minute, broadcast back by a logger it sent it to: not logged again
+      const body = ("<EOH>" + message).split(/<EOH>/i)[1].trim();
+      if (isEchoOfLoggedQso(parseADIFRecord(body))) return;
+      sendToLogger("<EOH>" + message);
     }
     else
     {

@@ -1036,7 +1036,7 @@ function setVisualAudioAlerts()
   usesOQRSDiv.style.display = (GT.settings.callsignLookups.oqrsUseEnable) ? "" : "none";
   onlySpotDiv.style.display = (!feed && GT.settings.roster.columns.Spot) ? "" : "none";
   huntingMatrixPotaRow.style.display = (GT.settings.app.potaFeatureEnabled && GT.settings.map.offlineMode == false) ? "" : "none";
-  huntingMatrixSotaRow.style.display = (feed && sotaActive()) ? "" : "none";
+  huntingMatrixSotaRow.style.display = sotaActive() ? "" : "none";
 
   if (!feed && GT.settings.app.wantedByBandMode == true && GT.instanceCount == 1) {
      let audioAlertsHeader = document.querySelector('h3[data-i18n="settings.alerts.AudioAlert.label"]');

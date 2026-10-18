@@ -63,7 +63,7 @@ const k_max_aeqd_grid_in_miles = 11500.0;
 // exactly the columns that roster has (Band and Mode use the band and mode colors instead). The hunting colors
 // (Callsign, Calling, Grid, POTA, DXCC, DXM, State, County, Cont, CQz, ITUz, PX) also tint a wanted entry's background.
 const k_callRosterColumnColors = {
-  Callsign: "FFFF00", Calling: "90EE90", Rig: "EEEEEE", Wanted: "EEEEEE", Grid: "00FFFF", Msg: "EEEEEE", POTA: "FBB6FC",
+  Callsign: "FFFF00", Calling: "90EE90", Rig: "EEEEEE", Wanted: "EEEEEE", Grid: "00FFFF", Msg: "EEEEEE", POTA: "FBB6FC", SOTA: "40FFD8",
   DXCC: "FFA500", DXM: "7398FF", State: "90EE90", County: "CCDD00", Cont: "00DDDD",
   dB: "CCCCCC", Freq: "00FF00", DT: "5CAEFF", Dist: "00FFFF", Azim: "FFFF00",
   CQz: "DDDDDD", ITUz: "DDDDDD", PX: "FFFF00",
@@ -145,12 +145,18 @@ const def_settings = {
     myRawCall: "NOCALL",
     myRawFreq: "",
     myRawGrid: "",
+    // Settings -> General -> Station Callsign: used while no connected instance gives a callsign (applyStationCallsign)
+    stationCallsign: "",
     oamsBandActivity: true,
     oamsBandActivityNeighbors: false,
     pathWidthWeight: 1.0,
     potaFeatureEnabled: true,
     // SOTA Chasing (Settings -> Features -> Online): SOTA activators from DX Feeds spots in the Feed Roster
     sotaFeatureEnabled: false,
+    // Logbook -> Export SOTA Chaser Log: where the last export ended (seconds), and the station of its newest QSO, so
+    // the next export starts there without sending that QSO twice
+    sotaLastChaserExport: 0,
+    sotaLastChaserExportCall: "",
     potaMapEnabled: false,
     pushPinMode: false,
     qrzPathWidthWeight: 1.2,
@@ -179,6 +185,7 @@ const def_settings = {
     workingGrids: {},
     workingDateEnable: false,
     workingDate: 0,
+    // No longer used: the Logbook scrolls its whole list (kept so saved settings don't change)
     qsoItemsPerPage: 100,
     qslAuthority: "L",
     collapsedMapViewFilters: false,
@@ -198,6 +205,8 @@ const def_settings = {
     fitQRZ: false,
     focusRig: true,
     gridAlpha: 136,
+    // POTA, SOTA and DX Feeds markers that would overlap are drawn as one (groupOverlappingFeatures)
+    groupSpots: true,
     haltAllOnTx: true,
     longitude: 0.0,
     latitude: 0.0,
@@ -348,7 +357,13 @@ const def_settings = {
   log4OM: {
     enable: false,
     port: 2236,
-    ip: "127.0.0.1"
+    ip: "127.0.0.1",
+    // Remote control (log4om.js): Connect, Enable Rig Control, Log4OM's remote-control port and its data-output port
+    // (where its Radio Status goes; Log4OM's own defaults)
+    connect: false,
+    rigControl: false,
+    rcPort: 2241,
+    rcOutputPort: 2242
   },
   dxkLog: {
     enable: false,
@@ -581,6 +596,7 @@ const def_settings = {
       huntCont: false,
       huntPX: false,
       huntPOTA: false,
+      huntSOTA: false,
       huntWatcher: false,
       huntDXM: false,
     },
@@ -598,6 +614,8 @@ const def_settings = {
       State: true,
       County: false,
       POTA: false,
+      // Shown while SOTA Chasing runs: decoded activators DX Feeds spots on a summit
+      SOTA: false,
       Cont: false,
       dB: true,
       Freq: false,
@@ -618,7 +636,7 @@ const def_settings = {
     },
     columnOrder: [
       "Callsign", "Band", "Mode", "Calling", "Grid", "DXCC", "Flag", "State", "County",
-      "POTA", "DXM", "Cont", "Msg",
+      "POTA", "SOTA", "DXM", "Cont", "Msg",
       "dB", "Freq", "DT", "Dist", "Azim",
       "CQz", "ITUz", "PX",
       "Rig", "Wanted", "LoTW", "eQSL", "OQRS",

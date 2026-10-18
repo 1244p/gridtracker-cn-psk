@@ -448,6 +448,7 @@ function renderMap()
 
   nightMapEnable.checked = GT.settings.map.nightMapEnable;
   changeNightMapEnable(nightMapEnable);
+  groupSpotsEnable.checked = GT.settings.map.groupSpots;
 }
 
 function mapMoveEndEvent(event)

@@ -62,6 +62,14 @@ function changeNightMapEnable(check)
   redrawSpots();
 }
 
+// Settings -> Map -> Group Overlapping Spots: POTA, SOTA and DX Feeds markers redrawn grouped or each on its own
+// (redrawParks also redraws the feed spot layers)
+function changeGroupSpots(check)
+{
+  GT.settings.map.groupSpots = check.checked;
+  redrawParks();
+}
+
 function loadMapSettings()
 {
   graylineValue.value = GT.settings.map.graylineOpacity;

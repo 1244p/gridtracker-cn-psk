@@ -4,13 +4,6 @@
 
 // Stats window: the logbook tab (sorting, searching, filtering, rendering) and worked-before searches (moved from GridTracker2.js)
 
-// Called from GridTracher.html
-function changeLogbookPage()
-{
-  qsoItemsPerPageTd.innerHTML = GT.settings.app.qsoItemsPerPage = parseInt(qsoItemsPerPageValue.value);
-  
-}
-
 function updateLogbook()
 {
   renderLogbookView();
@@ -80,6 +73,15 @@ function myPotaCompare(a, b)
   return 0;
 }
 
+function mySotaCompare(a, b)
+{
+  if (a.sota && !b.sota) return -1;
+  if (!a.sota && b.sota) return 1;
+  if (a.sota > b.sota) return 1;
+  if (a.sota < b.sota) return -1;
+  return 0;
+}
+
 function resetSearch()
 {
   GT.lastSortIndex = 4;
@@ -91,6 +93,7 @@ function resetSearch()
   GT.stateSearch = "";
   GT.cntySearch = "";
   GT.potaSearch = "";
+  GT.sotaSearch = "";
 
   GT.filterBand = "Mixed";
   GT.filterMode = "Mixed";
@@ -138,6 +141,14 @@ function renderLogbookSearchPOTA(object, index)
 {
   ValidateCallsign(object, null);
   GT.potaSearch = object.value.toUpperCase();
+  GT.lastSearchSelection = object.id;
+  renderLogbookView(index, 0);
+}
+
+function renderLogbookSearchSOTA(object, index)
+{
+  ValidateCallsign(object, null);
+  GT.sotaSearch = object.value.toUpperCase();
   GT.lastSearchSelection = object.id;
   renderLogbookView(index, 0);
 }
@@ -194,7 +205,18 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
     const dxccs = {};
     const confSrcs = {};
 
-    const perPage = GT.settings.app.qsoItemsPerPage;
+    // POTA / SOTA columns (parks hunted, POTA_REF; summits chased, SOTA_REF), and the SOTA export, only when the log has
+    // such QSOs, whatever the POTA Hunting / SOTA Chasing settings; a hidden column's search box doesn't filter, and a
+    // sort on it falls back to When
+    let showPota = false;
+    let showSota = false;
+    for (const hash in myObjects)
+    {
+      const qso = myObjects[hash];
+      if (qso.pota) showPota = true;
+      if (qso.sota) showSota = true;
+      if (showPota && showSota) break;
+    }
 
     function startsWithCI(value, search)
     {
@@ -245,21 +267,14 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
     }
     else
     {
-      if (mySort == GT.lastSortIndex)
+      // The same column again reverses it; another column is sorted in the direction the list is in now
+      if (mySort == GT.lastSortIndex && nextPage == 0)
       {
-        if (nextPage == 0) 
-        {
-          GT.lastSortType ^= 1;
-          GT.qsoPage = 0;
-        }
-      }
-      else
-      {
-        GT.lastSortType = 1;
-        GT.qsoPage = 0;
+        GT.lastSortType ^= 1;
       }
     }
 
+    if ((mySort == 7 && !showPota) || (mySort == 10 && !showSota)) mySort = 4;
     GT.lastSortIndex = mySort;
 
     const allList = Object.values(myObjects || {});
@@ -294,9 +309,14 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
         if (!includesCI(countyName, GT.cntySearch)) continue;
       }
 
-      if (GT.potaSearch.length > 0)
+      if (showPota && GT.potaSearch.length > 0)
       {
         if (!value.pota || !includesCI(value.pota, GT.potaSearch)) continue;
+      }
+
+      if (showSota && GT.sotaSearch.length > 0)
+      {
+        if (!value.sota || !includesCI(value.sota, GT.sotaSearch)) continue;
       }
 
       const pp = value.dxcc in GT.dxccInfo ? GT.dxccInfo[value.dxcc].pp : "?";
@@ -325,24 +345,28 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
 
     const ObjectCount = filtered.length;
 
-    GT.qsoPages = Math.max(1, Math.ceil(ObjectCount / perPage));
-
-    GT.qsoPage += (nextPage || 0);
-    GT.qsoPage = ((GT.qsoPage % GT.qsoPages) + GT.qsoPages) % GT.qsoPages;
-
-    const startIndex = GT.qsoPage * perPage;
-    const endIndex = Math.min(startIndex + perPage, ObjectCount);
-
-    const workHead = `<b> Entries (${ObjectCount})</b>` + 
-      (GT.qsoPages > 1 ? `<br><font style='font-size:15px;' color='cyan' onClick='window.opener.renderLogbookView(${mySort}, -1);'>&#8678;&nbsp;</font> ${I18N("gt.logbook.page").replace("{0}", GT.qsoPage + 1).replace("{1}", GT.qsoPages)} (${endIndex - startIndex}) <font style='font-size:16px;' color='cyan' onClick='window.opener.renderLogbookView(${mySort}, 1);'>&nbsp;&#8680;</font>` : "");
+    const workHead = `<b> Entries (${ObjectCount})</b>` +
+      (showSota ? ` <div class='button sotaExportButton' title='${I18N("stats.sotaExport.button.hover").replace(/'/g, "&#39;")}' onclick='window.opener.openSotaChaserExport();'>${I18N("stats.sotaExport.button.label")}</div>` : "");
 
     setStatsDiv("workedHeadDiv", workHead);
 
+    // Another sort, search or filter starts at the top; a refresh (a QSO logged, the window resized) keeps the place
+    const signature = [mySort, GT.lastSortType, GT.searchWB, GT.gridSearch, GT.stateSearch, GT.cntySearch, GT.potaSearch,
+      GT.sotaSearch, GT.filterBand, GT.filterMode, GT.filterDxcc, GT.filterQSL, GT.Zday].join("|");
+    const statsWindow = GT.statsWindowInitialized ? GT.statsWindowHandle.window : null;
+    const scrollTop = (statsWindow && signature === GT.logbookView.signature) ? statsWindow.workedListDiv.scrollTop : 0;
+    GT.logbookView.signature = signature;
+
     if (myObjects != null)
     {
+      // ▲ / ▼ after the sorted column's title, like the roster's headers (DXCC and Flag share a sort: DXCC shows it)
+      const sortArrow = (index) => index == mySort ? `<div style='display:inline-block;margin:0px;padding:0px;'>&nbsp;${GT.lastSortType == 0 ? "▲" : "▼"}</div>` : "";
       const clearBtn = (val, id, func) => val ? `<img title='Clear' onclick='${id}.value="";window.opener.${func}(${id});' src='img/trash_24x48.png' style='width:30px;margin:0px;padding:0px;margin-bottom:-4px;cursor:pointer;' />` : "";
 
+      // The search / filter row and the column titles are drawn here once; the rows go in the tbody, only the ones in
+      // view (renderLogbookRows), so scrolling never redraws the search boxes being typed in
       let tableHtml = `<table id='logTable' style='white-space:nowrap;overflow:auto;overflow-x:hidden;' class='darkTable' align=center>
+        <thead>
         <tr>
           <th><input type='text' id='searchWB' style='margin:0px' class='inputTextValue' value='${GT.searchWB}' size='8' oninput='window.opener.renderLogbookSearchChanged(this);' />${clearBtn(GT.searchWB, "searchWB", "renderLogbookSearchChanged")}</th>
           <th><input type='text' id='searchGrid' style='margin:0px' class='inputTextValue' value='${GT.gridSearch}' size='6' oninput='window.opener.renderLogbookSearchGrid(this);' />${clearBtn(GT.gridSearch, "searchGrid", "renderLogbookSearchGrid")}</th>
@@ -357,39 +381,49 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
           }
           <th><input type='text' id='searchState' style='margin:0px' class='inputTextValue' value='${GT.stateSearch}' size='3' oninput='window.opener.renderLogbookSearchState(this);' />${clearBtn(GT.stateSearch, "searchState", "renderLogbookSearchState")}</th>
           <th><input type='text' id='searchCnty' style='margin:0px' class='inputTextValue' value='${GT.cntySearch}' size='4' oninput='window.opener.renderLogbookSearchCnty(this);' />${clearBtn(GT.cntySearch, "searchCnty", "renderLogbookSearchCnty")}</th>
-          ${GT.settings.app.potaFeatureEnabled ? `<th><input type='text' id='searchPOTA' style='margin:0px' class='inputTextValue' value='${GT.potaSearch}' size='4' oninput='window.opener.renderLogbookSearchPOTA(this);' />${clearBtn(GT.potaSearch, "searchPOTA", "renderLogbookSearchPOTA")}</th>` : ""}
+          ${showPota ? `<th><input type='text' id='searchPOTA' style='margin:0px' class='inputTextValue' value='${GT.potaSearch}' size='4' oninput='window.opener.renderLogbookSearchPOTA(this);' />${clearBtn(GT.potaSearch, "searchPOTA", "renderLogbookSearchPOTA")}</th>` : ""}
+          ${showSota ? `<th><input type='text' id='searchSOTA' style='margin:0px' class='inputTextValue' value='${GT.sotaSearch}' size='6' oninput='window.opener.renderLogbookSearchSOTA(this);' />${clearBtn(GT.sotaSearch, "searchSOTA", "renderLogbookSearchSOTA")}</th>` : ""}
           <th><label>${I18N("gt.Zday")}</label>&nbsp;<input type='checkbox' id='Zday' ${GT.Zday ? "checked" : ""} onclick='window.opener.changeZday(Zday)'/></th>
         </tr>
         <tr>
-          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(0);'>${I18N("gt.qsoPage.Station")}</th>
-          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(1);'>${I18N("gt.qsoPage.Grid")}</th>
-          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(5);'>${I18N("gt.qsoPage.Band")}</th>
-          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(2);'>${I18N("gt.qsoPage.Mode")}</th>
-          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(6);'>${I18N("gt.qsoPage.QSL")}</th>
+          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(0);'>${I18N("gt.qsoPage.Station")}${sortArrow(0)}</th>
+          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(1);'>${I18N("gt.qsoPage.Grid")}${sortArrow(1)}</th>
+          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(5);'>${I18N("gt.qsoPage.Band")}${sortArrow(5)}</th>
+          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(2);'>${I18N("gt.qsoPage.Mode")}${sortArrow(2)}</th>
+          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(6);'>${I18N("gt.qsoPage.QSL")}${sortArrow(6)}</th>
           <th align=center>${I18N("gt.qsoPage.Sent")}</th>
           <th align=center>${I18N("gt.qsoPage.Rcvd")}</th>
-          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(3);'>${I18N("gt.qsoPage.DXCC")}</th>
+          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(3);'>${I18N("gt.qsoPage.DXCC")}${sortArrow(3)}</th>
           <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(3);'>${I18N("gt.qsoPage.Flag")}</th>
-          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(8);'>${I18N("roster.secondary.wanted.state")}</th>
-          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(9);'>${I18N("roster.secondary.wanted.county")}</th>
-          ${GT.settings.app.potaFeatureEnabled ? `<th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(7);'>POTA</th>` : ""}
-          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(4);'>${I18N("gt.qsoPage.When")}</th>
+          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(8);'>${I18N("roster.secondary.wanted.state")}${sortArrow(8)}</th>
+          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(9);'>${I18N("roster.secondary.wanted.county")}${sortArrow(9)}</th>
+          ${showPota ? `<th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(7);'>POTA${sortArrow(7)}</th>` : ""}
+          ${showSota ? `<th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(10);'>SOTA${sortArrow(10)}</th>` : ""}
+          <th style='cursor:pointer;' align=center onclick='window.opener.renderLogbookView(4);'>${I18N("gt.qsoPage.When")}${sortArrow(4)}</th>
           ${GT.settings.callsignLookups.lotwUseEnable ? `<th>${I18N("gt.qsoPage.LoTW")}</th>` : ""}
           ${GT.settings.callsignLookups.eqslUseEnable ? `<th>${I18N("gt.qsoPage.eQSL")}</th>` : ""}
           ${GT.settings.callsignLookups.oqrsUseEnable ? `<th>${I18N("gt.qsoPage.OQRS")}</th>` : ""}
-        </tr>`;
+        </tr>
+        </thead><tbody id='logTableBody'></tbody></table>`;
 
-      // Build Data Rows via ultra-fast array mapping
-      tableHtml += filtered.slice(startIndex, endIndex).map(key => {
+      // One QSO's row, built when it comes into view
+      const rowHtml = (key) => {
         let confTitle = "", confTd = "";
         if (key.confirmed && key.confSrcs) {
           confTd = Object.keys(key.confSrcs).join("");
           confTitle = `title='${Object.keys(key.confSrcs).map(src => GT.confSrcNames[src]).join(", ")}'`;
         }
 
-        let stateTd = key.state ? `<td align=center style='color:lightgreen' ${key.state in GT.StateData ? `title='${GT.StateData[key.state].name}'` : ""}>${key.state.substr(3)}</td>` : `<td></td>`;
+        // A state from an imported log can be free text ("CIUDAD DE BUENOS AIRES"): cut to the column's width
+        // (#logTable .logClip), the whole of it in the hover, so one such QSO doesn't widen the column for good
+        let stateTd = "<td></td>";
+        if (key.state) {
+          const stateTitle = htmlEntities(key.state in GT.StateData ? GT.StateData[key.state].name : key.state.substr(3)).replace(/'/g, "&#39;");
+          stateTd = `<td align=center style='color:lightgreen' title='${stateTitle}'><div class='logClip'>${htmlEntities(key.state.substr(3))}</div></td>`;
+        }
         let cntyTd = (key.cnty && key.cnty in GT.countyData) ? `<td align=center style='color:cyan'>${GT.countyData[key.cnty].geo.properties.n}</td>` : `<td></td>`;
-        let potaTd = GT.settings.app.potaFeatureEnabled ? (key.pota ? `<td align=center style='color:#fbb6fc'>${key.pota}</td>` : `<td></td>`) : "";
+        let potaTd = showPota ? (key.pota ? `<td align=center style='color:#fbb6fc'>${key.pota}</td>` : `<td></td>`) : "";
+        let sotaTd = showSota ? (key.sota ? `<td align=center style='color:#40ffd8'>${key.sota}</td>` : `<td></td>`) : "";
 
         let lotwTd = GT.settings.callsignLookups.lotwUseEnable ? `<td align=center>${key.DEcall in GT.lotwCallsigns ? "&#10004;" : ""}</td>` : "";
         let eqslTd = GT.settings.callsignLookups.eqslUseEnable ? `<td align=center>${key.DEcall in GT.eqslCallsigns ? "&#10004;" : ""}</td>` : "";
@@ -414,12 +448,13 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
           ${stateTd}
           ${cntyTd}
           ${potaTd}
+          ${sotaTd}
           <td style='color:lightblue'>${userTimeString(key.time * 1000)}</td>
           ${lotwTd}
           ${eqslTd}
           ${oqrsTd}
         </tr>`;
-      }).join("") + "</table>";
+      };
 
       setStatsDiv("workedListDiv", tableHtml);
 
@@ -427,7 +462,8 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
       statsValidateCallByElement("searchGrid");
       statsValidateCallByElement("searchState");
       statsValidateCallByElement("searchCnty");
-      if (GT.settings.app.potaFeatureEnabled) statsValidateCallByElement("searchPOTA");
+      if (showPota) statsValidateCallByElement("searchPOTA");
+      if (showSota) statsValidateCallByElement("searchSOTA");
 
       let newSelect = document.createElement("select");
       newSelect.id = "bandFilter";
@@ -536,6 +572,10 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
 
       statsFocus(GT.lastSearchSelection);
       setStatsDivHeight("workedListDiv", getStatsWindowHeight() - 6 + "px");
+
+      GT.logbookView.rows = filtered;
+      GT.logbookView.rowHtml = rowHtml;
+      renderLogbookRows(scrollTop);
     }
     else
     {
@@ -546,6 +586,83 @@ function renderLogbookView(sortIndex = null, nextPage = 0)
   {
     console.error(e);
   }
+}
+
+// ---- Logbook virtual scrolling ----
+// The whole sorted, filtered list scrolls (no pages); only the rows from LOGBOOK_BUFFER above the view to as many below
+// are in the page, spacer rows stand in for the rest. Rows are one height (#logTable in style.css), measured from the
+// rows drawn. Columns fit the rows drawn, so they can change width as the list scrolls; that keeps the table within the
+// window (the widest entries of a whole long log would add up to more)
+// Rows drawn above and below the view: each redraw lays out the view plus twice this (about half a millisecond a row)
+const LOGBOOK_BUFFER = 15;
+GT.logbookView = { rows: [], rowHtml: null, first: 0, last: 0, rowHeight: 20, signature: "", scrollQueued: false };
+
+// The rows in view now ({ shownFirst, shownLast }) and the range to draw with the buffer ({ first, last }) at a scroll
+// position; last indexes are exclusive. The header stays at the top (sticky), so the row just under it is the one
+// scrolled to the top of the list, and the rows have the list's height less the header's
+function logbookRange(statsWindow, scrollTop)
+{
+  const view = GT.logbookView;
+  const table = statsWindow.logTable;
+  const headHeight = table && table.tHead ? table.tHead.getBoundingClientRect().height : 0;
+  const count = view.rows.length;
+  const shownFirst = Math.max(0, Math.min(count, Math.floor(scrollTop / view.rowHeight)));
+  const shownLast = Math.max(shownFirst, Math.min(count, Math.ceil((scrollTop + statsWindow.workedListDiv.clientHeight - headHeight) / view.rowHeight)));
+  return { shownFirst, shownLast, first: Math.max(0, shownFirst - LOGBOOK_BUFFER), last: Math.min(count, shownLast + LOGBOOK_BUFFER) };
+}
+
+function logbookSpacerRow(height)
+{
+  return `<tr class='logbookSpacer' style='height:${height}px;'><td colspan='99'></td></tr>`;
+}
+
+// The rows in view into the table's tbody, at a scroll position (kept across a refresh: the table was just replaced)
+function renderLogbookRows(scrollTop = null)
+{
+  if (!GT.statsWindowInitialized) return;
+  const statsWindow = GT.statsWindowHandle.window;
+  const view = GT.logbookView;
+  const body = statsWindow.document.getElementById("logTableBody");
+  if (!body || !view.rowHtml) return;
+  const list = statsWindow.workedListDiv;
+  const top = scrollTop == null ? list.scrollTop : scrollTop;
+
+  const { first, last } = logbookRange(statsWindow, top);
+  view.first = first;
+  view.last = last;
+  const html = [];
+  if (first > 0) html.push(logbookSpacerRow(first * view.rowHeight));
+  for (let i = first; i < last; i++) html.push(view.rowHtml(view.rows[i]));
+  if (last < view.rows.length) html.push(logbookSpacerRow((view.rows.length - last) * view.rowHeight));
+  body.innerHTML = html.join("");
+  if (scrollTop != null) list.scrollTop = scrollTop;
+
+  // Measured from what was drawn, for the next range and spacers
+  let height = 0;
+  let count = 0;
+  for (const row of body.rows)
+  {
+    if (row.className === "logbookSpacer") continue;
+    height += row.getBoundingClientRect().height;
+    count++;
+  }
+  if (count > 0) view.rowHeight = height / count;
+}
+
+// From the stats window: the list scrolled or the window resized. A redraw once the drawn rows no longer cover the
+// view (at most once a frame)
+function logbookScrolled()
+{
+  if (!GT.statsWindowInitialized || GT.logbookView.scrollQueued) return;
+  const statsWindow = GT.statsWindowHandle.window;
+  GT.logbookView.scrollQueued = true;
+  statsWindow.requestAnimationFrame(() =>
+  {
+    GT.logbookView.scrollQueued = false;
+    const view = GT.logbookView;
+    const { shownFirst, shownLast } = logbookRange(statsWindow, statsWindow.workedListDiv.scrollTop);
+    if (shownFirst < view.first || shownLast > view.last) renderLogbookRows();
+  });
 }
 
 function searchWorked(dxcc, band, mode)

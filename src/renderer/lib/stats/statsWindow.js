@@ -120,6 +120,8 @@ function validateCallByElement(elementString)
 
 function init()
 {
+  // The logbook draws only the rows in view: scrolling brings in the rest (logbook.js, logbookScrolled)
+  workedListDiv.addEventListener("scroll", () => window.opener.logbookScrolled(), { passive: true });
   openInfoTab(qsobox, "workedBoxDiv", "renderLogbookView");
   loadChildWindowI18n();
   registerCutAndPasteContextMenu();
@@ -153,6 +155,8 @@ function setClipboardFromLookup()
 function resizeWorked()
 {
   workedListDiv.style.height = window.innerHeight - 63 - 6 + "px";
+  // A taller list shows more rows
+  window.opener.logbookScrolled();
 }
 
 function Resize()

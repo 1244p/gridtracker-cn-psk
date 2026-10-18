@@ -34,6 +34,7 @@
     <script src="./lib/roster/rosterColumns.js" type="text/javascript"></script>
     <script src="./lib/roster/rosterColumnFunctions.js" type="text/javascript"></script>
     <script src="./lib/roster/sendAlerts.js" type="text/javascript"></script>
+    <script src="./lib/roster/sotaLogDialog.js" type="text/javascript"></script>
   </head>
   <body id="rosterBody" onload="init()"  onresize="resize()" style="display:none;" class="roster" oncontextmenu="return handleContextMenu(event);">
     <div id="settingsDiv">
@@ -662,6 +663,33 @@
     </div>
 
     <div id="rosterDelayDiv" class="roundBorder" style="display:none; margin: 0px; margin-top: -1px; position:fixed; top:3px; left:3px;font-size:larger;">&#8987;</div>
+
+    <!-- Log a POTA / SOTA QSO: click a park or summit in the Feed Roster's POTA / SOTA column (roster/sotaLogDialog.js).
+         Above the settings panel -->
+    <div id="sotaLogBox" class="sotaLogScrim">
+      <div class="sotaLogDialog roundBorder">
+        <div class="sotaLogTitle" data-i18n="sotaLog.title">Log POTA / SOTA QSO</div>
+        <table class="darkTable sotaLogFields">
+          <tr><td data-i18n="stats.sotaExport.myCall">My Call</td><td><input type="text" id="sotaLogMyCall" class="inputTextValue" /></td></tr>
+          <tr><td data-i18n="stats.sotaExport.worked">Worked</td><td><input type="text" id="sotaLogCall" class="inputTextValue" /></td></tr>
+          <tr><td data-i18n="sotaLog.park">Park</td><td><input type="text" id="sotaLogPark" class="inputTextValue" /></td></tr>
+          <tr><td data-i18n="stats.sotaExport.summit">Summit</td><td><input type="text" id="sotaLogRef" class="inputTextValue" /></td></tr>
+          <tr><td data-i18n="sotaLog.date">Date (UTC)</td><td><input type="date" id="sotaLogDate" class="inputTextValue" /></td></tr>
+          <tr><td data-i18n="sotaLog.time">Time (UTC)</td><td><input type="time" id="sotaLogTime" class="inputTextValue" /></td></tr>
+          <tr><td data-i18n="sotaLog.freq">Freq (MHz)</td><td><input type="text" id="sotaLogFreq" class="inputTextValue" oninput="sotaLogBandFromFreq();" /></td></tr>
+          <tr><td data-i18n="stats.sotaExport.band">Band</td><td><select id="sotaLogBand" class="inputTextValue"></select></td></tr>
+          <tr><td data-i18n="stats.sotaExport.mode">Mode</td><td><input type="text" id="sotaLogMode" class="inputTextValue" /></td></tr>
+          <tr><td data-i18n="sotaLog.rst">RST Sent / Rcvd</td><td class="sotaLogRst"><input type="text" id="sotaLogRstS" class="inputTextValue" /><input type="text" id="sotaLogRstR" class="inputTextValue" /></td></tr>
+          <tr><td data-i18n="stats.sotaExport.comment">Comment</td><td><input type="text" id="sotaLogComment" class="inputTextValue" /></td></tr>
+        </table>
+        <div id="sotaLogStatusText" class="sotaLogStatus"></div>
+        <div class="sotaLogButtons">
+          <div class="button" onclick="closeSotaLogDialog();" data-i18n="stats.sotaExport.cancel">Cancel</div>
+          <div class="button" onclick="submitSotaLogQso();" data-i18n="sotaLog.logButton">Log QSO</div>
+        </div>
+      </div>
+    </div>
+
 
 
   </body>

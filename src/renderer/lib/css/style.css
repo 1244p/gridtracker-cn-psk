@@ -609,6 +609,158 @@ a {
   justify-content: center;
 }
 
+/* Logbook virtual scrolling (stats/logbook.js, renderLogbookRows): every row the same height, so the spacers'
+   heights match the rows they stand in for (the flag image and symbol-font check marks would otherwise vary it) */
+#logTable > tbody > tr {
+  height: 20px;
+}
+
+#logTable > tbody > tr > td {
+  line-height: 14px;
+}
+
+#logTable > tbody > tr > td img {
+  vertical-align: middle;
+  padding-top: 0 !important;
+}
+
+/* Free text that would otherwise widen its column for good (the State column) */
+#logTable .logClip {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#logTable > tbody > tr.logbookSpacer > td {
+  border: none;
+  padding: 0;
+}
+
+/* The search boxes and column titles stay at the top of the list while it scrolls; rows pass under them. The list
+   (#workedListDiv) has no top padding, so the header sticks where it rests and no rows show through above it */
+#logTable > thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+#logTable > thead th {
+  background-color: #000;
+}
+
+/* A sticky header in a table with collapsed borders lets the rows scrolling under it show through its top: the table
+   uses separate borders instead, each cell drawing only its right and bottom one so the lines stay single. The top line
+   is drawn by the search row's cells, not the table, so it stays with the header when the table scrolls away */
+#logTable {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-width: 0 0 0 1px;
+}
+
+#logTable > thead th,
+#logTable > tbody td {
+  border-width: 0 1px 1px 0;
+}
+
+#logTable > thead > tr:first-child > th {
+  border-top-width: 1px;
+}
+
+/* Logbook -> Export SOTA Chaser Log (gt_stats.html, stats/sotaExport.js) */
+.sotaExportButton {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.sotaExportBox {
+  position: fixed;
+  z-index: 1201;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+.sotaExportDialog {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(900px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #1b1b1b;
+  border: 1px solid #777;
+  color: #eee;
+}
+
+.sotaExportTitle {
+  padding: 8px 12px;
+  border-bottom: 1px solid #444;
+  font-weight: bold;
+  color: #40ffd8;
+}
+
+.sotaExportRange {
+  padding: 8px 12px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #333;
+}
+
+.sotaExportRange input {
+  margin: 0 0 0 4px;
+}
+
+.sotaExportCount {
+  color: #9cf;
+}
+
+.sotaExportNote {
+  color: #aaa;
+  font-style: italic;
+  white-space: normal;
+}
+
+.sotaExportList {
+  overflow: auto;
+  flex: 1;
+  padding: 0 12px;
+}
+
+.sotaExportList table {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.sotaExportList input {
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sotaExportDup {
+  background-color: #5a1a1a;
+}
+
+.sotaExportRemove {
+  cursor: pointer;
+  color: #f66;
+  font-weight: bold;
+}
+
+.sotaExportButtons {
+  padding: 8px 12px;
+  border-top: 1px solid #444;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 /* Settings -> Feeds: Modes, Bands and Allow, each its own box under Max Age / Clear All Feeds (was the Feed Roster's
    Spots tab) */
 #feedsSettingsDiv > .mapItem.feedSpotsBox {

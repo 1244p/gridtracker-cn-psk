@@ -70,7 +70,7 @@ CR.profiles = {
     ignores: () => GT.settings,
     // Entries from instances that are gone, or unticked in a multi-instance roster, are hidden
     filter: (callObj) => (callObj.instance in GT.instances) && !(GT.instanceCount > 1 && GT.instances[callObj.instance].crEnable === false),
-    excludedColumns: { Spotter: true, CQ: true, DEDXCCv2: true, DEContv2: true, SOTA: true },
+    excludedColumns: { Spotter: true, CQ: true, DEDXCCv2: true, DEContv2: true },
     watchersTest: {},
     alertTimer: null
   },
@@ -127,15 +127,16 @@ function isFeedRoster()
 // A rig's mode as feed spots name it: AC Log reports the radio's sideband
 const FEED_RIG_MODE_ALIASES = { USB: "SSB", LSB: "SSB" };
 
-// The bands and modes the connected rigs are on (every WSJT-X / JTDX instance and AC Log): for the Feed Roster's
-// ▲ (a rig on the spot's band and mode) and its Auto Band / Auto Mode exceptions. count is 0 with no rig connected
+// The bands and modes the connected rigs are on (every WSJT-X / JTDX instance, AC Log and Log4OM): for the Feed
+// Roster's ▲ (a rig on the spot's band and mode) and its Auto Band / Auto Mode exceptions. A logger with no band yet
+// (Log4OM without a rig) isn't one. count is 0 with no rig connected
 function feedRigBandModes()
 {
   const rigs = { bands: {}, modes: {}, bandModes: {}, count: 0 };
   for (const id in GT.instances)
   {
     const instance = GT.instances[id];
-    if (instance.valid && instance.open && instance.status)
+    if (instance.valid && instance.open && instance.status && !(window.opener.isLoggerInstance(id) && instance.status.Band == "OOB"))
     {
       const band = instance.status.Band;
       const reported = String(instance.status.MO || "").toUpperCase();
@@ -582,7 +583,7 @@ function processStatus(newMessage)
       txrxdec.style.backgroundColor = "Green";
       txrxdec.style.borderColor = "GreenYellow";
       // AC Log doesn't receive or decode: it's just connected
-      txrxdec.innerHTML = I18N(newMessage.instance == window.opener.GT.acLogInstanceId ? "gt.status.txrx.connected" : "gt.status.txrx.receive");
+      txrxdec.innerHTML = I18N(window.opener.isLoggerInstance(newMessage.instance) ? "gt.status.txrx.connected" : "gt.status.txrx.receive");
     }
   }
   else
@@ -934,7 +935,7 @@ function setVisual()
   usesOQRSDiv.style.display = (GT.settings.callsignLookups.oqrsUseEnable) ? "" : "none";
   onlySpotDiv.style.display = (CR.rosterSettings.columns.Spot) ? "" : "none";
   huntingMatrixPotaDiv.style.display = (GT.settings.app.potaFeatureEnabled && !GT.settings.map.offlineMode) ? "" : "none";
-  huntingMatrixSotaDiv.style.display = (isFeedRoster() && sotaActive()) ? "" : "none";
+  huntingMatrixSotaDiv.style.display = sotaActive() ? "" : "none";
   rosterBody.style.display = "block";
    
   resize();

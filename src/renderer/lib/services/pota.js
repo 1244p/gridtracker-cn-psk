@@ -314,8 +314,8 @@ function potaSpotCallObj(spot, key)
 }
 
 // Map left-click on a park (or parks grouped at this zoom): a spot a rig is already on the band and mode of goes to that
-// rig (WSJT-X / JTDX: its call and grid; AC Log: its entry tab). Otherwise a connected AC Log gets the first spot the
-// tooltip lists (with Enable Rig Control, the rig tuned to it)
+// rig (WSJT-X / JTDX: its call and grid; AC Log: its entry tab). Otherwise the first spot the tooltip lists goes to a
+// connected AC Log (with Enable Rig Control, the rig tuned to it), else to Gen Msgs on the active WSJT-X / JTDX
 function leftClickPota(feature)
 {
   const keys = feature.parkKeys || [feature.key];
@@ -341,6 +341,11 @@ function leftClickPota(feature)
       acLogWorkSpot(callObj);
       return;
     }
+    if (instance == GT.log4OMInstanceId)
+    {
+      log4OMWorkSpot(callObj);
+      return;
+    }
     if (instance != null)
     {
       setCallAndGrid(callObj.DEcall, callObj.grid, instance);
@@ -348,8 +353,12 @@ function leftClickPota(feature)
     }
   }
 
+  // Otherwise the first spot the tooltip lists: through a connected AC Log, else Log4OM, else Gen Msgs on the active
+  // WSJT-X / JTDX (as DX Feeds and SOTA markers do)
   const first = potaSpotCallObj(spots[0].spot, spots[0].key);
   if (acLogCanWork(first)) acLogWorkSpot(first);
+  else if (log4OMCanWork(first)) log4OMWorkSpot(first);
+  else setCallAndGrid(first.DEcall, first.grid, null);
 }
 
 function reportPotaQSO(record)
@@ -704,11 +713,12 @@ function createParkTipTable(toolElement)
   myParktip.innerHTML = keys.length > 1 ? parkGroupTipHtml(keys) : parkTipHtml(keys[0]);
 }
 
-// A spot's 4-character grid: the activator's when the spot gives one, else the park's main grid, else "-"
+// A spot's grid for the tooltip, as long as it's known (6 characters when it has them): the activator's when the spot
+// gives one, else the park's main grid, else "-"
 function potaSpotGrid(spot, park)
 {
-  if (spot.activatorGrid && spot.activatorGrid.length >= 4) return spot.activatorGrid.substring(0, 4).toUpperCase();
-  return (park && park.grid && park.grid.length >= 4) ? park.grid.substring(0, 4).toUpperCase() : "-";
+  if (spot.activatorGrid && spot.activatorGrid.length >= 4) return spot.activatorGrid.toUpperCase();
+  return (park && park.grid && park.grid.length >= 4) ? park.grid.toUpperCase() : "-";
 }
 
 // Several parks under one marker: no park headers, just "POTA Spot × n" and one row per spot with its park after the
@@ -745,8 +755,8 @@ function parkGroupTipHtml(keys)
   </table>`;
 }
 
-// One park's section: its header, then its spots, each with a 4-character grid (the activator's when the spot gives one,
-// else the park's main grid)
+// One park's section: its header, then its spots, each with its grid (the activator's when the spot gives one, else the
+// park's main grid; 6 characters when known)
 function parkTipHtml(key)
 {
   const park = GT.pota.parks[key];

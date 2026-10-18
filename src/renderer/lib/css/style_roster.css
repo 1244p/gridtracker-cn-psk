@@ -486,15 +486,27 @@ table.awardTableCSS thead th:first-child {
   box-shadow: inset 0px 11px 6px -8px #888, inset 0px -11px 6px -8px #888;
 }
 
+/* The column titles stay at the top of the window while the roster scrolls (the controls above scroll away); rows pass
+   under them. With collapsed borders the rows would show through the sticky header's borders, so the table uses
+   separate borders, each cell drawing only its right and bottom one (the titles their top one too) so lines stay single */
 table.rosterTable {
-  border-collapse:collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   background-color: black;
   text-align: center;
   width: 100%;
 }
 
+table.rosterTable > thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 table.rosterTable th {
   border: 1px solid #555;
+  border-left-width: 0;
+  background-color: black;
   font-weight: bold;
   padding: 2px;
   padding-bottom: 1px;
@@ -511,6 +523,7 @@ table.rosterTable th:last-child {
 
 table.rosterTable td {
   border: 1px solid #555;
+  border-width: 0 1px 1px 0;
   padding: 2px;
   padding-bottom: 1px;
 }
@@ -736,6 +749,94 @@ body.feedRosterShown .msgCol .msgCut {
   max-width: 146px;
   display: inline-block;
   vertical-align: top;
+}
+
+/* Log SOTA Chase dialog (gt_roster.html #sotaLogBox, roster/sotaLogDialog.js): a scrim over the whole window, the dialog
+   centred, above the settings panel */
+.sotaLogScrim {
+  display: none;
+  position: fixed;
+  z-index: 1201;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+.sotaLogDialog {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(360px, 94vw);
+  max-height: 90vh;
+  overflow: auto;
+  background-color: #1b1b1b;
+  border: 1px solid #777;
+  padding: 6px 10px;
+  white-space: normal;
+}
+
+.sotaLogTitle {
+  font-weight: bold;
+  color: #40FFD8;
+  padding-bottom: 6px;
+}
+
+table.sotaLogFields {
+  width: 100%;
+}
+
+table.sotaLogFields td:first-child {
+  text-align: right;
+  white-space: nowrap;
+  padding-right: 6px;
+}
+
+table.sotaLogFields input,
+table.sotaLogFields select {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+table.sotaLogFields td.sotaLogRst {
+  display: flex;
+  gap: 4px;
+}
+
+.sotaLogStatus {
+  min-height: 1.2em;
+  padding: 4px 0;
+  text-align: center;
+  color: #888;
+}
+
+.sotaLogButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* SOTA column: dots beside a summit reference (rosterColumns.js sotaColumnRef), stacked in a narrow slot in the text's
+   color, centred on the line */
+.sotaMark {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  width: 5px;
+  height: 1em;
+  vertical-align: middle;
+}
+
+.sotaMark > i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: currentColor;
 }
 
 .wantedCol {

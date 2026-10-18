@@ -41,7 +41,7 @@ function processRosterHunting(callRoster, rosterSettings)
   const zYearStr = "z" + currentYear;
   
   const potaFeatureEnabled = (GT.settings.app.potaFeatureEnabled && GT.settings.map.offlineMode === false);
-  // SOTA Chasing: Feed Roster spots only (a summit comes from the spot's note)
+  // SOTA Chasing: a feed spot's summit (from its note), or a decoded activator's (wsjtx.js, sotaActivatorSummit)
   const sotaFeatureEnabled = sotaActive();
   const isAwardTracker = (CR.activeRoster.logbook.referenceNeed === LOGBOOK_AWARD_TRACKER);
   const AAW = CR.activeAudioAlerts.wanted;

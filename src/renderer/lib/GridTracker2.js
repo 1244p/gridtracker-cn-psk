@@ -116,6 +116,14 @@ function loadAllSettings()
     GT.settings.roster.columnOrder.splice(indexOfOAMS, 1);
   }
 
+  // The Call Roster's SOTA column (decoded SOTA activators) goes right after POTA in a saved column order
+  if (Array.isArray(GT.settings.roster.columnOrder) && !GT.settings.roster.columnOrder.includes("SOTA"))
+  {
+    const indexOfPOTA = GT.settings.roster.columnOrder.indexOf("POTA");
+    if (indexOfPOTA > -1) GT.settings.roster.columnOrder.splice(indexOfPOTA + 1, 0, "SOTA");
+    else GT.settings.roster.columnOrder.push("SOTA");
+  }
+
   if (GT.settings.feedRoster)
   {
     const feedRoster = GT.settings.feedRoster;
@@ -664,7 +672,8 @@ GT.sortFunction = [
   myConfirmedCompare,
   myPotaCompare,
   myStateCompare,
-  myCntyCompare
+  myCntyCompare,
+  mySotaCompare
 ];
 
 GT.lastSortIndex = 4;
@@ -674,6 +683,7 @@ GT.lastSortType = 1;
 GT.searchWB = "";
 GT.gridSearch = "";
 GT.potaSearch = "";
+GT.sotaSearch = "";
 GT.stateSearch = "";
 GT.cntySearch = "";
 GT.filterBand = "Mixed";

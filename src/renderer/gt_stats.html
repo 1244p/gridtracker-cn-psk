@@ -89,7 +89,29 @@
       </div>
       <div id="workedBoxDiv" class="infoTabcontent">
         <div id="workedHeadDiv"></div>
-        <div id="workedListDiv" style="margin: 2px; padding: 2px; overflow: auto"></div>
+        <div id="workedListDiv" style="margin: 2px; padding: 0 2px 2px 2px; overflow: auto"></div>
+      </div>
+      <!-- Logbook -> Export SOTA Chaser Log (filled by the main window, stats/sotaExport.js) -->
+      <div id="sotaExportBox" class="sotaExportBox" style="display: none">
+        <div class="sotaExportDialog roundBorder">
+          <div class="sotaExportTitle" data-i18n="stats.sotaExport.title">SOTA Chaser Log Export</div>
+          <div class="sotaExportRange">
+            <label><span data-i18n="stats.sotaExport.from">From</span>
+              <input type="datetime-local" id="sotaExportFrom" class="inputTextValue" oninput="window.opener.sotaExportPreview();" /></label>
+            <label><span data-i18n="stats.sotaExport.to">To</span>
+              <input type="datetime-local" id="sotaExportTo" class="inputTextValue" oninput="window.opener.sotaExportPreview();" /></label>
+            <span id="sotaExportCount" class="sotaExportCount"></span>
+            <span style="flex: 1"></span>
+            <span class="sotaExportNote" data-i18n="stats.sotaExport.note">Edits here only change the exported file, not your logbook.</span>
+          </div>
+          <div class="sotaExportList">
+            <table id="sotaExportTable" class="darkTable"></table>
+          </div>
+          <div class="sotaExportButtons">
+            <div class="button" data-i18n="stats.sotaExport.cancel" onclick="window.opener.closeSotaChaserExport();">Cancel</div>
+            <div class="button" data-i18n="stats.sotaExport.export" onclick="window.opener.doSotaChaserExport();">Export CSV&hellip;</div>
+          </div>
+        </div>
       </div>
       <div id="callsignBoxDiv" class="infoTabcontent">
         <div id="callsignListDiv" style="margin: 2px; padding: 2px"></div>

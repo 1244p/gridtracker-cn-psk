@@ -12,7 +12,7 @@ function ignoreMessagesToggle()
   {
     txrxdec.style.backgroundColor = "Green";
     txrxdec.style.borderColor = "GreenYellow";
-    txrxdec.innerHTML = I18N(GT.activeInstance == GT.acLogInstanceId ? "gt.status.txrx.connected" : "gt.status.txrx.receive");
+    txrxdec.innerHTML = I18N(isLoggerInstance(GT.activeInstance) ? "gt.status.txrx.connected" : "gt.status.txrx.receive");
     txrxdec.title = I18N("gt.status.ignoreMessages.hover");
   }
   else

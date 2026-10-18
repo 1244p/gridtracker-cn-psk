@@ -259,6 +259,40 @@ function saveCenterGridsquare()
   tryRecenterAEQD();
 }
 
+// Settings -> General -> Station Callsign: the callsign used while no connected instance (WSJT-X, JTDX, AC Log) gives
+// one. A callsign an instance reports is always used for it and never replaced by this one
+function instanceKnowsCallsign()
+{
+  for (const instance of Object.values(GT.instances))
+  {
+    if (instance.open && instance.valid && instance.status && String(instance.status.DEcall || "").trim().length > 0) return true;
+  }
+  return false;
+}
+
+// Called at startup, when the setting changes and when an instance goes away
+function applyStationCallsign()
+{
+  const call = GT.settings.app.stationCallsign;
+  if (!call || instanceKnowsCallsign()) return;
+  if (GT.settings.app.myCall == call && GT.settings.app.myRawCall == call) return;
+  GT.settings.app.myCall = GT.settings.app.myRawCall = call;
+  // OAMS picks it up on its own (PSK Reporter: openPskMqtt, by the callers)
+  goProcessRoster();
+}
+
+function saveStationCallsign(input)
+{
+  input.value = input.value.trim().toUpperCase();
+  const valid = /\d/.test(input.value) && /[A-Z]/.test(input.value);
+  setInputStatus(input, valid || input.value.length == 0, null);
+  if (!valid && input.value.length > 0) return;
+  GT.settings.app.stationCallsign = input.value;
+  applyStationCallsign();
+  // PSK Reporter follows the Station Callsign too, whether or not it's in use
+  openPskMqtt();
+}
+
 function tryUpdateQTH(grid)
 {
   if (grid != GT.settings.app.myGrid)
@@ -275,6 +309,8 @@ function tryUpdateQTH(grid)
 
     setHomeGridsquare();
     redrawGrids();
+    // RX Spots' paths start at the new QTH (their cached paths start over with the grid)
+    redrawSpots();
   }
 }
 

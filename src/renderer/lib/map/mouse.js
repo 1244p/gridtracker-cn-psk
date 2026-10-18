@@ -373,7 +373,7 @@ function createSpotTipTable(toolElement)
       myTooltip.innerHTML = `
         <table id='tooltipTable' class='darkTable'>
           <tr><th colspan=2 style='color:cyan'>Rx Spot</th></tr>
-          <tr><td>Call</td><td style='color:#ff0'>${lookupCallHtml(report.call, report.grid)}</td></tr>
+          <tr><td>${I18N("rosterColumns.Spotter.header")}</td><td style='color:#ff0'>${lookupCallHtml(report.call, report.grid)}</td></tr>
           <tr><td>dB</td><td style='color:#DD44DD'>${formatSignalReport(Number(report.snr))}</td></tr>
           <tr><td>Age</td><td>${toDHMS(Number(now - report.when))}</td></tr>
           ${report.dxcc > 0 ? `<tr><td>DXCC</td><td style='color:orange;'>${GT.dxccToAltName[report.dxcc]} <font color='lightgreen'>(${GT.dxccInfo[report.dxcc].pp})</font></td>` : ""}
@@ -446,7 +446,7 @@ function createFeedGroupTipTable(toolElement)
     const freq = callObj.freq > 0 ? formatMhz(callObj.freq / 1000) + " " : "";
     const dxcc = callObj.dxcc > 0 ? GT.dxccToAltName[callObj.dxcc] : "";
     rows += `<tr><td style='color:#ff0'>${lookupCallHtml(callObj.DEcall, callObj.grid)}</td>` +
-      `<td style='color:lightgreen'>${callObj.grid || "-"}</td>` +
+      `<td style='color:lightgreen'>${callObj.fullGrid || callObj.grid || "-"}</td>` +
       `<td style='color:orange'>${dxcc}</td>` +
       `<td style='color:#5caeff'>${lookupCallHtml(callObj.spotter)}</td>` +
       `<td style='color:lightgreen'>${freq}<font color='yellow'>(${callObj.band})</font></td>` +

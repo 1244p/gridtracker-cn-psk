@@ -117,12 +117,12 @@ function ringSelectedMarker(feature)
 // Point markers whose icons would overlap at the current zoom, grouped (POTA parks, SOTA summits, DX Feeds spots): an array of groups,
 // each an array of features, the first being the one to show (highest feature.rank). radiusPx: centers closer than
 // this, in screen pixels, count as overlapping. Only markers with the same feature.dxcc are grouped: spots from
-// different DXCC entities stay apart
+// different DXCC entities stay apart. With Settings -> Map -> Group Overlapping Spots off, every marker is its own group
 function groupOverlappingFeatures(features, radiusPx = 22)
 {
   const resolution = GT.mapView ? GT.mapView.getResolution() : 0;
   const sorted = features.slice().sort((a, b) => (b.rank || 0) - (a.rank || 0));
-  if (!(resolution > 0)) return sorted.map((feature) => [feature]);
+  if (!(resolution > 0) || !GT.settings.map.groupSpots) return sorted.map((feature) => [feature]);
 
   const radius = radiusPx * resolution;
   const radius2 = radius * radius;

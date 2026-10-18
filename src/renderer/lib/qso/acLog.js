@@ -305,8 +305,10 @@ function queueAcLogFetch(attempt)
       const count = GT.acLogUnfetched;
       if (count == 0) return done();
       GT.acLogUnfetched = 0;
-      acLogDownload(count, (ok) =>
+      acLogDownload(count, (ok, buffer) =>
       {
+        // A park QSO just logged in AC Log is spotted to POTA, like one GridTracker logs itself
+        if (ok) acLogSpotPotaQsos(buffer);
         if (!ok)
         {
           GT.acLogUnfetched += count;
@@ -316,6 +318,69 @@ function queueAcLogFetch(attempt)
       });
     }, null, 120000);
   }, 250);
+}
+
+// QSOs logged in AC Log with a park (its Other field titled POTA_REF) are spotted to POTA, as a QSO GridTracker logs
+// itself is (finishSendingReport -> reportPotaQSO): only from the downloads of QSOs just entered (acLogQsoEntered,
+// not loading the whole log) holding a single QSO, only one from the last 10 minutes with a frequency, each once (key ->
+// when spotted)
+GT.acLogPotaSpotted = new Map();
+const AC_LOG_POTA_SPOT_WINDOW_SEC = 600;
+
+function acLogSpotPotaQsos(buffer)
+{
+  if (!buffer || !GT.settings.app.potaFeatureEnabled || GT.settings.map.offlineMode) return;
+  const now = timeNowSec();
+  for (const [key, at] of GT.acLogPotaSpotted)
+  {
+    if (now - at > 3600) GT.acLogPotaSpotted.delete(key);
+  }
+
+  let opCall = "";
+  let opGrid = "";
+  const records = [];
+  for (const part of buffer.toString().split(/<\/CMD>/i))
+  {
+    const start = part.indexOf("<CMD>");
+    if (start < 0) continue;
+    const object = parseAcLogXML(part.substring(start));
+    if (object.type == "OPINFORESPONSE")
+    {
+      opCall = object.CALL || "";
+      opGrid = object.GRID || "";
+    }
+    else if (object.CALL) records.push(object);
+  }
+  // A safety measure: only a reply with exactly one QSO (QSOs logged moments apart come in one reply, and aren't spotted)
+  if (records.length != 1) return;
+
+  for (const object of records)
+  {
+    const park = String(object.POTA_REF || "").trim().toUpperCase();
+    const freq = Number(object.FREQUENCY);
+    if (!object.CALL || !park || !(freq > 0) || !object.DATE || !object.TIMEON) continue;
+
+    // DATE "YYYY/MM/DD", TIMEON "HH:MM:SS", UTC (as the log worker reads them)
+    const when = Date.UTC(object.DATE.substring(0, 4), parseInt(object.DATE.substring(5, 7)) - 1, object.DATE.substring(8, 10),
+      object.TIMEON.substring(0, 2), object.TIMEON.substring(3, 5), object.TIMEON.substring(6, 8)) / 1000;
+    if (!(now - when <= AC_LOG_POTA_SPOT_WINDOW_SEC && when - now <= 300)) continue;
+
+    const key = object.CALL.toUpperCase() + "|" + object.DATE + "|" + object.TIMEON + "|" + park;
+    if (GT.acLogPotaSpotted.has(key)) continue;
+    GT.acLogPotaSpotted.set(key, now);
+
+    reportPotaQSO({
+      CALL: object.CALL.toUpperCase(),
+      STATION_CALLSIGN: (object.FLDOPERATOR || opCall || GT.settings.app.myCall).toUpperCase(),
+      FREQ: String(object.FREQUENCY).trim(),
+      POTA_REF: park,
+      MODE: (object.MODE || "").toUpperCase(),
+      COMMENT: object.COMMENTS || "",
+      GRIDSQUARE: (object.GRID || "").toUpperCase(),
+      MY_GRIDSQUARE: (object.FLDGRIDS || opGrid || "").toUpperCase()
+    });
+    addLastTraffic("<font style='color:white'>" + I18N("gt.log.spottedPota") + "</font>");
+  }
 }
 
 // AC Log's BAND field as a GridTracker band ("15" -> "15m", "70" -> "70cm", "144" -> "2m"), or "" if unknown

@@ -1,5 +1,7 @@
 # GridTracker2
 
+> Yes, we use Claude AI for some development tasks. If you don't like this, you are free to not run GridTracker2.
+
 **Do not commit to git. Commits are only done by the developer.**
 
 Electron app (no bundler, no build step for dev). Main process: [src/main/index.js](src/main/index.js). Renderer pages: `src/renderer/*.html`, scripts in `src/renderer/lib/` loaded as plain `<script>` globals (load `first.js` first in every window). Translations: `resources/i18n/<locale>.json`, keyed by the `data-i18n` attribute (`.hover` keys set `title`, `.label` keys set `innerHTML`).

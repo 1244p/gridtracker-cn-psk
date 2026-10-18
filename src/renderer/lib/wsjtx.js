@@ -24,11 +24,15 @@ function handleInstanceStatus(newMessage)
 
   // The rig's call, band, mode or grid changed: the Feed Roster (▲, Auto Band / Mode) needs reprocessing too, at the
   // next status that isn't mid-decode (GT.feedRosterStatusDirty, below)
+  // An instance has reported its callsign (PSK Reporter stops following the one read at startup, mqttPsk.js)
+  if (String(newMessage.DEcall || "").trim()) GT.pskInstanceSeen = true;
   if (instanceKey != GT.instances[newMessage.instance].instanceKey )
   {
     GT.instances[newMessage.instance].instanceKey = instanceKey;
     GT.gtLiveStatusUpdate = true;
     GT.feedRosterStatusDirty = true;
+    // PSK Reporter follows every instance's callsign (mqttPsk.js)
+    openPskMqtt();
   }
   // So does its DX Call (the Feed Roster highlights that call), and the map rings its POTA / SOTA / DX Feeds markers
   const dxCall = String(newMessage.DXcall || "").trim();
@@ -162,18 +166,27 @@ function handleInstanceStatus(newMessage)
 
     GT.settings.app.myRawFreq = newMessage.Frequency;
     // AC Log without a rig interface has no frequency: just the band
-    const showFrequency = newMessage.Id != GT.acLogInstanceId || newMessage.Frequency > 0;
+    const showFrequency = !isLoggerInstance(newMessage.Id) || newMessage.Frequency > 0;
     frequency.innerHTML = (showFrequency ? "<font color='lightgreen'>" + formatMhz(Number(newMessage.Frequency / 1000)) + " Hz </font>" : "") +
       "<font color='yellow'>(" + GT.settings.app.myBand + ")</font>";
     
 
-    GT.settings.app.myRawCall = newMessage.DEcall.trim();
+    // The instance's own callsign; when it gives none (AC Log without its station info, Log4OM without a rig),
+    // Settings -> General -> Station Callsign, else the callsign already known stays
+    GT.settings.app.myRawCall = newMessage.DEcall.trim() || GT.settings.app.stationCallsign || GT.settings.app.myRawCall;
 
 
     let testGrid = newMessage.DEgrid.trim().substr(0, 6);
+    const validGrid = (grid) => /^[A-R]+$/.test(grid.substr(0, 2)) && /^[0-9]+$/.test(grid.substr(2, 2)) && (grid.length == 4 || grid.length == 6);
 
-    if (/^[A-R]+$/.test(testGrid.substr(0, 2)) && /^[0-9]+$/.test(testGrid.substr(2, 2)) && ( testGrid.length == 4 || testGrid.length == 6))
+    if (validGrid(testGrid))
     {
+    }
+    else if (isLoggerInstance(newMessage.instance) && validGrid(GT.settings.app.myRawGrid))
+    {
+      // A logger that gives no grid (Log4OM's radio status has none, AC Log without its station info): the grid
+      // already known stays, not the placeholder
+      testGrid = GT.settings.app.myRawGrid;
     }
     else
     {
@@ -270,8 +283,11 @@ function handleInstanceStatus(newMessage)
       localDXReport.innerHTML = localDXCountry.innerHTML = "";
     }
 
-    GT.settings.app.myCall = newMessage.DEcall;
- 
+    const lastCall = GT.settings.app.myCall;
+    GT.settings.app.myCall = newMessage.DEcall.trim() ? newMessage.DEcall : (GT.settings.app.stationCallsign || GT.settings.app.myCall);
+    // PSK Reporter follows the current callsign too (mqttPsk.js)
+    if (GT.settings.app.myCall != lastCall) openPskMqtt();
+
     if (newMessage.Decoding == 1)
     {
       // Decoding
@@ -317,7 +333,7 @@ function handleInstanceStatus(newMessage)
       txrxdec.style.backgroundColor = "Green";
       txrxdec.style.borderColor = "GreenYellow";
       // AC Log doesn't receive or decode: it's just connected
-      txrxdec.innerHTML = I18N(newMessage.instance == GT.acLogInstanceId ? "gt.status.txrx.connected" : "gt.status.txrx.receive");
+      txrxdec.innerHTML = I18N(isLoggerInstance(newMessage.instance) ? "gt.status.txrx.connected" : "gt.status.txrx.receive");
     }
 
     if (newMessage.TxEnabled)
@@ -516,6 +532,11 @@ function handleClosed(newMessage)
     GT.activeInstance = "";
   }
 
+  // With no instance left that gives a callsign, Settings -> General -> Station Callsign; PSK Reporter drops the closed
+  // instance's callsign
+  applyStationCallsign();
+  openPskMqtt();
+
   if (Object.keys(GT.instances).length > 1)
   {
     rigWrap.style.display = "";
@@ -699,7 +720,8 @@ function finalWsjtxDecode(newMessage, useReformedMessage = false, reformedMessag
     const liveCall = GT.liveCallsigns[hash];
     if (liveCall !== undefined) {
       callsign = liveCall;
-      if (theirQTH === "" && callsign.grid.length > 0) {
+      // A summit's square filled in below (no grid known) isn't one the station sent
+      if (theirQTH === "" && callsign.grid.length > 0 && !callsign.gridFromSummit) {
         theirQTH = callsign.grid;
         validQTH = true;
         decodeHadGrid = true;
@@ -801,6 +823,7 @@ function finalWsjtxDecode(newMessage, useReformedMessage = false, reformedMessag
       if (validQTH)
       {
         callsign.grid = theirQTH;
+        callsign.gridFromSummit = false;
         if (decodeHadGrid || rtsnHadGrid || spotHadGrid) callsign.gridQualified = true;
       }
 
@@ -898,6 +921,29 @@ function finalWsjtxDecode(newMessage, useReformedMessage = false, reformedMessag
         callsign.pota = "?-????";
       }
     }
+
+    // SOTA Chasing: an activator DX Feeds spots on a summit gets it here too (Call Roster SOTA column and Wanted, and
+    // SOTA_REF when logged). A grid the station sent always stands; with none known, the summit's square is shown, not
+    // qualified (◇), until a real one comes or the activation ends
+    callsign.sota = sotaActivatorSummit(callsign.DEcall);
+    // Heard on the air: their summit keeps counting while they're decoded, and its marker shows you hearing them
+    if (callsign.sota) refreshSotaActivator(callsign.DEcall);
+    if (callsign.sota && (callsign.grid.length == 0 || callsign.gridFromSummit))
+    {
+      const summitGrid = sotaSummitGrid(callsign.sota);
+      if (summitGrid)
+      {
+        callsign.grid = summitGrid.substring(0, 4);
+        callsign.gridQualified = false;
+        callsign.gridFromSummit = true;
+      }
+    }
+    else if (!callsign.sota && callsign.gridFromSummit)
+    {
+      callsign.grid = "";
+      callsign.gridFromSummit = false;
+    }
+    if (callsign.sota) noteSotaDecode(callsign);
 
     if (newMessage.NW)
     {
@@ -1528,6 +1574,8 @@ function LiveCallsign(DEcall, DXcall, grid, mode, band, msg, dxcc, time) {
   this.DXcall = DXcall;
   this.grid = grid;
   this.gridQualified = false;
+  // The grid is a SOTA summit's square filled in for an activator who sent none (finalWsjtxDecode)
+  this.gridFromSummit = false;
   this.mode = mode;
   this.band = band;
   this.msg = msg;
@@ -1566,7 +1614,7 @@ function LiveCallsign(DEcall, DXcall, grid, mode, band, msg, dxcc, time) {
   this.zone = null;
   this.cont = null;
   this.pota = null;
-  // SOTA summit, feed spots only (rtsn.js)
+  // SOTA summit: a feed spot's (rtsn.js), or a decoded activator's (sotaActivatorSummit)
   this.sota = null;
   this.state = null;
   this.cnty = null;
@@ -1896,7 +1944,9 @@ function updateBasedOnIni()
   // Which INI do we load?
   if (GT.settings.app.wsjtUdpPort > 0 && which.MyCall != "NOCALL")
   {
-    GT.settings.app.myCall = which.MyCall;
+    // myRawCall as well, like a status message sets both: the traffic pane's own-call highlight and the ClubLog
+    // callsign prefill read it, and stayed on "NOCALL" until WSJT-X itself connected
+    GT.settings.app.myCall = GT.settings.app.myRawCall = which.MyCall;
     GT.settings.app.myGrid = GT.settings.app.myRawGrid = which.MyGrid;
     GT.lastBand = GT.settings.app.myBand;
     GT.lastMode = GT.settings.app.myMode;

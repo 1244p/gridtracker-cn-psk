@@ -247,6 +247,7 @@ function displayTime()
   checkWsjtxListener();
   checkAdifBroadcastListener();
   connectToAcLogAPI();
+  connectToLog4OM();
 
   if (GT.timeNow % 22 == 0)
   {

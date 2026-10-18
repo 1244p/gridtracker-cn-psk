@@ -285,6 +285,28 @@ ipcMain.on('appVersion', (event) => {
   event.returnValue = app.getVersion();
 });
 
+// Saves text to a file the user picks (the SOTA chaser log export): { title, defaultPath, filters, content } ->
+// the saved path, null if cancelled, or { error }
+ipcMain.on('saveTextFile', (event, opts) => {
+  let result = null;
+  try {
+    const o = opts || {};
+    const parent = BrowserWindow.fromWebContents(event.sender);
+    const savePath = dialog.showSaveDialogSync(parent, {
+      title: o.title || "Save File",
+      defaultPath: o.defaultPath || "export.txt",
+      filters: o.filters || [{ name: "All Files", extensions: ["*"] }]
+    });
+    if (savePath) {
+      fs.writeFileSync(savePath, String(o.content || ""));
+      result = savePath;
+    }
+  } catch (e) {
+    result = { error: e.message };
+  }
+  event.returnValue = result;
+});
+
 ipcMain.on('mapKeys', (event) => {
   event.returnValue = mapKeys;
 });

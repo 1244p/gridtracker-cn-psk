@@ -59,6 +59,10 @@ function loadViewSettings()
   buttonLog4OMCheckBox.checked = GT.settings.log4OM.enable;
   ValidatePort(log4OMPortInput, buttonLog4OMCheckBox, null);
   ValidateIPaddress(log4OMIpInput, buttonLog4OMCheckBox, null);
+  log4OMConnectCheckbox.checked = GT.settings.log4OM.connect;
+  log4OMRigControlCheckbox.checked = GT.settings.log4OM.rigControl;
+  log4OMRigControlSpan.style.display = GT.settings.log4OM.connect ? "" : "none";
+  updateLog4OMConnectStatus();
 
   acLogIpInput.value = GT.settings.acLog.ip;
   acLogPortInput.value = GT.settings.acLog.port;
@@ -197,7 +201,6 @@ function setMsgSettingsView()
 function loadAdifSettings()
 {
   qslAuthority.value = GT.settings.app.qslAuthority;
-  qsoItemsPerPageTd.innerHTML = qsoItemsPerPageValue.value = GT.settings.app.qsoItemsPerPage;
 
   if (Object.keys(GT.settings.app.workingCallsigns).length == 0) {
     GT.settings.app.workingCallsignEnable = false;
@@ -317,6 +320,10 @@ function startupButtonsAndInputs()
       }
     }
     ValidateCallsign(alertValueInput, null);
+
+    // Station Callsign: in place of the one read from WSJT-X's settings (updateBasedOnIni) until an instance connects
+    stationCallsignInput.value = GT.settings.app.stationCallsign;
+    saveStationCallsign(stationCallsignInput);
 
     if (GT.settings.map.offlineMode == true)
     {

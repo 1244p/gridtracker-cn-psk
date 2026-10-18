@@ -149,14 +149,12 @@ function renderRoster(callRoster, rosterSettings)
 // ---- Roster virtual scrolling (normal view, both rosters) ----
 // The rows from VIRTUAL_ROSTER_BUFFER above the window to as many below are in the page; spacer rows stand in for the
 // rest, so the window (rosterBody) scrolls the whole list. Rows are one line (nowrap) of one height (table.virtualRoster
-// in style_roster.css), measured from the rows drawn. Column widths only grow while the column set stays the same, so a wider entry scrolling into view
-// widens its column once instead of every column jumping as rows come and go
+// in style_roster.css), measured from the rows drawn. Columns fit the rows drawn, so they can change width as the
+// roster scrolls (like the Logbook)
 const VIRTUAL_ROSTER_BUFFER = 20;
 CR.virtualRoster = null;
 CR.virtualRowHeight = 18;
 CR.virtualHeaderHeight = 22;
-// Per roster ("call" / "feed"): { key: its column set, widths }
-CR.virtualWidths = {};
 CR.virtualScrollQueued = false;
 CR.virtualScrollHooked = false;
 
@@ -224,24 +222,6 @@ function renderVirtualRoster()
     count++;
   }
   if (count > 0) CR.virtualRowHeight = height / count;
-
-  // Grow-only column widths for this column set: each column's natural width (measured with the table not stretched to
-  // the window), kept as its minimum; the table then fills the window as usual. All widths are read before any is set:
-  // a read after a write would lay the table out again for every column
-  const key = v.columns.join(",");
-  const profileName = CR.profile.name;
-  if (!CR.virtualWidths[profileName] || CR.virtualWidths[profileName].key !== key) CR.virtualWidths[profileName] = { key, widths: [] };
-  const widths = CR.virtualWidths[profileName].widths;
-  const headers = thead && thead.rows[0] ? thead.rows[0].cells : [];
-  const measured = [];
-  table.style.width = "auto";
-  for (let i = 0; i < headers.length; i++) measured.push(headers[i].getBoundingClientRect().width);
-  table.style.width = "";
-  for (let i = 0; i < headers.length; i++)
-  {
-    if (!(widths[i] >= measured[i])) widths[i] = Math.ceil(measured[i]);
-    headers[i].style.minWidth = widths[i] + "px";
-  }
 }
 
 // Scrolling or resizing: a redraw once the slice no longer covers the window (at most once a frame)

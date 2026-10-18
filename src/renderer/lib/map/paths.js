@@ -252,10 +252,10 @@ function fadePaths()
   }
 }
 
+// A great-circle path's coordinates in the map projection, from points[0] to points[1] (EPSG:3857), in steps
 // Initially from https://pskreporter.info/
 // Many many thanks!!!
-function flightFeature(points, opts, layer, canAnimate) {
-  let steps = opts.steps;
+function flightPathCoords(points, steps) {
   let start = ol.proj.toLonLat(points[0]);
   let end = ol.proj.toLonLat(points[1]);
   let generator = new arc.GreatCircle({ x: start[0], y: start[1] }, { x: end[0], y: end[1] });
@@ -279,6 +279,14 @@ function flightFeature(points, opts, layer, canAnimate) {
     }
   }
   if (line.length == 0) line.push(ol.proj.fromLonLat(start, projection));
+  return line;
+}
+
+// A path line and its arrow on a layer. opts: { weight, color, steps, isQRZ; coords: the path's coordinates already
+// worked out (flightPathCoords); collect: an array the two features go in instead of the layer, to add many at once;
+// styleCache: a Map that features of the same color and width share their styles from }
+function flightFeature(points, opts, layer, canAnimate) {
+  const line = opts.coords || flightPathCoords(points, opts.steps);
 
   let dash = [];
   let dashOff = 0;
@@ -320,15 +328,27 @@ function flightFeature(points, opts, layer, canAnimate) {
     arrowStyle.getImage().getStroke().setColor(opts.color);
     arrowStyle.getImage().getStroke().setWidth(opts.weight);
   } else {
-    // FALLBACK for unique spots (pskHop, etc. whose colors vary wildly per-feature)
-    lineStyle = new ol.style.Style({ stroke: new ol.style.Stroke({ color: opts.color, width: opts.weight, lineDash: dash, lineDashOffset:dashOff}) });
-    arrowStyle = new ol.style.Style({ image: new ol.style.Circle({ stroke: new ol.style.Stroke({color: opts.color, width: opts.weight}), radius: 3 }) });
+    // FALLBACK for unique spots (pskHop, etc. whose colors vary wildly per-feature); shared through opts.styleCache when
+    // given (never animated, so only color and width differ)
+    const styleKey = opts.color + "|" + opts.weight;
+    const cached = opts.styleCache ? opts.styleCache.get(styleKey) : null;
+    if (cached) {
+      [lineStyle, arrowStyle] = cached;
+    } else {
+      lineStyle = new ol.style.Style({ stroke: new ol.style.Stroke({ color: opts.color, width: opts.weight, lineDash: dash, lineDashOffset:dashOff}) });
+      arrowStyle = new ol.style.Style({ image: new ol.style.Circle({ stroke: new ol.style.Stroke({color: opts.color, width: opts.weight}), radius: 3 }) });
+      if (opts.styleCache) opts.styleCache.set(styleKey, [lineStyle, arrowStyle]);
+    }
   }
 
   feature.setStyle(lineStyle);
   featureArrow.setStyle(arrowStyle);
   feature.Arrow = featureArrow;
 
+  if (opts.collect) {
+    opts.collect.push(featureArrow, feature);
+    return feature;
+  }
   GT.layerSources[layer].addFeature(featureArrow);
   GT.layerSources[layer].addFeature(feature);
   return feature;

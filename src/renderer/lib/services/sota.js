@@ -84,6 +84,7 @@ function changeSotaEnable()
   {
     // Spots keep their summit only while SOTA Chasing is on
     for (const hash in GT.feedCallsigns) GT.feedCallsigns[hash].sota = null;
+    GT.sotaDecodeSpots = {};
   }
 
   updateSotaViews();
@@ -157,7 +158,7 @@ function summitGroupTipHtml(groups)
   {
     for (const hash of group.hashes || [])
     {
-      if (GT.feedCallsigns[hash]) spots.push({ ref: group.ref, callObj: GT.feedCallsigns[hash] });
+      if (summitSpotObj(hash)) spots.push({ ref: group.ref, callObj: summitSpotObj(hash) });
     }
   }
   if (spots.length == 0) return "";
@@ -168,7 +169,7 @@ function summitGroupTipHtml(groups)
   {
     const freq = callObj.freq > 0 ? formatMhz(callObj.freq / 1000) + " " : "";
     rows += `<tr><td style='color:yellow'>${lookupCallHtml(callObj.DEcall, callObj.grid)}</td>` +
-      `<td style='color:lightgreen'>${callObj.grid || "-"}</td>` +
+      `<td style='color:lightgreen'>${callObj.fullGrid || callObj.grid || "-"}</td>` +
       `<td style='color:orange'>${ref}</td>` +
       `<td style='color:cyan'>${lookupCallHtml(callObj.spotter)}</td>` +
       `<td style='color:lightgreen'>${freq}<font color='yellow'>(${callObj.band})</font></td>` +
@@ -204,14 +205,14 @@ function summitTipHtml(ref, hashes)
     <tr><th>${I18N("gt.newCallList.Call")}</th><th>${I18N("gt.callsignBox.Grid")}</th><th>${I18N("rosterColumns.Spotter.header")}</th><th>${I18N("gt.newCallList.Freq")}</th>` +
     `<th>${I18N("gt.newCallList.Mode")}</th><th>${I18N("gt.feedSpot.age")}</th><th>${I18N("gt.newCallList.LastMsg")}</th></tr>`;
 
-  const spots = (hashes || []).map((hash) => GT.feedCallsigns[hash]).filter((callObj) => callObj);
+  const spots = (hashes || []).map((hash) => summitSpotObj(hash)).filter((callObj) => callObj);
   spots.sort((a, b) => b.age - a.age);
   for (const callObj of spots)
   {
     const freq = callObj.freq > 0 ? formatMhz(callObj.freq / 1000) + " " : "";
     // Callsigns look up when clicked, also in the popped-out tooltip (lookupCallHtml, map/mouse.js)
     html += `<tr><td style='color:yellow'>${lookupCallHtml(callObj.DEcall, callObj.grid)}</td>` +
-      `<td style='color:lightgreen'>${callObj.grid || "-"}</td>` +
+      `<td style='color:lightgreen'>${callObj.fullGrid || callObj.grid || "-"}</td>` +
       `<td style='color:cyan'>${lookupCallHtml(callObj.spotter)}</td>` +
       `<td style='color:lightgreen'>${freq}<font color='yellow'>(${callObj.band})</font></td>` +
       `<td style='color:orange'>${callObj.mode}</td>` +
@@ -229,7 +230,144 @@ function feedSotaForCall(call, band)
     const callObj = GT.feedCallsigns[hash];
     if (callObj.sota && callObj.DEcall == call && callObj.band == band) return callObj.sota;
   }
-  return null;
+  // Spotted under another form of the call (W7ABC/P) or on another band: the summit the activator is on now
+  return sotaActivatorSummit(call);
+}
+
+// ---- Active SOTA activators (for decodes: Call Roster, logging)
+
+// Base call (feedBaseCallsign: W7ABC for W7ABC/P) -> { ref, age }: the summit an activator was last spotted on, from feed
+// spots naming one (rtsn.js addFeedSpot). Kept as long as the map keeps summit spots (sotaSpotMaxAge)
+GT.sotaActivators = {};
+
+function noteSotaActivator(callObj)
+{
+  if (!callObj.sota) return;
+  const base = feedBaseCallsign(callObj.DEcall);
+  const prev = GT.sotaActivators[base];
+  GT.sotaActivators[base] = { ref: callObj.sota, age: callObj.age };
+  // On to another summit: an activator is on one at a time, so their spots still on the old one (other bands or
+  // modes) go now instead of when they age out
+  if (prev && prev.ref !== callObj.sota && dropSotaActivatorSpots(base, prev.ref))
+  {
+    scheduleFeedRosterUpdate();
+    scheduleDxcwRedraw();
+  }
+}
+
+// A decode of an activator: they're still on the air, so their summit keeps counting (sotaActivatorSummit) even once
+// the last spot of them is older than the spots' max age
+function refreshSotaActivator(call)
+{
+  const entry = GT.sotaActivators[feedBaseCallsign(String(call).toUpperCase())];
+  if (entry) entry.age = timeNowSec();
+}
+
+// An activator's (base call) Feed Roster spots on a summit, and their decodes on its marker, removed; true if there
+// were any
+function dropSotaActivatorSpots(base, summit)
+{
+  let removed = false;
+  for (const hash in GT.feedCallsigns)
+  {
+    const callObj = GT.feedCallsigns[hash];
+    if (callObj.sota === summit && feedBaseCallsign(callObj.DEcall) === base)
+    {
+      delete GT.feedCallsigns[hash];
+      delete GT.feedRoster[hash];
+      removed = true;
+    }
+  }
+  for (const hash in GT.sotaDecodeSpots)
+  {
+    const callObj = GT.sotaDecodeSpots[hash];
+    if (callObj.sota === summit && feedBaseCallsign(callObj.DEcall) === base)
+    {
+      delete GT.sotaDecodeSpots[hash];
+      removed = true;
+    }
+  }
+  return removed;
+}
+
+// ---- Activators you decode, on their summit's marker (from Matt's SOTA work; like POTA's spots from decodes): your
+// band, mode, frequency and dB, as a spot from you ("N0TTL-#"). Only the marker and its tooltip show them, not the Feed
+// Roster. Keyed apart from feed spots ("decode:" + call + band + mode)
+GT.sotaDecodeSpots = {};
+
+// A summit marker's spot: a feed spot, or a decode of the activator
+function summitSpotObj(hash)
+{
+  return GT.feedCallsigns[hash] || GT.sotaDecodeSpots[hash];
+}
+
+// A decode of an activator (callObj.sota, from sotaActivatorSummit); redraws the markers only when the spot is new or
+// moved band, mode or summit (its age shows live in the tooltip)
+function noteSotaDecode(callObj)
+{
+  const myCall = GT.settings.app.myCall;
+  if (!callObj.sota || !myCall || myCall == "NOCALL") return;
+  const hash = "decode:" + callObj.DEcall + callObj.band + callObj.mode;
+  let spot = GT.sotaDecodeSpots[hash];
+  const changed = !spot || spot.sota !== callObj.sota;
+  if (!spot)
+  {
+    spot = new LiveCallsign(callObj.DEcall, "", callObj.grid, callObj.mode, callObj.band, "", callObj.dxcc, timeNowSec());
+    spot.hash = hash;
+    spot.instance = GT.feedInstance;
+    GT.sotaDecodeSpots[hash] = spot;
+  }
+  spot.time = spot.age = timeNowSec();
+  spot.sota = callObj.sota;
+  spot.grid = callObj.grid;
+  spot.fullGrid = callObj.grid;
+  spot.gridQualified = callObj.gridQualified;
+  const instance = GT.instances[callObj.instance];
+  const dial = instance && instance.status ? Number(instance.status.Frequency) : 0;
+  spot.freq = dial > 0 ? dial + Number(callObj.delta || 0) : 0;
+  spot.spotter = myCall + "-#";
+  spot.msg = "GT " + callObj.RSTsent + " dB " + GT.settings.app.myGrid;
+  if (changed && GT.settings.map.sotaMap) scheduleDxcwRedraw();
+}
+
+// The summit a call is activating now (a decode's DEcall, a logged QSO's CALL), or null. Only while SOTA Chasing runs;
+// it never changes the station's own grid
+function sotaActivatorSummit(call)
+{
+  if (!sotaActive() || !call) return null;
+  const entry = GT.sotaActivators[feedBaseCallsign(String(call).toUpperCase())];
+  if (!entry) return null;
+  return timeNowSec() - entry.age <= sotaSpotMaxAge() ? entry.ref : null;
+}
+
+const SOTA_QRT_REGEXP = /\bQRT\b/i;
+
+// A feed spot whose comment says QRT, for an activator on a summit (the one the spot names, else the one they're
+// spotted on): that activation has ended, so their spots on the summit leave the Feed Roster and the map, and decodes
+// stop getting it. noFrequency: the spot has no frequency, which is how SOTLAS / Spothole post an activator marking
+// themselves off the summit (its comment is often left over from their last spot), so it counts as QRT too. True if
+// it was such a spot (the caller doesn't add it); a later spot of them brings it all back
+function endSotaActivationOnQrt(call, msg, noFrequency = false)
+{
+  if (!noFrequency && !SOTA_QRT_REGEXP.test(msg)) return false;
+  const base = feedBaseCallsign(call);
+  const summit = feedSotaReference(msg) || (GT.sotaActivators[base] ? GT.sotaActivators[base].ref : null);
+  if (!summit) return false;
+
+  if (GT.sotaActivators[base] && GT.sotaActivators[base].ref === summit) delete GT.sotaActivators[base];
+  const removed = dropSotaActivatorSpots(base, summit);
+  if (removed)
+  {
+    scheduleFeedRosterUpdate();
+    scheduleDxcwRedraw();
+  }
+  return true;
+}
+
+// How long a summit's spots count: the Feed Roster's Max Age or the map's Feed Spots Max Age, whichever is longer
+function sotaSpotMaxAge()
+{
+  return Math.max(GT.settings.app.feedMaxAge, Number(GT.settings.feedRoster.rosterTime) || 0);
 }
 
 // ---- The summit list
@@ -460,4 +598,122 @@ function processSotaSummits(data)
   goProcessFeedRoster();
   scheduleDxcwRedraw();
   return true;
+}
+
+// ---- Hand-logging a POTA / SOTA QSO from the Feed Roster (click a park or summit in its POTA / SOTA column,
+// roster/sotaLogDialog.js; from Matt's SOTA work). For QSOs nothing else logs (CW, SSB). Never from the Call Roster
+
+// A logging service GridTracker hands QSOs to is connected (AC Log, Log4OM; others to be added here): it logs the QSO
+// itself
+function loggingServiceConnected()
+{
+  return acLogCanWork(null) || log4OMCanWork(null);
+}
+
+// A Feed Roster spot's park (not the "?-????" of an unknown one), or ""
+function feedSpotPark(callObj)
+{
+  return callObj.pota && callObj.pota !== "?-????" ? callObj.pota : "";
+}
+
+// A Feed Roster spot's QSO can be logged by hand: it's in a park or on a summit, no logging service is connected, and no
+// WSJT-X / JTDX is on its band and mode (that rig logs the QSO, with the park / summit, sendToLogger)
+function feedHandLogAllowed(callObj)
+{
+  if ((!callObj.sota && !feedSpotPark(callObj)) || loggingServiceConnected()) return false;
+  for (const id in GT.instances)
+  {
+    const instance = GT.instances[id];
+    if (!isLoggerInstance(id) && instance.open && instance.valid && instance.status &&
+      instance.status.Band == callObj.band && instance.status.MO == callObj.mode) return false;
+  }
+  return true;
+}
+
+// The log reader drops QSOs outside the working callsign / date / grid filters without a word (adifWorker.js); a
+// hand-logged one that vanished would look like a bug, so it's refused up front with the reason. null when it's fine
+function sotaChaseFilterBlock(myCall, whenSec)
+{
+  const app = GT.settings.app;
+  if (app.workingCallsignEnable && !(myCall in app.workingCallsigns)) return I18N("sotaLog.filterCall").replace("{0}", myCall);
+  if (app.workingDateEnable && whenSec < app.workingDate) return I18N("sotaLog.filterDate");
+  const myGrid = (app.myGrid || "").substring(0, 4).toUpperCase();
+  if (app.workingGridEnable && myGrid.length > 3 && !(myGrid in app.workingGrids)) return I18N("sotaLog.filterGrid").replace("{0}", myGrid);
+  return null;
+}
+
+const POTA_PARK_REGEXP = /^[A-Z0-9]{1,4}-\d{4,5}$/;
+
+// fields: { myCall, call, park, ref (summit), dateUtc "YYYY-MM-DD", timeUtc "HH:MM", freqMhz, band, mode, rstSent,
+// rstRcvd, comment, grid }; a park, a summit or both. Logged like any QSO (sendToLogger: the backup log, loggers,
+// uploads; with a park, finishSendingReport spots it to POTA as for a logged decode, so it needs a frequency). Returns
+// { ok, message }
+function logSotaChaseQso(fields)
+{
+  try
+  {
+    const myCall = String(fields.myCall || "").trim().toUpperCase();
+    const call = String(fields.call || "").trim().toUpperCase();
+    const park = String(fields.park || "").trim().toUpperCase();
+    const ref = String(fields.ref || "").trim().toUpperCase();
+    const band = String(fields.band || "").trim().toLowerCase();
+    const mode = String(fields.mode || "").trim().toUpperCase();
+    if (!call) return { ok: false, message: I18N("sotaLog.needCall") };
+    if (!myCall) return { ok: false, message: I18N("sotaLog.needMyCall") };
+    if (!park && !ref) return { ok: false, message: I18N("sotaLog.needRef") };
+    if (park && !POTA_PARK_REGEXP.test(park)) return { ok: false, message: I18N("sotaLog.badPark").replace("{0}", park) };
+    if (ref && !sotaRefParts(ref)) return { ok: false, message: I18N("sotaLog.badRef").replace("{0}", ref) };
+    if (!band) return { ok: false, message: I18N("sotaLog.needBand") };
+    if (!mode) return { ok: false, message: I18N("sotaLog.needMode") };
+    if (park && !(Number(fields.freqMhz) > 0)) return { ok: false, message: I18N("sotaLog.needFreq") };
+
+    const date = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(fields.dateUtc || ""));
+    const time = /^(\d{1,2}):(\d{2})/.exec(String(fields.timeUtc || ""));
+    if (!date || !time) return { ok: false, message: I18N("sotaLog.needTime") };
+    const whenMs = Date.UTC(Number(date[1]), Number(date[2]) - 1, Number(date[3]), Number(time[1]), Number(time[2]), 0);
+    if (isNaN(whenMs)) return { ok: false, message: I18N("sotaLog.needTime") };
+    // A QSO in the future is nearly always local time typed as UTC (a few minutes' slack for a fast clock)
+    if (whenMs > Date.now() + 300000) return { ok: false, message: I18N("sotaLog.future") };
+
+    const blocked = sotaChaseFilterBlock(myCall, Math.floor(whenMs / 1000));
+    if (blocked) return { ok: false, message: blocked };
+
+    let adif = backupAdifHeader;
+    adif += valueToAdiField("CALL", call);
+    adif += valueToAdiField("QSO_DATE", date[1] + date[2] + date[3]);
+    adif += valueToAdiField("TIME_ON", String(time[1]).padStart(2, "0") + time[2] + "00");
+    adif += valueToAdiField("BAND", band);
+    const freq = Number(fields.freqMhz);
+    if (freq > 0) adif += valueToAdiField("FREQ", freq.toFixed(6));
+    adif += valueToAdiField("MODE", mode);
+    const rstSent = String(fields.rstSent || "").trim();
+    const rstRcvd = String(fields.rstRcvd || "").trim();
+    if (rstSent) adif += valueToAdiField("RST_SENT", rstSent);
+    if (rstRcvd) adif += valueToAdiField("RST_RCVD", rstRcvd);
+    adif += valueToAdiField("STATION_CALLSIGN", myCall);
+    // The row's grid (its summit's square); with none, sendToLogger uses the summit's
+    const grid = String(fields.grid || "").trim().toUpperCase();
+    if (grid.length > 3) adif += valueToAdiField("GRIDSQUARE", grid);
+    if (park) adif += valueToAdiField("POTA_REF", park);
+    if (ref) adif += valueToAdiField("SOTA_REF", ref);
+    const comment = String(fields.comment || "").trim();
+    if (comment) adif += valueToAdiField("COMMENT", comment);
+    adif += "<EOR>";
+
+    // sendToLogger / finishSendingReport quietly skip a record identical to the last one; GT.lastReport only changes
+    // once a QSO is committed, so it tells
+    const before = GT.lastReport;
+    sendToLogger(adif);
+    if (GT.lastReport === before) return { ok: false, message: I18N("sotaLog.duplicate") };
+
+    const refs = [park, ref].filter((value) => value).join(" / ");
+    addLastTraffic(`<font style='color:lightgreen;'>${I18N("sotaLog.title")}</font><br><font style='color:yellow;'>${call}</font> ` +
+      `<font style='color:#40FFD8;'>${refs}</font>`);
+    return { ok: true, message: I18N("sotaLog.logged").replace("{0}", call).replace("{1}", refs) };
+  }
+  catch (e)
+  {
+    console.error("SOTA chase log failed:", e);
+    return { ok: false, message: I18N("sotaLog.failed").replace("{0}", e.message) };
+  }
 }

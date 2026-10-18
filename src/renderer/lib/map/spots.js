@@ -60,7 +60,6 @@ function loadReceptionReports()
 }
 
 function addNewRTSNSpot(parts) {
-  nodeTimers.clearTimeout(GT.redrawSpotsTimeout);
 
   // 3. Array Destructuring makes grabbing parts much cleaner
   const [call, rawGrid, rawDb, rawFreq, mode] = parts;
@@ -85,8 +84,7 @@ function addNewRTSNSpot(parts) {
   report.color = clamp(Math.trunc((Math.trunc(snr) + 25) * 9), 0, 255);
   report.source.O = true;
 
-  // Restart the timer
-  GT.redrawSpotsTimeout = nodeTimers.setTimeout(redrawSpots, 250);
+  scheduleSpotsRedraw();
 }
 
 function addNewMqttPskSpot(json)
@@ -94,12 +92,6 @@ function addNewMqttPskSpot(json)
   if (json.rl == null || json.rl.length < 4) return;
   // json.rc, json.rl, json.ra, json.rp, json.f, json.b, json.md, json.t
   // call, grid, dxcc, snr, frequency, band, mode, when
-  if (GT.redrawSpotsTimeout != null)
-  {
-    nodeTimers.clearTimeout(GT.redrawSpotsTimeout);
-    GT.redrawSpotsTimeout = null;
-  }
-  
   let call = String(json.rc).replaceAll(".", "/").toUpperCase();
   let report;
   json.rl = String(json.rl).substring(0, 6).toUpperCase();
@@ -140,7 +132,7 @@ function addNewMqttPskSpot(json)
   report.freq = json.f;
   report.color = clamp(parseInt((parseInt(report.snr) + 25) * 9), 0, 255);
   report.source.M = true;
-  GT.redrawSpotsTimeout = nodeTimers.setTimeout(redrawSpots, 250);
+  scheduleSpotsRedraw();
 }
 
 function spotFeature(center)
@@ -148,7 +140,34 @@ function spotFeature(center)
   return new ol.Feature(ol.geom.Polygon.circular(center, 30000, 63).transform("EPSG:4326", GT.settings.map.projection));
 }
 
-function createSpot(report, key, fromPoint, addToLayer = true)
+// A redraw 250 ms after the last new spot, but at least once a second while spots keep coming (each one would
+// otherwise put it off again)
+GT.spotsRedrawPendingSince = 0;
+
+function scheduleSpotsRedraw()
+{
+  nodeTimers.clearTimeout(GT.redrawSpotsTimeout);
+  const now = Date.now();
+  if (GT.spotsRedrawPendingSince == 0) GT.spotsRedrawPendingSince = now;
+  GT.redrawSpotsTimeout = nodeTimers.setTimeout(redrawSpots, Math.max(0, Math.min(250, GT.spotsRedrawPendingSince + 1000 - now)));
+}
+
+// Kept across redraws: each spot grid's circle and path (they only change with the home grid or the map projection,
+// which start them over), circle styles by fill color, path styles by color and width. Only what the last redraw used
+// is kept
+GT.spotDrawCache = { key: "", circles: new Map(), paths: new Map(), styles: new Map(), pathStyles: new Map() };
+// What the last redraw built: 0 nothing (RX Spots off), 1 circles and paths, 2 the heat map (updateSpottingViews
+// redraws when that changes)
+GT.spotsDrawnView = 0;
+
+function spotsViewToDraw()
+{
+  if (GT.settings.app.spottingEnable == false || GT.settings.app.offAirServicesEnable == false || GT.settings.map.offlineMode == true) return 0;
+  return GT.spotView == 1 || GT.spotView == 2 ? GT.spotView : 0;
+}
+
+// One spot's circle and path (view 1) or heat point (view 2), into draw's feature lists
+function createSpot(report, key, fromPoint, draw)
 {
   try
   {
@@ -160,13 +179,33 @@ function createSpot(report, key, fromPoint, addToLayer = true)
       return;
     }
 
-    let spot = spotFeature([LL.o, LL.a]);
+    if (draw.view == 2)
+    {
+      let pointFeature = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([LL.o, LL.a])),
+        weight: report.color / 255 // e.g. temperature
+      });
+
+      if (GT.useTransform)
+      {
+        pointFeature.getGeometry().transform("EPSG:3857", GT.settings.map.projection);
+      }
+
+      draw.heat.push(pointFeature);
+      return;
+    }
+
+    // Each feature gets its own copy of the grid's circle (several spots can share a grid)
+    let circle = draw.cache.circles.get(report.grid) || draw.old.circles.get(report.grid);
+    if (!circle) circle = spotFeature([LL.o, LL.a]).getGeometry();
+    draw.cache.circles.set(report.grid, circle);
+    let spot = new ol.Feature(circle.clone());
 
     let colorNoAlpha = "#" + GT.bandColors[report.band];
     let colorAlpha = intAlphaToRGB(colorNoAlpha, report.color);
     let spotColor = colorAlpha;
 
-    let workingColor = GT.settings.map.nightMapEnable && GT.nightTime ? GT.settings.reception.pathNightColor : GT.settings.reception.pathColor;
+    let workingColor = draw.workingColor;
 
     if (workingColor != -1)
     {
@@ -181,39 +220,33 @@ function createSpot(report, key, fromPoint, addToLayer = true)
       }
     }
 
-    let featureStyle = new ol.style.Style({
-      fill: new ol.style.Fill({
-        color: spotColor
-      }),
-      stroke: new ol.style.Stroke({
-        color: "#000000FF",
-        width: 0.25
-      })
-    });
+    let featureStyle = draw.cache.styles.get(spotColor) || draw.old.styles.get(spotColor);
+    if (!featureStyle)
+    {
+      featureStyle = new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: spotColor
+        }),
+        stroke: new ol.style.Stroke({
+          color: "#000000FF",
+          width: 0.25
+        })
+      });
+    }
+    draw.cache.styles.set(spotColor, featureStyle);
     spot.setStyle(featureStyle);
     spot.spot = key;
     spot.set("prop", "spot");
     spot.size = 6; // Mouseover detection
-    GT.layerSources.pskSpots.addFeature(spot);
-
-    let toPoint = ol.proj.fromLonLat([LL.o, LL.a]);
-
-    let lonLat = new ol.geom.Point(toPoint);
-
-    let pointFeature = new ol.Feature({
-      geometry: lonLat,
-      weight: report.color / 255 // e.g. temperature
-    });
-
-    if (GT.useTransform)
-    {
-      pointFeature.getGeometry().transform("EPSG:3857", GT.settings.map.projection);
-    }
-
-    GT.layerSources.pskHeat.addFeature(pointFeature);
+    draw.spots.push(spot);
 
     if (GT.settings.reception.spotWidth > 0)
     {
+      let toPoint = ol.proj.fromLonLat([LL.o, LL.a]);
+      let coords = draw.cache.paths.get(report.grid) || draw.old.paths.get(report.grid);
+      if (!coords) coords = flightPathCoords([fromPoint, toPoint], 75);
+      draw.cache.paths.set(report.grid, coords);
+
       let strokeWeight = GT.settings.reception.spotWidth;
 
       let flightColor =
@@ -228,7 +261,10 @@ function createSpot(report, key, fromPoint, addToLayer = true)
         {
           weight: strokeWeight,
           color: flightColor,
-          steps: 75
+          steps: 75,
+          coords,
+          collect: draw.flights,
+          styleCache: draw.cache.pathStyles
         },
         "pskFlights",
         false
@@ -243,6 +279,9 @@ function createSpot(report, key, fromPoint, addToLayer = true)
 
 function redrawSpots()
 {
+  nodeTimers.clearTimeout(GT.redrawSpotsTimeout);
+  GT.spotsRedrawPendingSince = 0;
+
   let now = timeNowSec();
   GT.spotTotalCount = 0;
   GT.layerSources.pskSpots.clear();
@@ -252,10 +291,28 @@ function redrawSpots()
 
   let fromPoint = getPoint(GT.settings.app.myRawGrid);
 
-  if (GT.settings.reception.mergeSpots == false)
+  // Only the view on show is built (none while RX Spots are off); the cache starts over with another home grid or
+  // projection, and keeps only what this redraw uses
+  const cacheKey = GT.settings.app.myRawGrid + "|" + GT.settings.map.projection + "|" + GT.useTransform;
+  const old = GT.spotDrawCache;
+  const cache = { key: cacheKey, circles: new Map(), paths: new Map(), styles: new Map(), pathStyles: new Map() };
+  const draw = {
+    view: spotsViewToDraw(),
+    old: old.key == cacheKey ? old : { circles: new Map(), paths: new Map(), styles: new Map(), pathStyles: new Map() },
+    cache,
+    workingColor: GT.settings.map.nightMapEnable && GT.nightTime ? GT.settings.reception.pathNightColor : GT.settings.reception.pathColor,
+    spots: [],
+    flights: [],
+    heat: []
+  };
+  // Path styles are few (a color per band and width): kept as they are
+  cache.pathStyles = draw.old.pathStyles.size < 64 ? draw.old.pathStyles : cache.pathStyles;
+  GT.spotsDrawnView = draw.view;
+
+  if (draw.view == 1 && GT.settings.reception.mergeSpots == false)
   {
     let spot = iconFeature(fromPoint, GT.gtFlagIcon, 100, "homeFlag");
-    GT.layerSources.pskSpots.addFeature(spot);
+    draw.spots.push(spot);
   }
 
   for (let key in GT.receptionReports.spots)
@@ -272,11 +329,17 @@ function redrawSpots()
     {
       if (now - report.when <= GT.settings.reception.viewHistoryTimeSec)
       {
-        createSpot(report, key, fromPoint);
+        if (draw.view > 0) createSpot(report, key, fromPoint, draw);
         GT.spotTotalCount++;
       }
     }
   }
+
+  // Each layer gets its features in one go (one index update and render, not one per feature)
+  if (draw.spots.length) GT.layerSources.pskSpots.addFeatures(draw.spots);
+  if (draw.flights.length) GT.layerSources.pskFlights.addFeatures(draw.flights);
+  if (draw.heat.length) GT.layerSources.pskHeat.addFeatures(draw.heat);
+  GT.spotDrawCache = cache;
 
   updateSpotCountDiv();
 }
@@ -435,6 +498,8 @@ function directSpotLayer(index)
 
 function updateSpottingViews()
 {
+  if (spotsViewToDraw() != GT.spotsDrawnView) redrawSpots();
+
   if (GT.settings.app.offAirServicesEnable == false || GT.settings.map.offlineMode == true)
   {
     spottingEnableTr.style.display = "none";
