@@ -609,6 +609,30 @@ a {
   justify-content: center;
 }
 
+/* Settings -> Feeds: Modes, Bands and Allow, each its own box under Max Age / Clear All Feeds (was the Feed Roster's
+   Spots tab) */
+#feedsSettingsDiv > .mapItem.feedSpotsBox {
+  display: inline-block;
+  padding: 4px;
+}
+
+.feedBands {
+  display: grid;
+  grid-template-columns: repeat(6, auto);
+  gap: 4px 14px;
+  margin-top: 4px;
+  text-align: left;
+}
+
+.feedBand {
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.feedBand input {
+  margin-right: 2px;
+}
+
 /* Settings -> Audio Alerts: Call Roster | Feed Roster sub-tabs (shown when a feed is enabled);
    the Feed Roster's active tab is yellow, like its roster tab */
 #audioAlertsRosterTabs {

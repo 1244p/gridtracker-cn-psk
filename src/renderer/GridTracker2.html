@@ -781,7 +781,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <button data-i18n="settings.Colors.label" id="colorsSettingsButton" class="settingsTablinks"
           onclick="openSettingsTab(event, 'bandColorsSettingsDiv')">Colors</button>
         <button data-i18n="settings.Feeds.label" id="feedsSettingsButton" class="settingsTablinks" style="display:none;"
-          onclick="openSettingsTab(event, 'feedsSettingsDiv')">Feeds</button>
+          onclick="openSettingsTab(event, 'feedsSettingsDiv'); renderFeedSpotsSettings();">Feeds</button>
         <button data-i18n="settings.Logging.label" class="settingsTablinks"
           onclick="openSettingsTab(event, 'logSettingsDiv')">Logging</button>
         <button data-i18n="settings.alerts.AudioAlert.label" id="audioalertbut" class="settingsTablinks"
@@ -1906,6 +1906,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <div data-i18n="settings.feeds.clear.label" class="button" title="Clears all feed data received" onclick="clearFeedCallsigns()">Clear All Feeds</div>
         </div>
       </div>
+      <!-- Which feed spots the Feed Roster and the map show, and the Feed Roster's alerts (network.js, renderFeedSpotsSettings) -->
+      <br />
+      <div class="mapItem feedSpotsBox" align="center">
+        <div data-i18n="roster.feeds.modes.label">Modes</div>
+        <div id="feedSpotModesDiv" class="feedBands"></div>
+      </div>
+      <br />
+      <div class="mapItem feedSpotsBox" align="center">
+        <div data-i18n="roster.feeds.bands.label">Bands</div>
+        <div id="feedSpotBandsDiv" class="feedBands"></div>
+      </div>
+      <br />
+      <div class="mapItem feedSpotsBox" align="center">
+        <table>
+          <tr>
+            <td align="left">
+              <input type="checkbox" id="feedAlertScriptEnable" onchange="feedSpotAllowChanged()" />
+              <label data-i18n="roster.feeds.alertScript.label" for="feedAlertScriptEnable">Allow Alert Script</label>
+            </td>
+          </tr>
+          <tr>
+            <td align="left">
+              <input type="checkbox" id="feedNotificationsEnable" onchange="feedSpotAllowChanged()" />
+              <label data-i18n="roster.feeds.notifications.label" for="feedNotificationsEnable">Allow Notifications (Pushover, Simplepush)</label>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
     <div id="mapSettingsDiv" class="settingsTabcontent" style="background-color: #00000044; text-shadow: 0 0 5px #000000ff">
       <div class="flexSettingDiv" >
@@ -2444,8 +2472,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <br />
                 <input type="checkbox" id="acLogRigControlCheckbox" onclick="acLogLoggerChanged()" />
                 <label data-i18n="settings.logging.N3FJP.rigControl.label" for="acLogRigControlCheckbox">Enable Rig Control</label>
-              </span>
-            </td>
+              </span>            </td>
             <td></td>
             <td></td>
           </tr>

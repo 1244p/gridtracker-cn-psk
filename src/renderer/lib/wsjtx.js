@@ -22,13 +22,22 @@ function handleInstanceStatus(newMessage)
   let instanceKey = null;
   if (newMessage.DEcall && newMessage.DEgrid) instanceKey = `${newMessage.DEcall}|${newMessage.Band}|${newMessage.MO}|${newMessage.DEgrid}`;
 
-  // The rig's call, band, mode or grid changed: the Feed Roster (▲, Auto Band / Mode) needs reprocessing too
-  let rigChanged = false;
+  // The rig's call, band, mode or grid changed: the Feed Roster (▲, Auto Band / Mode) needs reprocessing too, at the
+  // next status that isn't mid-decode (GT.feedRosterStatusDirty, below)
   if (instanceKey != GT.instances[newMessage.instance].instanceKey )
   {
     GT.instances[newMessage.instance].instanceKey = instanceKey;
     GT.gtLiveStatusUpdate = true;
-    rigChanged = true;
+    GT.feedRosterStatusDirty = true;
+  }
+  // So does its DX Call (the Feed Roster highlights that call), and the map rings its POTA / SOTA / DX Feeds markers
+  const dxCall = String(newMessage.DXcall || "").trim();
+  if (dxCall != GT.instances[newMessage.instance].feedDXcall)
+  {
+    GT.instances[newMessage.instance].feedDXcall = dxCall;
+    GT.feedRosterStatusDirty = true;
+    // Parks, then DX Feeds and summits with them (redrawParks)
+    scheduleParksRedraw();
   }
   
   if (GT.callRosterWindowInitialized)
@@ -269,7 +278,7 @@ function handleInstanceStatus(newMessage)
       fadePaths();
       txrxdec.style.backgroundColor = "Blue";
       txrxdec.style.borderColor = "Cyan";
-      txrxdec.innerHTML = "DECODE";
+      txrxdec.innerHTML = I18N("gt.status.txrx.decode");
       GT.countIndex++;
       GT.weAreDecoding = true;
     }
@@ -307,7 +316,8 @@ function handleInstanceStatus(newMessage)
 
       txrxdec.style.backgroundColor = "Green";
       txrxdec.style.borderColor = "GreenYellow";
-      txrxdec.innerHTML = "RECEIVE";
+      // AC Log doesn't receive or decode: it's just connected
+      txrxdec.innerHTML = I18N(newMessage.instance == GT.acLogInstanceId ? "gt.status.txrx.connected" : "gt.status.txrx.receive");
     }
 
     if (newMessage.TxEnabled)
@@ -353,7 +363,7 @@ function handleInstanceStatus(newMessage)
     {
       txrxdec.style.backgroundColor = "red";
       txrxdec.style.borderColor = "orange";
-      txrxdec.innerHTML = "TRANSMIT";
+      txrxdec.innerHTML = I18N("gt.status.txrx.transmit");
       GT.layerSources.transmit.clear();
       GT.transmitFlightPath = null;
 
@@ -415,7 +425,11 @@ function handleInstanceStatus(newMessage)
   if (newMessage.Decoding == 0)
   {
     // Every status (AC Log's 5 second polls, WSJT-X's many) would otherwise rebuild the whole Feed Roster as well
-    if (rigChanged) goProcessRoster();
+    if (GT.feedRosterStatusDirty)
+    {
+      GT.feedRosterStatusDirty = false;
+      goProcessRoster();
+    }
     else goProcessCallRoster();
   }
 }
@@ -486,7 +500,8 @@ function handleClosed(newMessage)
     txrxdec.style.backgroundColor = "Purple";
     txrxdec.style.borderColor = "Purple";
     let name = newMessage.Id.toUpperCase().split(" - ");
-    txrxdec.innerHTML = name[name.length - 1] + " Closed";
+    // The rig name cut like the panel's rig name (rigDiv), so it fits with the word in every language
+    txrxdec.innerHTML = I18N("gt.status.txrx.closed").replace("{0}", name[name.length - 1].substring(0, 18));
   }
 
   if (GT.instances[newMessage.Id].open == false)
@@ -1536,6 +1551,13 @@ function LiveCallsign(DEcall, DXcall, grid, mode, band, msg, dxcc, time) {
   this.fullGrid = "";
   this.readOnly = false;
   this.wspr = null;
+  // Feed spots (rtsn.js) and the Feed Roster set these; declared here so decodes and feed spots share one shape
+  this.spotterDxcc = 0;
+  this.spotterCont = "";
+  this.selfSpot = false;
+  this.potaTime = 0;
+  this.summitPlaced = false;
+  this.onRig = false;
 
   // 4. Geographic Data
   this.distance = 0;

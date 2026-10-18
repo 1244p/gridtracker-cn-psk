@@ -879,5 +879,11 @@
   "gt.potaSpot.title": "POTA-spot",
   "gt.sotaSpot.title": "SOTA-spot",
   "settings.logging.N3FJP.rigControl.label": "Rigbesturing Inschakelen",
-  "settings.logging.N3FJP.rigControl.hover": "Een klik op een roepnaam in de Feedlijst stemt de rig via AC Log af op de frequentie van de spot. Vereist ingestelde rigbesturing in AC Log."
+  "settings.logging.N3FJP.rigControl.hover": "Een klik op een roepnaam in de Feedlijst stemt de rig via AC Log af op de frequentie van de spot. Vereist ingestelde rigbesturing in AC Log.",
+  "gt.status.txrx.receive": "ONTVANGEN",
+  "gt.status.txrx.decode": "DECODEERT",
+  "gt.status.txrx.transmit": "ZENDEN",
+  "gt.status.txrx.connected": "VERBONDEN",
+  "gt.status.txrx.ignore": "NEGEREN",
+  "gt.status.txrx.closed": "{0} GESLOTEN"
 }

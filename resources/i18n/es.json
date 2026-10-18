@@ -872,5 +872,11 @@
   "gt.potaSpot.title": "Spot de POTA",
   "gt.sotaSpot.title": "Spot de SOTA",
   "settings.logging.N3FJP.rigControl.label": "Activar Control Del Equipo",
-  "settings.logging.N3FJP.rigControl.hover": "Al hacer clic en un indicativo de la Lista de fuentes, el equipo se sintoniza en la frecuencia del spot a través de AC Log. Requiere el control del equipo configurado en AC Log."
+  "settings.logging.N3FJP.rigControl.hover": "Al hacer clic en un indicativo de la Lista de fuentes, el equipo se sintoniza en la frecuencia del spot a través de AC Log. Requiere el control del equipo configurado en AC Log.",
+  "gt.status.txrx.receive": "RECEPCIÓN",
+  "gt.status.txrx.decode": "DECODIFICA",
+  "gt.status.txrx.transmit": "TRANSMITIR",
+  "gt.status.txrx.connected": "CONECTADO",
+  "gt.status.txrx.ignore": "IGNORAR",
+  "gt.status.txrx.closed": "{0} CERRADO"
 }

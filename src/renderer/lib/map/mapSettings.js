@@ -450,6 +450,14 @@ function changeMapBackgroundColor(fromSettings = true)
   }
 
   mapDiv.style.backgroundColor = mapBackgroundColor.value = GT.settings.map.backgroundColor[GT.currentMapIndex];
+
+  // A different background (another map, day / night map, or the color itself): the rings around markers of calls in
+  // a rig's DX Call use its opposite hue (ringSelectedMarker), so the POTA / SOTA / DX Feeds markers are redrawn
+  if (GT.ringMapBackground != mapDiv.style.backgroundColor)
+  {
+    GT.ringMapBackground = mapDiv.style.backgroundColor;
+    scheduleParksRedraw();
+  }
 }
 
 // Map pins are drawn in the band colors: 12x20, rendered at 2x for sharpness and shown at half scale

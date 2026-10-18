@@ -426,11 +426,12 @@ input.slider {
 /* == Other Elements ====================================== */
 
 #txrxdec {
-  padding-left: 5px;
-  padding-right: 5px;
+  padding-left: 3px;
+  padding-right: 3px;
   margin: 3px;
   border-width: 2px;
-  width: 68px;
+  /* Room for the longest status, AC Log's "CONNECTED", so it stays centered (wider text spills to the right) */
+  width: 76px;
 }
 
 .link {
@@ -521,6 +522,31 @@ table.rosterTable td:first-child {
 
 table.rosterTable td:last-child {
   border-right: none;
+}
+
+/* Roster virtual scrolling (renderVirtualRoster, both rosters' normal view): every row the same height, so the spacers'
+   heights match the rows they stand in for. The cells' line height keeps a symbol-font glyph (the CQ column's check
+   mark, drawn from a taller fallback font) from making its row 2px taller than the rest */
+table.virtualRoster > tbody > tr {
+  height: 18px;
+}
+
+table.virtualRoster > tbody > tr > td {
+  line-height: 14px;
+}
+
+table.virtualRoster > tbody > tr > td img {
+  vertical-align: middle;
+}
+
+/* Stands in for the rows not in the page */
+table.rosterTable tr.virtualSpacer td {
+  border: none;
+  padding: 0;
+}
+
+.rosterTable tr.virtualSpacer:hover td {
+  box-shadow: none;
 }
 
 .regexMatch {
@@ -616,27 +642,6 @@ table.rosterTable td:last-child {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-#feedsBoxDiv .mapItem {
-  padding: 4px;
-}
-
-.feedBands {
-  display: grid;
-  grid-template-columns: repeat(6, auto);
-  gap: 4px 14px;
-  margin-top: 4px;
-  text-align: left;
-}
-
-.feedBand {
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.feedBand input {
-  margin-right: 2px;
 }
 
 /* Settings -> Colors: the main window's band color cells, wider for column names, 6 to a row */

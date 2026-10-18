@@ -881,5 +881,11 @@
   "gt.potaSpot.title": "POTA報告",
   "gt.sotaSpot.title": "SOTA報告",
   "settings.logging.N3FJP.rigControl.label": "啟用電台控制",
-  "settings.logging.N3FJP.rigControl.hover": "在資料來源清單中點擊呼號時，透過 AC Log 將電台調到該 spot 的頻率。需要在 AC Log 中設定電台控制。"
+  "settings.logging.N3FJP.rigControl.hover": "在資料來源清單中點擊呼號時，透過 AC Log 將電台調到該 spot 的頻率。需要在 AC Log 中設定電台控制。",
+  "gt.status.txrx.receive": "接收",
+  "gt.status.txrx.decode": "解碼",
+  "gt.status.txrx.transmit": "發射",
+  "gt.status.txrx.connected": "已連接",
+  "gt.status.txrx.ignore": "忽略",
+  "gt.status.txrx.closed": "{0} 已關閉"
 }

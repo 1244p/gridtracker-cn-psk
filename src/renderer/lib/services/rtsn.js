@@ -353,6 +353,10 @@ function feedBandPlan()
   return isKnownCallsignUSplus(GT.myDXCC) ? FEED_BANDS_US : FEED_BANDS_OTHER;
 }
 
+// The same as Sets, for the per-spot checks (feedBandAllowed)
+const FEED_BANDS_US_SET = new Set(FEED_BANDS_US);
+const FEED_BANDS_OTHER_SET = new Set(FEED_BANDS_OTHER);
+
 // DX Feeds is on and can run (Off-Air Services on, map online)
 function feedsActive()
 {
@@ -373,6 +377,8 @@ GT.feedTargetIcon = new ol.style.Icon({ src: "img/feed_target.png", scale: 0.4 }
 GT.feedOnBandIcon = new ol.style.Icon({ src: "img/feed_on_band.png", scale: 0.3 });
 GT.feedIdleIcon = new ol.style.Icon({ src: "img/feed_idle.png", scale: 0.3 });
 GT.dxcwRedrawTimeout = null;
+// By level (0 no rig on the band, 1 on the band, 2 on the band and mode), built once (sota.js has the summit icons)
+const FEED_LEVEL_ICONS = [GT.feedIdleIcon, GT.feedOnBandIcon, GT.feedTargetIcon];
 
 function scheduleDxcwRedraw()
 {
@@ -474,8 +480,8 @@ function redrawDxcwSpots()
     const age = now - callObj.age;
     const onSummit = showSota && callObj.sota && callObj.sota in GT.sota.summits;
     if (age > (onSummit ? sotaMaxAge : mapMaxAge)) continue;
-    // Map shows all bands and modes: only the map's own Band / Mode filter applies (the Feeds tab lists are roster-only)
-    if (!validateMapBandAndMode(callObj.band, callObj.mode)) continue;
+    // The bands and modes ticked in Settings -> Feeds (as in the Feed Roster), then the map's own Band / Mode filter
+    if (!feedSpotShown(callObj) || !validateMapBandAndMode(callObj.band, callObj.mode)) continue;
 
     // 0 no rig on its band, 1 a rig on its band, 2 a rig on its band and mode
     const level = ((callObj.band + "|" + callObj.mode) in onBandMode) ? 2 : (callObj.band in onBand) ? 1 : 0;
@@ -499,8 +505,7 @@ function redrawDxcwSpots()
     const LL = feedSpotPosition(callObj);
     if (!LL || isNaN(LL.a)) continue;
 
-    const icon = [GT.feedIdleIcon, GT.feedOnBandIcon, GT.feedTargetIcon][level];
-    const feature = iconFeature(ol.proj.fromLonLat([LL.o, LL.a]), icon, level + 1, "feed");
+    const feature = iconFeature(ol.proj.fromLonLat([LL.o, LL.a]), FEED_LEVEL_ICONS[level], level + 1, "feed");
     feature.feedHash = hash;
     // The spots it shows: more than one when they overlap at this zoom (see below)
     feature.feedHashes = [hash];
@@ -514,7 +519,13 @@ function redrawDxcwSpots()
     feedFeatures.push(feature);
   }
 
-  // Spots that overlap at this zoom: one marker, the best of them, in the middle of the group; its tooltip lists them all
+  // A marker with a spot of a call in a rig's DX Call is ringed
+  const selected = rigDXcallSet();
+  const hasSelected = (hashes) => hashes.some((hash) => GT.feedCallsigns[hash] && GT.feedCallsigns[hash].DEcall in selected);
+
+  // Spots that overlap at this zoom: one marker, the best of them, in the middle of the group; its tooltip lists them all.
+  // Added to the layer in one go (one index update and render, not one per marker)
+  const feedMarkers = [];
   for (const overlapping of groupOverlappingFeatures(feedFeatures))
   {
     const lead = overlapping[0];
@@ -523,17 +534,19 @@ function redrawDxcwSpots()
       lead.feedHashes = overlapping.map((feature) => feature.feedHash);
       centerGroupMarker(overlapping);
     }
-    GT.layerSources.dxcwSpots.addFeature(lead);
+    if (hasSelected(lead.feedHashes)) ringSelectedMarker(lead);
+    feedMarkers.push(lead);
   }
+  GT.layerSources.dxcwSpots.addFeatures(feedMarkers);
 
   // One marker per summit, at the summit; its icon shows the best of its spots, its tooltip lists them all
+  const summitIcons = [GT.sotaIdleIcon, GT.sotaOnBandIcon, GT.sotaTargetIcon];
   const summitFeatures = [];
   for (const ref in summits)
   {
     const group = summits[ref];
     const summit = GT.sota.summits[ref];
-    const icon = [GT.sotaIdleIcon, GT.sotaOnBandIcon, GT.sotaTargetIcon][group.level];
-    const feature = iconFeature(ol.proj.fromLonLat([summit.lon, summit.lat]), icon, group.level + 1, "feed");
+    const feature = iconFeature(ol.proj.fromLonLat([summit.lon, summit.lat]), summitIcons[group.level], group.level + 1, "feed");
     feature.feedHash = group.best;
     feature.summitRef = ref;
     feature.summitHashes = group.hashes;
@@ -547,6 +560,7 @@ function redrawDxcwSpots()
   }
 
   // Summits that overlap at this zoom: one marker, the best of them, in the middle of the group; its tooltip lists them all
+  const summitMarkers = [];
   for (const overlapping of groupOverlappingFeatures(summitFeatures))
   {
     const lead = overlapping[0];
@@ -556,8 +570,23 @@ function redrawDxcwSpots()
       lead.summitHashes = overlapping.flatMap((feature) => feature.summitHashes);
       centerGroupMarker(overlapping);
     }
-    GT.layerSources.sotaSpots.addFeature(lead);
+    if (hasSelected(lead.summitHashes)) ringSelectedMarker(lead);
+    summitMarkers.push(lead);
   }
+  GT.layerSources.sotaSpots.addFeatures(summitMarkers);
+}
+
+// The calls in a rig's DX Call (any WSJT-X / JTDX, AC Log's entry tab): highlighted in the Feed Roster, ringed on the map
+function rigDXcallSet()
+{
+  const calls = {};
+  for (const id in GT.instances)
+  {
+    const instance = GT.instances[id];
+    const dxCall = instance.valid && instance.open && instance.status ? String(instance.status.DXcall || "").trim() : "";
+    if (dxCall) calls[dxCall] = true;
+  }
+  return calls;
 }
 
 // Map left-click on a DX Feeds or SOTA marker: worked like a Feed Roster click (workFeedCallObj). A marker standing for
@@ -579,7 +608,15 @@ function leftClickFeedSpot(feature)
 
 function feedBandAllowed(callObj)
 {
-  return feedBandPlan().includes(callObj.band) && !(callObj.band in GT.settings.feedRoster.feeds.hiddenBands);
+  const plan = isKnownCallsignUSplus(GT.myDXCC) ? FEED_BANDS_US_SET : FEED_BANDS_OTHER_SET;
+  return plan.has(callObj.band) && !(callObj.band in GT.settings.app.feeds.hiddenBands);
+}
+
+// Settings -> Feeds' Bands and Modes: a spot on a band or mode unticked there is left out of the Feed Roster and the
+// map (DX Feeds and SOTA markers)
+function feedSpotShown(callObj)
+{
+  return feedBandAllowed(callObj) && GT.settings.app.feeds.modes[callObj.mode] !== false;
 }
 
 function addFeedToRoster(hash, callObj, now)
@@ -594,7 +631,7 @@ function addFeedToRoster(hash, callObj, now)
 
   if (!entry)
   {
-    GT.feedRoster[hash] = { message: FEED_MESSAGE, callObj: callObj, DXcall: callObj.DXcall, DEcall: callObj.DEcall };
+    GT.feedRoster[hash] = { message: FEED_MESSAGE, callObj: callObj, DXcall: callObj.DXcall, DEcall: callObj.DEcall, ignored: false };
   }
   else
   {
@@ -786,9 +823,13 @@ function addFeedSpot(parts, now)
 
   // Kept raw like decoded messages: the roster escapes msg when it renders it
   let msg = parts[6].trim();
-  // Every mode seen is kept for the Feed Roster's Mode selector, shown until the user unticks it
-  const seenModes = GT.settings.feedRoster.feeds.modes;
-  if (!(mode in seenModes)) seenModes[mode] = true;
+  // Every mode seen is kept for Settings -> Feeds -> Modes, shown until the user unticks it
+  const seenModes = GT.settings.app.feeds.modes;
+  if (!(mode in seenModes))
+  {
+    seenModes[mode] = true;
+    renderFeedModesSettings();
+  }
   // The whole comment is kept (Watchers, the POTA park and CQ look at all of it); the Msg column and the map hover
   // shorten it on screen only
 
@@ -1205,14 +1246,14 @@ function gtChatSendFeeds()
   sendGtJson(JSON.stringify({ t: "f", p: on, d: on, c: on && feedCWWanted() ? 1 : 0 }));
 }
 
-// The Feed Roster's Spots -> Modes -> CW is ticked (or not set yet)
+// Settings -> Feeds -> Modes -> CW is ticked (or not set yet)
 function feedCWWanted()
 {
-  const modes = GT.settings.feedRoster && GT.settings.feedRoster.feeds && GT.settings.feedRoster.feeds.modes;
+  const modes = GT.settings.app.feeds && GT.settings.app.feeds.modes;
   return !modes || modes.CW !== false;
 }
 
-// From the Feed Roster's CW tick box: tell the server, and when unticked drop the CW spots held (roster and map) now
+// From the CW tick box in Settings -> Feeds -> Modes: tell the server, and when unticked drop the CW spots held (roster and map) now
 // rather than when they age out
 function feedCWChanged()
 {

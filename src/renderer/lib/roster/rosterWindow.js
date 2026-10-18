@@ -84,10 +84,8 @@ CR.profiles = {
     audioAlerts: () => GT.settings.feedAudioAlerts,
     // Its own ignores, not the Call Roster's (no CQ ignores: CR.ignoredCQ is always empty), plus DE DXCC (the spotter's)
     ignores: () => GT.settings.feedRoster,
-    // Bands unticked in the Feeds tab, modes unticked in the Mode selector, and ignored spotters, are hidden
-    // (mode groups are chosen in Settings -> Feeds)
-    filter: (callObj) => window.opener.feedBandAllowed(callObj) && GT.settings.feedRoster.feeds.modes[callObj.mode] !== false &&
-      !(callObj.spotter.split("-")[0] in CR.ignoredSpotters),
+    // Bands and modes unticked in the main window's Settings -> Feeds, and ignored spotters, are hidden
+    filter: (callObj) => window.opener.feedSpotShown(callObj) && !(callObj.spotter.split("-")[0] in CR.ignoredSpotters),
     excludedColumns: { Rig: true, dB: true, DT: true, Spot: true, Calling: true },
     watchersTest: {},
     alertTimer: null
@@ -399,9 +397,6 @@ function runRoster(render)
   {
     renderRoster(CR.callRoster, rosterSettings);
   }
-  // New spots can bring new modes into Settings -> Feeds
-  if (CR.profile === CR.profiles.feed) updateFeedModes();
-
   const profile = CR.profile;
   if (profile.alertTimer !== null)
   {
@@ -572,32 +567,6 @@ function updateInstances()
   }
 }
 
-// Feed Roster Settings -> Feeds -> Modes: every mode seen in feed spots, ticked or not, laid out like the Bands
-function updateFeedModes()
-{
-  const modes = feedSettings().modes;
-  const list = Object.keys(modes).sort();
-
-  // Redrawn only when the list or a tick changes, so a click isn't lost to a redraw
-  const key = list.map(mode => mode + (modes[mode] === false ? "-" : "+")).join(",");
-  if (key !== CR.feedModesKey)
-  {
-    CR.feedModesKey = key;
-    feedModesDiv.innerHTML = list.map(mode =>
-      `<label class='feedBand' style='color:#${GT.modeColors[mode] || "FFFFFF"};'>` +
-      `<input type='checkbox' ${modes[mode] === false ? "" : "checked"} onchange='feedModeChange(this, "${mode}")' />${mode}</label>`
-    ).join("");
-  }
-}
-
-function feedModeChange(checkbox, mode)
-{
-  feedSettings().modes[mode] = checkbox.checked;
-  // CW decides whether the server sends CW spots at all (window.opener tells it)
-  if (mode === "CW") window.opener.feedCWChanged();
-  viewRoster();
-}
-
 function processStatus(newMessage)
 {
   if (newMessage.Transmitting == 0)
@@ -606,20 +575,21 @@ function processStatus(newMessage)
     {
       txrxdec.style.backgroundColor = "Blue";
       txrxdec.style.borderColor = "Cyan";
-      txrxdec.innerHTML = "DECODE";
+      txrxdec.innerHTML = I18N("gt.status.txrx.decode");
     }
     else
     {
       txrxdec.style.backgroundColor = "Green";
       txrxdec.style.borderColor = "GreenYellow";
-      txrxdec.innerHTML = "RECEIVE";
+      // AC Log doesn't receive or decode: it's just connected
+      txrxdec.innerHTML = I18N(newMessage.instance == window.opener.GT.acLogInstanceId ? "gt.status.txrx.connected" : "gt.status.txrx.receive");
     }
   }
   else
   {
     txrxdec.style.backgroundColor = "red";
     txrxdec.style.borderColor = "orange";
-    txrxdec.innerHTML = "TRANSMIT";
+    txrxdec.innerHTML = I18N("gt.status.txrx.transmit");
   }
 }
 
@@ -1509,19 +1479,11 @@ function clearAllITUzIgnores()
   viewRoster();
 }
 
-// The pane is shown before the tab renders, so the Ignores and Watcher tabs can measure where they start;
-// the Feed Roster opens on its Feeds tab
+// The pane is shown before the tab renders, so the Ignores and Watcher tabs can measure where they start
 function openSettings()
 {
   settingsDiv.style.display = "inline-block";
-  if (isFeedRoster())
-  {
-    openInfoTab("feedsbox", "feedsBoxDiv", renderFeedsTab);
-  }
-  else
-  {
-    openInfoTab("generalbox", "generalSettingsDiv");
-  }
+  openInfoTab("generalbox", "generalSettingsDiv");
 }
 
 function openWatcher()
@@ -1543,7 +1505,7 @@ function updateFeedExceptionsTab()
   const empty = feedExceptionsTabEmpty();
   moreExceptionsButton.style.display = empty ? "none" : "";
   exceptionsbox.style.display = empty ? "none" : "";
-  if (empty && exceptionsBoxDiv.style.display === "block") openInfoTab("feedsbox", "feedsBoxDiv", renderFeedsTab);
+  if (empty && exceptionsBoxDiv.style.display === "block") openInfoTab("generalbox", "generalSettingsDiv");
 }
 
 function openExceptions()
@@ -1662,7 +1624,6 @@ function updateFeedsTab()
   {
     updateRosterTabControls();
   }
-  renderFeedsTab();
 }
 
 // Call Roster | Feed Roster tabs: the controls, settings panel and table all switch to the chosen roster
@@ -1693,13 +1654,12 @@ function showRosterTab(name, render = true)
   updateInstances();
 }
 
-// Settings that only one roster has: Feeds tab, Spotter ignores and watchers, and Spotter column for the Feed Roster;
+// Settings that only one roster has: Spotter ignores and watchers, and Spotter column for the Feed Roster;
 // CQ ignores, Calling watchers, dB / DT / Freq exceptions and Clear Roster on Band change for the Call Roster
 function updateRosterTabControls()
 {
   const feed = isFeedRoster();
 
-  feedsbox.style.display = feed ? "" : "none";
   ignoreSpotterOption.style.display = feed ? "" : "none";
   ignoreCqOption.style.display = feed ? "none" : "";
   watcherSpotterOption.style.display = feed ? "" : "none";
@@ -1743,11 +1703,7 @@ function updateRosterTabControls()
   }
 
   // An open settings tab redraws for the roster now showing
-  if (feedsBoxDiv.style.display === "block" && !feed)
-  {
-    openInfoTab("generalbox", "generalSettingsDiv");
-  }
-  else if (ignoresBoxDiv.style.display === "block")
+  if (ignoresBoxDiv.style.display === "block")
   {
     renderIgnoresTab();
   }
@@ -1755,45 +1711,6 @@ function updateRosterTabControls()
   {
     openWatchersTab();
   }
-}
-
-function feedSettings()
-{
-  return CR.profiles.feed.settings().feeds;
-}
-
-function renderFeedsTab()
-{
-  const feeds = feedSettings();
-
-  feedAlertScriptEnable.checked = feeds.alertScript;
-  feedNotificationsEnable.checked = feeds.notifications;
-
-  feedBands.innerHTML = window.opener.feedBandPlan().map(band =>
-    `<label class='feedBand' style='color:#${GT.bandColors[band]};'>` +
-    `<input type='checkbox' ${band in feeds.hiddenBands ? "" : "checked"} onchange='feedBandChanged(this, "${band}")' />${band}</label>`
-  ).join("");
-  updateFeedModes();
-}
-
-function feedBandChanged(checkbox, band)
-{
-  const hidden = feedSettings().hiddenBands;
-  if (checkbox.checked)
-  {
-    delete hidden[band];
-  }
-  else
-  {
-    hidden[band] = true;
-  }
-  viewRoster();
-}
-
-function feedsSettingChanged()
-{
-  feedSettings().alertScript = feedAlertScriptEnable.checked;
-  feedSettings().notifications = feedNotificationsEnable.checked;
 }
 
 function renderIgnoresTab()

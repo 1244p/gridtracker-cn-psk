@@ -15,10 +15,10 @@ function sendAlerts()
   let audioAlertCounts = createEmptyAudioAlerts();
   let pushReport = {};
   let scriptReport = {};
-  // Feed Roster, per its Feeds tab: "Allow Alert Script" and "Allow Notifications" (Pushover, Simplepush);
-  // its audio alerts come from Settings -> Audio Alerts -> Feed Roster, like the Call Roster's
-  const allowScript = !feedRoster || CR.rosterSettings.feeds.alertScript;
-  const allowPush = !feedRoster || CR.rosterSettings.feeds.notifications;
+  // Feed Roster, per the main window's Settings -> Feeds: "Allow Alert Script" and "Allow Notifications" (Pushover,
+  // Simplepush); its audio alerts come from Settings -> Audio Alerts -> Feed Roster, like the Call Roster's
+  const allowScript = !feedRoster || GT.settings.app.feeds.alertScript;
+  const allowPush = !feedRoster || GT.settings.app.feeds.notifications;
 
   for (const entry in callRoster)
   {

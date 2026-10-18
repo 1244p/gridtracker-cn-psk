@@ -879,5 +879,11 @@
   "gt.potaSpot.title": "Spot POTA",
   "gt.sotaSpot.title": "Spot SOTA",
   "settings.logging.N3FJP.rigControl.label": "Włącz Sterowanie Radiem",
-  "settings.logging.N3FJP.rigControl.hover": "Kliknięcie znaku na Liście kanałów dostraja radio do częstotliwości spotu przez AC Log. Wymaga skonfigurowanego sterowania radiem w AC Log."
+  "settings.logging.N3FJP.rigControl.hover": "Kliknięcie znaku na Liście kanałów dostraja radio do częstotliwości spotu przez AC Log. Wymaga skonfigurowanego sterowania radiem w AC Log.",
+  "gt.status.txrx.receive": "ODBIÓR",
+  "gt.status.txrx.decode": "DEKODUJE",
+  "gt.status.txrx.transmit": "NADAWANIE",
+  "gt.status.txrx.connected": "POŁĄCZONO",
+  "gt.status.txrx.ignore": "IGNORUJ",
+  "gt.status.txrx.closed": "{0} ZAMKNIĘTY"
 }

@@ -12,14 +12,14 @@ function ignoreMessagesToggle()
   {
     txrxdec.style.backgroundColor = "Green";
     txrxdec.style.borderColor = "GreenYellow";
-    txrxdec.innerHTML = "RECEIVE";
+    txrxdec.innerHTML = I18N(GT.activeInstance == GT.acLogInstanceId ? "gt.status.txrx.connected" : "gt.status.txrx.receive");
     txrxdec.title = I18N("gt.status.ignoreMessages.hover");
   }
   else
   {
     txrxdec.style.backgroundColor = "DimGray";
     txrxdec.style.borderColor = "DarkGray";
-    txrxdec.innerHTML = "IGNORE";
+    txrxdec.innerHTML = I18N("gt.status.txrx.ignore");
     txrxdec.title = I18N("gt.status.resumeMessages.hover");
   }
 }

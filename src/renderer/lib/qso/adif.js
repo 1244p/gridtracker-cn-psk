@@ -3118,6 +3118,15 @@ function sendTcpMessageGetResponse(msg, port, address, callback = null)
 
 function grabAcLog(count = 0)
 {
+  // In AC Log's request queue (acLog.js): sent once nothing else is waiting on AC Log, the next one once this
+  // download is in (a whole log can take a while: up to the connection's 30 second idle timeout and more)
+  acLogRequest((done) => acLogDownload(count, () => done()), null, 120000);
+}
+
+// Downloads AC Log's newest count QSOs (0: the whole log) into the log; finished(true) once they're in, finished(false)
+// if the download failed. Called from a queued request (grabAcLog, acLogQsoEntered)
+function acLogDownload(count, finished)
+{
   AcLogImg.style.webkitFilter = "invert(100%)";
 
   let countString = count > 0 ? ("<VALUE>" + count + "</VALUE>") : "";
@@ -3125,16 +3134,14 @@ function grabAcLog(count = 0)
   let cmd = valueToXmlField("CMD", "<OPINFO>") + "\r\n";
   cmd += valueToXmlField("CMD", "<LIST><INCLUDEALL>" + countString) + "\r\n\r\n";
 
-  // In AC Log's request queue (acLog.js): sent once nothing else is waiting on AC Log, the next one once this
-  // download is in (a whole log can take a while: up to the connection's 30 second idle timeout and more)
-  acLogRequest((done) =>
+  let called = false;
+  sendTcpMessageGetResponse(cmd, GT.settings.acLog.port, GT.settings.acLog.ip, (buffer) =>
   {
-    sendTcpMessageGetResponse(cmd, GT.settings.acLog.port, GT.settings.acLog.ip, (buffer) =>
-    {
-      acLogCallback(buffer);
-      done();
-    });
-  }, null, 120000);
+    if (called) return;
+    called = true;
+    acLogCallback(buffer);
+    finished(buffer != null);
+  });
 }
 
 function acLogCallback(buffer)

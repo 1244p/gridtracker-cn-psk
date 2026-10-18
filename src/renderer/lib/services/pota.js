@@ -216,8 +216,14 @@ function makeParkFeatures()
     console.error(e);
   }
 
+  // A marker with a spot (one the map's Band / Mode filter shows) of a call in a rig's DX Call is ringed
+  const selected = rigDXcallSet();
+  const hasSelected = (keys) => keys.some((key) => Object.values(GT.pota.parkSpots[key] || {}).some((spot) =>
+    spot.activator in selected && validateMapBandAndMode(spot.band, spot.mode)));
+
   // Parks that overlap at this zoom: one marker (a park on a rig's band and mode first) in the middle of the group; its
-  // tooltip lists them all, left-click goes to the one shown
+  // tooltip lists them all, left-click goes to the one shown. Added to the layer in one go
+  const markers = [];
   for (const overlapping of groupOverlappingFeatures(parkFeatures))
   {
     const lead = overlapping[0];
@@ -226,8 +232,10 @@ function makeParkFeatures()
       lead.parkKeys = overlapping.map((feature) => feature.key);
       centerGroupMarker(overlapping);
     }
-    GT.layerSources.pota.addFeature(lead);
+    if (hasSelected(lead.parkKeys)) ringSelectedMarker(lead);
+    markers.push(lead);
   }
+  GT.layerSources.pota.addFeatures(markers);
 }
 
 // A redraw of the POTA layer soon, coalescing several requests (parks are regrouped as a whole)
@@ -302,7 +310,7 @@ function potaSpotCallObj(spot, key)
   let grid = String(spot.activatorGrid || "").toUpperCase();
   if (!/^[A-R]{2}[0-9]{2}([A-X]{2})?$/.test(grid)) grid = String((park && park.grid) || "").toUpperCase();
   if (!/^[A-R]{2}[0-9]{2}([A-X]{2})?$/.test(grid)) grid = "";
-  return { DEcall: spot.activator, band: spot.band, mode: spot.mode, freq: Math.round(Number(spot.frequency) * 1000000) || 0, grid: grid.substring(0, 4), fullGrid: grid };
+  return { DEcall: spot.activator, band: spot.band, mode: spot.mode, freq: Math.round(Number(spot.frequency) * 1000000) || 0, grid: grid.substring(0, 4), fullGrid: grid, pota: key };
 }
 
 // Map left-click on a park (or parks grouped at this zoom): a spot a rig is already on the band and mode of goes to that

@@ -56,6 +56,36 @@ function runAcLogQueue()
   request.start(done);
 }
 
+// AC Log's Other 1-8 fields by the title the user gave them (GETOTHERFIELDTITLES), e.g. { POTA_REF: "TXTENTRYOTHER1" }:
+// a spot click fills the ones titled POTA_REF / SOTA_REF. Asked on connecting; AC Log announces later changes itself (the
+// same reply, unasked). AC Log versions without the request answer CMD_NOT_FOUND
+GT.acLogOtherFields = {};
+GT.acLogTitlesSupported = true;
+
+function requestAcLogFieldTitles()
+{
+  if (GT.acLogTitlesSupported) acLogSocketRequest("<CMD><GETOTHERFIELDTITLES></CMD>\r\n", "OTHERFIELDTITLESRESPONSE", "titles");
+}
+
+// Its reply, over several lines: <CMD><OTHERFIELDTITLESRESPONSE><VALUE> txtEntryOther1: POTA_REF ... </VALUE></CMD>
+function handleAcLogFieldTitles(block)
+{
+  const fields = {};
+  for (const match of block.matchAll(/txtEntryOther([1-8])\s*:\s*([^\r\n<]*)/gi))
+  {
+    const title = match[2].trim().toUpperCase();
+    if (title && !(title in fields)) fields[title] = "TXTENTRYOTHER" + match[1];
+  }
+  GT.acLogOtherFields = fields;
+
+  if (GT.acLogExpect && GT.acLogExpect.type == "OTHERFIELDTITLESRESPONSE")
+  {
+    const done = GT.acLogExpect.done;
+    GT.acLogExpect = null;
+    done();
+  }
+}
+
 // A command on the API connection, answered by a responseType message (handleAcLogAPIMessage)
 function acLogSocketRequest(command, responseType, key = null)
 {
@@ -120,6 +150,18 @@ function acLogWorkSpot(callObj)
   {
     command += aclUpdateControlValue("TXTENTRYGRID", grid);
   }
+  // The spot's POTA park / SOTA summit, into the Other fields AC Log has titled POTA_REF / SOTA_REF (acLogOtherFields);
+  // not a "?-????" CQ POTA
+  const potaField = GT.acLogOtherFields.POTA_REF;
+  if (potaField && /^[A-Z0-9]{1,4}-\d{4,5}$/.test(String(callObj.pota || "")))
+  {
+    command += aclUpdateControlValue(potaField, callObj.pota);
+  }
+  const sotaField = GT.acLogOtherFields.SOTA_REF;
+  if (sotaField && /^[A-Z0-9]{1,4}\/[A-Z0-9]{2}-\d{3}$/.test(String(callObj.sota || "")))
+  {
+    command += aclUpdateControlValue(sotaField, callObj.sota);
+  }
 
   acLogRequest((done) =>
   {
@@ -129,7 +171,7 @@ function acLogWorkSpot(callObj)
 }
 
 // Settings, N3FJP Loggers: a green / red dot right of Connect for AC Log connected or not; none with Connect off.
-// A plain colored ● (not an emoji), which every platform's fonts have
+// A CSS circle (no font or emoji needed on any platform), centered on the checkbox
 function updateAcLogConnectStatus()
 {
   if (typeof acLogConnectStatus == "undefined") return;
@@ -137,7 +179,7 @@ function updateAcLogConnectStatus()
   if (GT.settings.acLog.connect)
   {
     const connected = GT.acLogAPISocket != null && GT.acLogAPISocket.connecting == false;
-    html = `<span style="color:${connected ? "#00DD00" : "#FF3333"};margin-left:2px;font-size:larger;line-height:1;">&#9679;</span>`;
+    html = `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background-color:${connected ? "#00DD00" : "#FF3333"};margin-left:3px;vertical-align:middle;position:relative;top:-1px;"></span>`;
   }
   if (acLogConnectStatus.innerHTML != html) acLogConnectStatus.innerHTML = html;
 }
@@ -172,6 +214,8 @@ function connectToAcLogAPI()
     acLogSocketRequest("<CMD><OPINFO></CMD>\r\n", "OPINFORESPONSE", "opinfo");
     acLogSocketRequest("<CMD><READBMF></CMD>\r\n", "READBMFRESPONSE", "readbmf");
     acLogSocketRequest("<CMD><ALLFIELDSWITHVALUES></CMD>\r\n", "ALLFIELDSWVRESPONSE", "allfields");
+    GT.acLogTitlesSupported = true;
+    requestAcLogFieldTitles();
 
     // AC Log doesn't announce band / mode changes, or a call typed into its entry tab without tabbing out: ask again
     // every 5 seconds while connected
@@ -187,12 +231,21 @@ function connectToAcLogAPI()
   GT.acLogAPISocket.on("data", function (data)  {
     if (!workingBuffer) workingBuffer = Buffer.from(data).toString();
     else workingBuffer += Buffer.from(data).toString();
-    let end = workingBuffer.indexOf("\r\n");
-    while (end > -1)
+    while (true)
     {
-      handleAcLogAPIMessage(workingBuffer.substring(0, end));
+      // The Other field titles reply spans several lines: taken whole, up to its </CMD>
+      if (workingBuffer.startsWith("<CMD><OTHERFIELDTITLESRESPONSE>"))
+      {
+        const close = workingBuffer.indexOf("</CMD>");
+        if (close == -1) break;
+        handleAcLogFieldTitles(workingBuffer.substring(0, close + 6));
+        workingBuffer = workingBuffer.substring(close + 6).replace(/^\r\n/, "");
+        continue;
+      }
+      const end = workingBuffer.indexOf("\r\n");
+      if (end == -1) break;
+      handleAcLogAPILine(workingBuffer.substring(0, end));
       workingBuffer = workingBuffer.substring(end+2);
-      end = workingBuffer.indexOf("\r\n");
     }
   });
 
@@ -224,6 +277,45 @@ function closeAcLogAPI()
   GT.acLogAPISocket.destroy();
   GT.acLogAPISocket = null;
   updateAcLogConnectStatus();
+}
+
+// QSOs logged in AC Log (ENTEREVENT) that haven't been downloaded yet, and whether a download for them is queued.
+// The download takes the newest that many when it starts: QSOs logged while it waited in the queue come with it, so
+// two QSOs logged close together aren't both fetched as "the newest one" (the first lost). One logged after it
+// started gets a download of its own
+GT.acLogUnfetched = 0;
+GT.acLogFetchQueued = false;
+
+function acLogQsoEntered()
+{
+  GT.acLogUnfetched++;
+  queueAcLogFetch(1);
+}
+
+// In a 1/4 second (AC Log has the QSO written by then); a failed download is tried again, up to 3 times
+function queueAcLogFetch(attempt)
+{
+  if (GT.acLogFetchQueued) return;
+  GT.acLogFetchQueued = true;
+  nodeTimers.setTimeout(() =>
+  {
+    acLogRequest((done) =>
+    {
+      GT.acLogFetchQueued = false;
+      const count = GT.acLogUnfetched;
+      if (count == 0) return done();
+      GT.acLogUnfetched = 0;
+      acLogDownload(count, (ok) =>
+      {
+        if (!ok)
+        {
+          GT.acLogUnfetched += count;
+          if (attempt < 3) nodeTimers.setTimeout(() => queueAcLogFetch(attempt + 1), 2000);
+        }
+        done();
+      });
+    }, null, 120000);
+  }, 250);
 }
 
 // AC Log's BAND field as a GridTracker band ("15" -> "15m", "70" -> "70cm", "144" -> "2m"), or "" if unknown
@@ -290,16 +382,26 @@ function handleAcLogEntryFields(buffer)
   }
 }
 
+// One line from the API connection: usually one message, but the entry tab's fields come as one <CMD> each on a single
+// line, and any other message on a line is handled too (an ENTEREVENT after another one would otherwise be lost)
+function handleAcLogAPILine(line)
+{
+  let fields = "";
+  for (const part of line.split("</CMD>"))
+  {
+    const start = part.indexOf("<CMD>");
+    if (start == -1) continue;
+    const message = part.substring(start) + "</CMD>";
+    if (message.startsWith("<CMD><ALLFIELDSWVRESPONSE>")) fields += message;
+    else handleAcLogAPIMessage(message);
+  }
+  if (fields) handleAcLogEntryFields(fields);
+}
+
 function handleAcLogAPIMessage(buffer)
 {
   if (buffer.length > 0)
   {
-    // The entry tab's fields all come on one line, one <CMD> per field
-    if (buffer.startsWith("<CMD><ALLFIELDSWVRESPONSE>"))
-    {
-      handleAcLogEntryFields(buffer);
-      return;
-    }
     let object = parseAcLogXML(buffer.substring(0, buffer.indexOf("</CMD>")));
     if (object.type)
     {
@@ -343,8 +445,16 @@ function handleAcLogAPIMessage(buffer)
       }
       else if (object.type == "ENTEREVENT")
       {
-        // Grab the last log entry in a 1/4 second
-        nodeTimers.setTimeout(grabAcLog, 250, 1);
+        acLogQsoEntered();
+      }
+      else if (object.type == "CMD_NOT_FOUND" && GT.acLogExpect && GT.acLogExpect.type == "OTHERFIELDTITLESRESPONSE")
+      {
+        // An AC Log without GETOTHERFIELDTITLES: no Other field titles, and it isn't asked again this connection
+        GT.acLogTitlesSupported = false;
+        GT.acLogOtherFields = {};
+        const done = GT.acLogExpect.done;
+        GT.acLogExpect = null;
+        done();
       }
 
       var notify = false;

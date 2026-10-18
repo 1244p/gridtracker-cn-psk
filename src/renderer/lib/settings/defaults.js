@@ -101,11 +101,27 @@ const def_settings = {
 
     offAirServicesEnable: true,
     spottingEnable: true,
-    // DX Feeds (DX Cluster / CW Skimmer / Spothole spots): Digital and Phone always, CW while the Feed Roster's
-    // Spots -> Modes -> CW is ticked (feedRoster.feeds.modes.CW)
+    // DX Feeds (DX Cluster / CW Skimmer / Spothole spots): Digital and Phone always, CW while Settings -> Feeds ->
+    // Modes -> CW is ticked (feeds.modes.CW)
     dxFeeds: false,
     // Seconds a feed spot is kept (shown on the map) after it was last spotted
     feedMaxAge: 300,
+    // Settings -> Feeds: which feed spots the Feed Roster and the map (DX Feeds and SOTA markers) show, and what the
+    // Feed Roster may alert through. Was feedRoster.feeds (the Feed Roster's Spots tab) until v2.261017, moved at startup
+    feeds: {
+      // Feed Roster audio alerts come from Settings -> Audio Alerts -> Feed Roster; these cover the script and push
+      alertScript: false,
+      notifications: false,
+      // Bands the user unticked; anything not listed is shown
+      hiddenBands: {},
+      // Every mode seen in feed spots (mode: shown); false = unticked. Starts with the ones the feed is known to send
+      // and only grows. CW unticked also stops the server sending CW (gtChatSendFeeds)
+      modes: {
+        CW: true, FT4: true, FT8: true, SSB: true,
+        AM: true, DATA: true, DIGVOICE: true, FM: true, FSK: true, HELL: true, JS8: true, JS8CALL: true,
+        PHONE: true, PSK: true, PSK31: true, PSK63: true, RTTY: true, SSTV: true, WSPR: true
+      }
+    },
     loadAdifAtStartup: false,
     locale: "en",
     lookupLoginCq: "",
@@ -739,21 +755,7 @@ const def_settings = {
     // Feed Roster Max Age: 2 minutes (the map's Feed Spots Max Age is app.feedMaxAge)
     rosterTime: 120,
     watchers: {},
-    feeds: {
-      // Feed Roster audio alerts come from Settings -> Audio Alerts -> Feed Roster; these cover the script and push
-      alertScript: false,
-      notifications: false,
-      // Bands the user unticked; anything not listed is shown
-      hiddenBands: {},
-      // Every mode seen in feed spots (mode: shown), for the Feed Roster's Settings -> Feeds -> Modes; false = unticked.
-      // Starts with the ones the feed is known to send and only grows. CW unticked also stops the server sending CW
-      // (gtChatSendFeeds)
-      modes: {
-        CW: true, FT4: true, FT8: true, SSB: true,
-        AM: true, DATA: true, DIGVOICE: true, FM: true, FSK: true, HELL: true, JS8: true, JS8CALL: true,
-        PHONE: true, PSK: true, PSK31: true, PSK63: true, RTTY: true, SSTV: true, WSPR: true
-      }
-    },
+    // (Its Spots settings, feeds, moved to app.feeds: Settings -> Feeds)
     // Feed Roster ignores, independent of the Call Roster's (the top-level ignored* keys), no CQ ignores;
     // spotter ignores are feed-only already and stay in the top-level ignoredSpotters
     ignoredCalls: {},

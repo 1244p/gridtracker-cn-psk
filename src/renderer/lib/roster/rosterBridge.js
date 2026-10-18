@@ -43,6 +43,7 @@ function insertMessageInRoster(newMessage, msgDEcallsign, msgDXcallsign, callObj
             callObj: activeCallObj,
             DXcall: msgDXcallsign,
             DEcall: msgDEcallsign,
+            ignored: false,
         };
     } else {
         entry.message = newMessage;
@@ -184,13 +185,13 @@ function goProcessCallRoster() {
     }
 }
 
-// New DX Cluster / CW Skimmer spots: only the Feed Roster needs reprocessing. Spots arrive in a steady stream and each
-// pass rebuilds the whole (often several hundred row) table, so they're gathered for a second
+// New DX Cluster / CW Skimmer spots: only the Feed Roster needs reprocessing. Spots arrive in a steady stream, so
+// they're gathered for a quarter second (the roster only draws the rows in view, renderVirtualRoster)
 function scheduleFeedRosterUpdate()
 {
   if (GT.feedRosterUpdateTimer == null)
   {
-    GT.feedRosterUpdateTimer = nodeTimers.setTimeout(goProcessFeedRoster, 1000);
+    GT.feedRosterUpdateTimer = nodeTimers.setTimeout(goProcessFeedRoster, 250);
   }
 }
 

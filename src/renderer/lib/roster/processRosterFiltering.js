@@ -28,6 +28,8 @@ function processRosterFiltering(callRoster, rosterSettings)
     const callObj = entry.callObj;
     const call = entry.DEcall;
     const msg = entry.message;
+    // Hidden by one of the roster's Ignores (not counted as heard in the Feed Roster's title, renderRoster)
+    entry.ignored = false;
 
     // --- EXTREMELY FAST FAILURES (Run these first) ---
     if (now - callObj.age > rs.rosterTime)
@@ -77,6 +79,7 @@ function processRosterFiltering(callRoster, rosterSettings)
         (dxCall + ":" + callObj.dxcc) in CR.ignoredCQ)
     {
       entry.tx = false;
+      entry.ignored = true;
       continue;
     }
 

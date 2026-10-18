@@ -367,23 +367,32 @@ function downloadSotaSummits()
 }
 
 // A CSV row; summit names can be quoted and hold commas
+// Fields split at commas outside quotes, quote characters dropped. Each field is cut out in one slice (not built a
+// character at a time): the list has ~180,000 rows
 function parseSotaCsvRow(line)
 {
   const result = [];
-  let current = "";
+  let start = 0;
   let inQuotes = false;
+  let hasQuote = false;
   for (let i = 0; i < line.length; i++)
   {
-    const c = line[i];
-    if (c === '"') inQuotes = !inQuotes;
-    else if (c === "," && !inQuotes)
+    const c = line.charCodeAt(i);
+    if (c === 34) // "
     {
-      result.push(current);
-      current = "";
+      inQuotes = !inQuotes;
+      hasQuote = true;
     }
-    else current += c;
+    else if (c === 44 && !inQuotes) // ,
+    {
+      const field = line.slice(start, i);
+      result.push(hasQuote ? field.replaceAll('"', "") : field);
+      start = i + 1;
+      hasQuote = false;
+    }
   }
-  result.push(current);
+  const field = line.slice(start);
+  result.push(hasQuote ? field.replaceAll('"', "") : field);
   return result;
 }
 

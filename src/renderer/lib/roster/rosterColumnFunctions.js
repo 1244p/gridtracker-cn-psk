@@ -1,9 +1,10 @@
 function rosterColumnList(settings = {}, overrides = {})
 {
   const excluded = CR.profile.excludedColumns;
+  // A saved column this version doesn't have (ROSTER_COLUMNS) is skipped rather than breaking the roster
   return CR.rosterSettings.columnOrder.filter(column =>
   {
-    return column && !excluded[column] && (settings[column] || overrides[column]) && overrides[column] !== false;
+    return column && ROSTER_COLUMNS[column] && !excluded[column] && (settings[column] || overrides[column]) && overrides[column] !== false;
   });
 }
 

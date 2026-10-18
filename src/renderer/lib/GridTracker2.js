@@ -120,9 +120,22 @@ function loadAllSettings()
   {
     const feedRoster = GT.settings.feedRoster;
 
-    // Settings -> Feeds' CW / Digital / Phone are gone (Digital and Phone are always sent, CW follows the Feed Roster's
-    // Spots -> Modes -> CW): CW unticked there carries over to the Feed Roster
-    if (GT.settings.app.feedCW === false && feedRoster.feeds && feedRoster.feeds.modes) feedRoster.feeds.modes.CW = false;
+    // The Feed Roster's Spots tab (feedRoster.feeds: modes, bands, Allow Alert Script / Notifications) moved to
+    // Settings -> Feeds (app.feeds), which the map's DX Feeds and SOTA markers follow too: the saved choices carry over
+    if (feedRoster.feeds)
+    {
+      const saved = feedRoster.feeds;
+      const feeds = GT.settings.app.feeds;
+      if (saved.modes) Object.assign(feeds.modes, saved.modes);
+      if (saved.hiddenBands) feeds.hiddenBands = { ...saved.hiddenBands };
+      if (typeof saved.alertScript == "boolean") feeds.alertScript = saved.alertScript;
+      if (typeof saved.notifications == "boolean") feeds.notifications = saved.notifications;
+      delete feedRoster.feeds;
+    }
+
+    // Settings -> Feeds' old CW / Digital / Phone are gone (Digital and Phone are always sent, CW follows Settings ->
+    // Feeds -> Modes -> CW): CW unticked there carries over
+    if (GT.settings.app.feedCW === false) GT.settings.app.feeds.modes.CW = false;
     delete GT.settings.app.feedCW;
     delete GT.settings.app.feedDigital;
     delete GT.settings.app.feedPhone;

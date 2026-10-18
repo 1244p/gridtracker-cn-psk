@@ -56,6 +56,7 @@ function updateFeedViews()
   }
   feedMaxAge.value = GT.settings.app.feedMaxAge;
   feedMaxAgeTd.innerHTML = toDHMS(GT.settings.app.feedMaxAge);
+  renderFeedSpotsSettings();
 
   // Main button panel: shown while DX Feeds is on, grey when the map option is off
   dxcwFeedButton.style.display = active ? "" : "none";
@@ -80,6 +81,67 @@ function changeFeedMaxAge()
 {
   GT.settings.app.feedMaxAge = parseInt(feedMaxAge.value);
   feedMaxAgeTd.innerHTML = toDHMS(GT.settings.app.feedMaxAge);
+}
+
+// Settings -> Feeds -> Modes, Bands and Allow (app.feeds, until v2.261017 the Feed Roster's Spots tab): which feed spots
+// the Feed Roster and the map's DX Feeds and SOTA markers show (feedSpotShown), and what the Feed Roster may alert
+// through. Drawn when the tab opens (the band plan follows your callsign) and with the other Feeds settings
+function renderFeedSpotsSettings()
+{
+  const feeds = GT.settings.app.feeds;
+  feedAlertScriptEnable.checked = feeds.alertScript;
+  feedNotificationsEnable.checked = feeds.notifications;
+  feedSpotBandsDiv.innerHTML = feedBandPlan().map((band) =>
+    `<label class='feedBand' style='color:#${GT.bandColors[band]};'>` +
+    `<input type='checkbox' ${band in feeds.hiddenBands ? "" : "checked"} onchange='feedSpotBandChanged(this, "${band}")' />${band}</label>`
+  ).join("");
+  GT.feedModesKey = null;
+  renderFeedModesSettings();
+}
+
+// Every mode seen in feed spots, ticked or not, laid out like the Bands; also when a spot brings a new mode (rtsn.js).
+// Redrawn only when the list or a tick changes, so a click isn't lost to a redraw
+function renderFeedModesSettings()
+{
+  const modes = GT.settings.app.feeds.modes;
+  const list = Object.keys(modes).sort();
+  const key = list.map((mode) => mode + (modes[mode] === false ? "-" : "+")).join(",");
+  if (key === GT.feedModesKey) return;
+  GT.feedModesKey = key;
+  feedSpotModesDiv.innerHTML = list.map((mode) =>
+    `<label class='feedBand' style='color:#${GT.modeColors[mode] || "FFFFFF"};'>` +
+    `<input type='checkbox' ${modes[mode] === false ? "" : "checked"} onchange='feedSpotModeChanged(this, "${mode}")' />${mode}</label>`
+  ).join("");
+}
+
+function feedSpotModeChanged(checkbox, mode)
+{
+  GT.settings.app.feeds.modes[mode] = checkbox.checked;
+  GT.feedModesKey = null;
+  // CW decides whether the server sends CW spots at all
+  if (mode === "CW") feedCWChanged();
+  feedSpotsChanged();
+}
+
+function feedSpotBandChanged(checkbox, band)
+{
+  const hidden = GT.settings.app.feeds.hiddenBands;
+  if (checkbox.checked) delete hidden[band];
+  else hidden[band] = true;
+  feedSpotsChanged();
+}
+
+// The Feed Roster and the map show the ticked bands and modes
+function feedSpotsChanged()
+{
+  goProcessFeedRoster();
+  redrawDxcwSpots();
+}
+
+function feedSpotAllowChanged()
+{
+  GT.settings.app.feeds.alertScript = feedAlertScriptEnable.checked;
+  GT.settings.app.feeds.notifications = feedNotificationsEnable.checked;
 }
 
 function updateGTFlagViews()

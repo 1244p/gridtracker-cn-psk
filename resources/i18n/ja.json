@@ -879,5 +879,11 @@
 	"gt.potaSpot.title": "POTAスポット",
 	"gt.sotaSpot.title": "SOTAスポット",
 	"settings.logging.N3FJP.rigControl.label": "リグ制御を有効にする",
-	"settings.logging.N3FJP.rigControl.hover": "フィードロースターのコールサインをクリックすると、AC Log 経由でリグをスポットの周波数に合わせます。AC Log でリグ制御の設定が必要です。"
+	"settings.logging.N3FJP.rigControl.hover": "フィードロースターのコールサインをクリックすると、AC Log 経由でリグをスポットの周波数に合わせます。AC Log でリグ制御の設定が必要です。",
+	"gt.status.txrx.receive": "受信",
+	"gt.status.txrx.decode": "デコード",
+	"gt.status.txrx.transmit": "送信",
+	"gt.status.txrx.connected": "接続中",
+	"gt.status.txrx.ignore": "無視",
+	"gt.status.txrx.closed": "{0} 終了"
 }

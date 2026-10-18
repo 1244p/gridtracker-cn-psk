@@ -11,7 +11,8 @@
   const out = { steps: [] };
   const step = (name, fn) => { try { const r = fn(); out.steps.push(name + ": ok" + (r !== undefined ? " (" + r + ")" : "")); } catch (e) { out.steps.push(name + ": THREW " + e.message); errs.push(name + ": " + e.message); } };
   const startTab = CR.visibleProfile.name;
-  const tabs = ["generalbox:generalSettingsDiv", "watcherbox:watcherBoxDiv", "exceptionsbox:exceptionsBoxDiv", "ingoresbox:ignoresBoxDiv", "feedsbox:feedsBoxDiv"];
+  // (The Feed Roster's Spots tab moved to the main window's Settings -> Feeds, which smoke_main.js opens)
+  const tabs = ["generalbox:generalSettingsDiv", "watcherbox:watcherBoxDiv", "exceptionsbox:exceptionsBoxDiv", "ingoresbox:ignoresBoxDiv", "colorsbox:colorsBoxDiv"];
 
   for (const name of ["call", "feed"]) {
     step(`${name}: show tab`, () => { showRosterTab(name); return CR.visibleProfile.name; });
@@ -23,7 +24,7 @@
       const [btn, div] = t.split(":");
       const el = document.getElementById(btn);
       if (!el || el.style.display === "none") { out.steps.push(`${name}: tab ${btn} hidden (expected for this roster)`); continue; }
-      step(`${name}: tab ${btn}`, () => { openInfoTab(btn, div, div === "watcherBoxDiv" ? openWatchersTab : div === "ignoresBoxDiv" ? renderIgnoresTab : div === "feedsBoxDiv" ? renderFeedsTab : null); return document.getElementById(div).style.display; });
+      step(`${name}: tab ${btn}`, () => { openInfoTab(btn, div, div === "watcherBoxDiv" ? openWatchersTab : div === "ignoresBoxDiv" ? renderIgnoresTab : div === "colorsBoxDiv" ? renderColorsTab : null); return document.getElementById(div).style.display; });
       await sleep(150);
     }
     step(`${name}: compact on`, () => { compactModeChanged(); return CR.rosterSettings.compact; });

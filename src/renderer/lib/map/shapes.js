@@ -59,6 +59,61 @@ function iconFeature(center, iconObj, zIndex, propName)
   return feature;
 }
 
+// The map's background color (Settings, Map) with its hue turned 180 degrees (same saturation and lightness), for
+// marks that stand out on it
+function complementMapBackground()
+{
+  const background = String((GT.settings.map.backgroundColor && GT.settings.map.backgroundColor[GT.currentMapIndex]) || "#000000");
+  // Worked out once per background (every ringed marker of a redraw asks)
+  if (GT.complementCache && GT.complementCache.background === background) return GT.complementCache.color;
+  const color = complementColor(background);
+  GT.complementCache = { background, color };
+  return color;
+}
+
+function complementColor(background)
+{
+  const hex = background.replace("#", "");
+  if (!/^[0-9a-f]{6}$/i.test(hex)) return "#FFFFFF";
+  const rgb = [0, 2, 4].map((i) => parseInt(hex.substring(i, i + 2), 16) / 255);
+  const max = Math.max(...rgb);
+  const min = Math.min(...rgb);
+  const l = (max + min) / 2;
+  const d = max - min;
+  let h = 0;
+  let s = 0;
+  if (d > 0)
+  {
+    s = d / (1 - Math.abs(2 * l - 1));
+    if (max == rgb[0]) h = 60 * (((rgb[1] - rgb[2]) / d) % 6);
+    else if (max == rgb[1]) h = 60 * ((rgb[2] - rgb[0]) / d + 2);
+    else h = 60 * ((rgb[0] - rgb[1]) / d + 4);
+  }
+  h = (h + 180 + 360) % 360;
+  // Back from HSL
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return "#" + [r, g, b].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0")).join("");
+}
+
+// A POTA / SOTA / DX Feeds marker for a call in a rig's DX Call (rigDXcallSet): ringed, not filled, just outside its
+// icon. White, then the map background's opposite hue, then black outermost, so it shows on any map. Its own icon stays
+// on top
+function ringSelectedMarker(feature)
+{
+  const iconStyle = feature.getStyle();
+  const icon = iconStyle.getImage();
+  const size = icon.getSize();
+  const radius = (size ? Math.ceil(Math.max(size[0], size[1]) * icon.getScale() / 2) : 12) + 3;
+  const ring = (r, color) => new ol.style.Style({
+    zIndex: iconStyle.getZIndex(),
+    image: new ol.style.Circle({ radius: r, stroke: new ol.style.Stroke({ color, width: 2 }) })
+  });
+  feature.setStyle([ring(radius + 4, "#000000"), ring(radius + 2, complementMapBackground()), ring(radius, "#FFFFFF"), iconStyle]);
+}
+
 // Point markers whose icons would overlap at the current zoom, grouped (POTA parks, SOTA summits, DX Feeds spots): an array of groups,
 // each an array of features, the first being the one to show (highest feature.rank). radiusPx: centers closer than
 // this, in screen pixels, count as overlapping. Only markers with the same feature.dxcc are grouped: spots from
@@ -70,17 +125,20 @@ function groupOverlappingFeatures(features, radiusPx = 22)
   if (!(resolution > 0)) return sorted.map((feature) => [feature]);
 
   const radius = radiusPx * resolution;
+  const radius2 = radius * radius;
   // Markers bucketed in cells one radius wide, so each is only compared with those in its own and the 8 cells around
-  // (DX Feeds can have thousands)
+  // (DX Feeds can have thousands). Cell keys are numbers (no string per lookup): even at the deepest zoom a cell row is
+  // well under 2^25 cells, so cx * 2^26 + cy is unique and stays an exact integer
   const coords = sorted.map((feature) => feature.getGeometry().getCoordinates());
   const cells = new Map();
-  const cellKey = (cx, cy) => cx + "," + cy;
-  coords.forEach(([x, y], i) =>
+  const cellKey = (cx, cy) => cx * 67108864 + cy;
+  for (let i = 0; i < coords.length; i++)
   {
-    const key = cellKey(Math.floor(x / radius), Math.floor(y / radius));
-    if (!cells.has(key)) cells.set(key, []);
-    cells.get(key).push(i);
-  });
+    const key = cellKey(Math.floor(coords[i][0] / radius), Math.floor(coords[i][1] / radius));
+    const cell = cells.get(key);
+    if (cell) cell.push(i);
+    else cells.set(key, [i]);
+  }
 
   const groups = [];
   const taken = new Uint8Array(sorted.length);
@@ -88,7 +146,9 @@ function groupOverlappingFeatures(features, radiusPx = 22)
   {
     if (taken[i]) continue;
     taken[i] = 1;
-    const [x, y] = coords[i];
+    const x = coords[i][0];
+    const y = coords[i][1];
+    const dxcc = sorted[i].dxcc;
     const cx = Math.floor(x / radius);
     const cy = Math.floor(y / radius);
     const members = [];
@@ -96,9 +156,15 @@ function groupOverlappingFeatures(features, radiusPx = 22)
     {
       for (let dy = -1; dy <= 1; dy++)
       {
-        for (const j of cells.get(cellKey(cx + dx, cy + dy)) || [])
+        const cell = cells.get(cellKey(cx + dx, cy + dy));
+        if (!cell) continue;
+        for (let k = 0; k < cell.length; k++)
         {
-          if (!taken[j] && sorted[j].dxcc === sorted[i].dxcc && Math.hypot(coords[j][0] - x, coords[j][1] - y) <= radius)
+          const j = cell[k];
+          if (taken[j] || sorted[j].dxcc !== dxcc) continue;
+          const ox = coords[j][0] - x;
+          const oy = coords[j][1] - y;
+          if (ox * ox + oy * oy <= radius2)
           {
             taken[j] = 1;
             members.push(j);
@@ -106,7 +172,12 @@ function groupOverlappingFeatures(features, radiusPx = 22)
         }
       }
     }
-    // The lead first, then the rest in rank order
+    // The lead first, then the rest in rank order (most markers are alone)
+    if (members.length == 0)
+    {
+      groups.push([sorted[i]]);
+      continue;
+    }
     members.sort((a, b) => a - b);
     groups.push([sorted[i], ...members.map((j) => sorted[j])]);
   }

@@ -879,5 +879,11 @@
 	"gt.potaSpot.title": "Spot POTA",
 	"gt.sotaSpot.title": "Spot SOTA",
 	"settings.logging.N3FJP.rigControl.label": "Activer Le Contrôle De La Radio",
-	"settings.logging.N3FJP.rigControl.hover": "Un clic sur un indicatif de la Liste des flux accorde la radio sur la fréquence du spot via AC Log. Nécessite le contrôle de la radio configuré dans AC Log."
+	"settings.logging.N3FJP.rigControl.hover": "Un clic sur un indicatif de la Liste des flux accorde la radio sur la fréquence du spot via AC Log. Nécessite le contrôle de la radio configuré dans AC Log.",
+	"gt.status.txrx.receive": "RÉCEPTION",
+	"gt.status.txrx.decode": "DÉCODAGE",
+	"gt.status.txrx.transmit": "ÉMISSION",
+	"gt.status.txrx.connected": "CONNECTÉ",
+	"gt.status.txrx.ignore": "IGNORER",
+	"gt.status.txrx.closed": "{0} FERMÉ"
 }

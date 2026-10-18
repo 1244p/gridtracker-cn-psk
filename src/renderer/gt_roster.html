@@ -45,9 +45,6 @@
         <button data-i18n="settings.General.label" id="generalbox" class="infoTablinks active" onclick="openInfoTab(event, 'generalSettingsDiv')">
           General
         </button>
-        <button data-i18n="roster.feeds.label" id="feedsbox" class="infoTablinks" style="display:none;" onclick="openInfoTab(event, 'feedsBoxDiv', renderFeedsTab)">
-          Spots
-        </button>
         <button data-i18n="roster.watcher.label" id="watcherbox" class="infoTablinks" onclick="openInfoTab(event, 'watcherBoxDiv', openWatchersTab);">
           Watcher
         </button>
@@ -426,34 +423,6 @@
           <label id="ingnoreAddResultLabel"></label>
         </div>
         <div id="ignoresEditView"></div>
-      </div>
-      <div id="feedsBoxDiv" class="infoTabcontent">
-        <div class="mapItem" align="center">
-          <div data-i18n="roster.feeds.modes.label">Modes</div>
-          <div id="feedModesDiv" class="feedBands"></div>
-        </div>
-        <br />
-        <div class="mapItem" align="center">
-          <div data-i18n="roster.feeds.bands.label">Bands</div>
-          <div id="feedBands" class="feedBands"></div>
-        </div>
-        <br />
-        <div class="mapItem" id="feedsAllowBox" align="center">
-          <table>
-            <tr>
-              <td align="left">
-                <input type="checkbox" id="feedAlertScriptEnable" onchange="feedsSettingChanged()" />
-                <label data-i18n="roster.feeds.alertScript.label" for="feedAlertScriptEnable">Allow Alert Script</label>
-              </td>
-            </tr>
-            <tr>
-              <td align="left">
-                <input type="checkbox" id="feedNotificationsEnable" onchange="feedsSettingChanged()" />
-                <label data-i18n="roster.feeds.notifications.label" for="feedNotificationsEnable">Allow Notifications (Pushover, Simplepush)</label>
-              </td>
-            </tr>
-          </table>
-        </div>
       </div>
       <!-- Column colors of the roster showing; each roster keeps its own (renderColorsTab in rosterWindow.js) -->
       <div id="colorsBoxDiv" class="infoTabcontent">

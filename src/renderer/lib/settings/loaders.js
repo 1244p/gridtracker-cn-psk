@@ -67,8 +67,7 @@ function loadViewSettings()
   acLogStartupCheckbox.checked = GT.settings.acLog.startup;
   acLogConnectCheckbox.checked = GT.settings.acLog.connect;
   acLogRigControlCheckbox.checked = GT.settings.acLog.rigControl;
-  acLogRigControlSpan.style.display = GT.settings.acLog.connect ? "" : "none";
-  updateAcLogConnectStatus();
+  acLogRigControlSpan.style.display = GT.settings.acLog.connect ? "" : "none";  updateAcLogConnectStatus();
   ValidatePort(acLogPortInput, acLogCheckbox, null);
   ValidateIPaddress(acLogIpInput, acLogCheckbox, null);
   acLogQsl.value = GT.settings.acLog.qsl;
