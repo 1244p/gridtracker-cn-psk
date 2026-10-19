@@ -174,6 +174,8 @@ function handleInstanceStatus(newMessage)
     // The instance's own callsign; when it gives none (AC Log without its station info, Log4OM without a rig),
     // Settings -> General -> Station Callsign, else the callsign already known stays
     GT.settings.app.myRawCall = newMessage.DEcall.trim() || GT.settings.app.stationCallsign || GT.settings.app.myRawCall;
+    // A blank Station Callsign takes WSJT-X / JTDX's
+    if (!isLoggerInstance(newMessage.instance)) fillStationCallsign(newMessage.DEcall);
 
 
     let testGrid = newMessage.DEgrid.trim().substr(0, 6);
@@ -545,6 +547,7 @@ function handleClosed(newMessage)
   {
     rigWrap.style.display = "none";
   }
+  updateMultiRigViews();
 
   updateRosterInstances();
   goProcessRoster();
@@ -1948,6 +1951,8 @@ function updateBasedOnIni()
     // callsign prefill read it, and stayed on "NOCALL" until WSJT-X itself connected
     GT.settings.app.myCall = GT.settings.app.myRawCall = which.MyCall;
     GT.settings.app.myGrid = GT.settings.app.myRawGrid = which.MyGrid;
+    // A blank Station Callsign takes WSJT-X's
+    fillStationCallsign(which.MyCall);
     GT.lastBand = GT.settings.app.myBand;
     GT.lastMode = GT.settings.app.myMode;
 

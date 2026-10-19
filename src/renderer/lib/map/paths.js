@@ -119,7 +119,9 @@ function toggleAnimate()
 // --- 4. THE UPDATED ANIMATION TOGGLE ---
 function changeAnimate() {
   GT.settings.map.animate = animateValue.checked;
-  
+  // The speed slider shows while Animate is on (Settings' checkbox comes here directly, not via toggleAnimate)
+  setAnimateView();
+
   let dash = [];
   let dashOff = 0;
   if (GT.settings.map.animate == true) {

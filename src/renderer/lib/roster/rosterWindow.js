@@ -172,6 +172,11 @@ const LOGBOOK_MIX_BAND_LIVE_MODE = "3";
 const LOGBOOK_MIX_BAND_MIX_MODE = "4";
 const LOGBOOK_MIX_BAND_DIGI_MODE = "5";
 const LOGBOOK_AWARD_TRACKER = "6";
+// Feed Roster only
+const LOGBOOK_LIVE_BAND_PHONE_MODE = "7";
+const LOGBOOK_LIVE_BAND_CW_MODE = "8";
+const LOGBOOK_MIX_BAND_PHONE_MODE = "9";
+const LOGBOOK_MIX_BAND_CW_MODE = "10";
 
 const LAYERED_MODE_FOR = {
   [LOGBOOK_LIVE_BAND_LIVE_MODE]: false,
@@ -180,7 +185,11 @@ const LAYERED_MODE_FOR = {
   [LOGBOOK_MIX_BAND_LIVE_MODE]: LOGBOOK_LIVE_BAND_LIVE_MODE,
   [LOGBOOK_MIX_BAND_MIX_MODE]: LOGBOOK_LIVE_BAND_MIX_MODE,
   [LOGBOOK_MIX_BAND_DIGI_MODE]: LOGBOOK_LIVE_BAND_DIGI_MODE,
-  [LOGBOOK_AWARD_TRACKER]: false
+  [LOGBOOK_AWARD_TRACKER]: false,
+  [LOGBOOK_LIVE_BAND_PHONE_MODE]: false,
+  [LOGBOOK_LIVE_BAND_CW_MODE]: false,
+  [LOGBOOK_MIX_BAND_PHONE_MODE]: LOGBOOK_LIVE_BAND_PHONE_MODE,
+  [LOGBOOK_MIX_BAND_CW_MODE]: LOGBOOK_LIVE_BAND_CW_MODE
 };
 
 // Hoisted Regular Expressions to prevent recompilation in hot loops
@@ -310,6 +319,18 @@ function hashMaker(callObj, reference)
 
     case LOGBOOK_MIX_BAND_DIGI_MODE:
       return "dg";
+
+    case LOGBOOK_LIVE_BAND_PHONE_MODE:
+      return `${b}ph`;
+
+    case LOGBOOK_LIVE_BAND_CW_MODE:
+      return `${b}CW`;
+
+    case LOGBOOK_MIX_BAND_PHONE_MODE:
+      return "ph";
+
+    case LOGBOOK_MIX_BAND_CW_MODE:
+      return "CW";
 
     case LOGBOOK_MIX_BAND_MIX_MODE:
     default:

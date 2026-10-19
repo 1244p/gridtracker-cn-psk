@@ -334,7 +334,8 @@ function mark(obj, baseKey, baseVal, includePhone, details, bandMode, bandDg, ba
     obj[baseKey + bandDg] = true;
   }
   
-  if (includePhone && details.phone) {
+  // Phone is marked for every category (the Feed Roster's Phone logbook choices); includePhone is kept for the callers
+  if (details.phone) {
     obj[baseKey + "ph"] = true;
     obj[baseKey + bandPh] = true;
   }

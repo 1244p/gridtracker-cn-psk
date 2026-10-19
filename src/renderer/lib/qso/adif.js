@@ -158,6 +158,9 @@ function setQsoFound()
 {
   qsoGridsFound.title = "Found: " + Object.keys(GT.myQsoGrids).join(",");
   qsoCallsignsFound.title = "Found: " + Object.keys(GT.myQsoCalls).join(",");
+  // Settings -> Logbook -> Logbook Filters: what's found also shows faintly in an empty field, until you type there
+  workingGridsValue.placeholder = Object.keys(GT.myQsoGrids).join(",");
+  workingCallsignsValue.placeholder = Object.keys(GT.myQsoCalls).join(",");
 }
 
 function adifParseComplete(task)

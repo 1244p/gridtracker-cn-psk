@@ -6,7 +6,7 @@
 
 function CheckReceivePortIsNotForwardPort(value)
 {
-  if (udpForwardIpInput.value.indexOf("127.0.0.1") > -1 && udpForwardPortInput.value == value && GT.settings.app.wsjtIP == "" && udpForwardEnable.checked)
+  if (forwardsToThisPC() && udpForwardPortInput.value == value && GT.settings.app.wsjtIP == "" && udpForwardEnable.checked)
   {
     return false;
   }
@@ -16,7 +16,7 @@ function CheckReceivePortIsNotForwardPort(value)
 
 function CheckForwardPortIsNotReceivePort(value)
 {
-  if (udpForwardIpInput.value.indexOf("127.0.0.1") > -1 && udpPortInput.value == value && GT.settings.app.wsjtIP == "")
+  if (forwardsToThisPC() && udpPortInput.value == value && GT.settings.app.wsjtIP == "")
   {
     return false;
   }
@@ -48,6 +48,35 @@ function validIpsKeys(value)
   if (value == 44) return true;
   if (value == 46) return true;
   return value >= 48 && value <= 57;
+}
+
+// Forward UDP Messages: IP addresses or hostnames, comma separated (letters, digits, "-", "." and ",")
+function validHostsKeys(value)
+{
+  if (value == 44 || value == 45 || value == 46) return true;
+  return (value >= 48 && value <= 57) || (value >= 65 && value <= 90) || (value >= 97 && value <= 122);
+}
+
+const FORWARD_HOSTNAME_REGEXP = /^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+
+// A hostname (not an IP address, nor digits and dots that aren't one)
+function isForwardHostname(host)
+{
+  return !/^[0-9.]+$/.test(host) && FORWARD_HOSTNAME_REGEXP.test(host);
+}
+
+function ValidateForwardHosts(inputText, checkBox)
+{
+  let hosts = inputText.value.split(",").map(h => h.trim()).filter(h => h);
+  let valid = hosts.length > 0 && hosts.every(h => (GT.ipformat.test(h) && h !== "0.0.0.0" && h !== "255.255.255.255") || isForwardHostname(h));
+  if (!valid && checkBox) checkBox.checked = false;
+  return setInputStatus(inputText, valid, null);
+}
+
+// This PC, by address or by name: forwarding there must not use GridTracker's own receive port
+function forwardsToThisPC()
+{
+  return udpForwardIpInput.value.indexOf("127.0.0.1") > -1 || /(^|,)\s*localhost\s*(,|$)/i.test(udpForwardIpInput.value);
 }
 
 function validNumberKeys(value)

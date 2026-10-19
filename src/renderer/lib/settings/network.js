@@ -264,7 +264,7 @@ function setUdpForwardEnable(checkbox)
 {
   if (checkbox.checked)
   {
-    if (ValidatePort(udpForwardPortInput, null, CheckForwardPortIsNotReceivePort) && ValidateIPaddresses(udpForwardIpInput, null))
+    if (ValidatePort(udpForwardPortInput, null, CheckForwardPortIsNotReceivePort) && ValidateForwardHosts(udpForwardIpInput, null))
     {
       GT.settings.app.wsjtForwardUdpEnable = checkbox.checked;
       return;
@@ -289,7 +289,7 @@ function setSpottingEnable()
 
 function setForwardIp()
 {
-  let ips = udpForwardIpInput.value.split(",");
+  let ips = udpForwardIpInput.value.split(",").map((ip) => ip.trim()).filter((ip) => ip);
   GT.forwardIPs = [...new Set(ips)];
   GT.settings.app.wsjtForwardUdpIp = GT.forwardIPs.join(",");
   if (ValidatePort(udpPortInput, null, CheckReceivePortIsNotForwardPort))
@@ -297,12 +297,16 @@ function setForwardIp()
     setUdpPort();
   }
   ValidatePort(udpForwardPortInput, null, CheckForwardPortIsNotReceivePort);
+  // Hostnames among them: looked up once (wsjtxUdp.js), so a name that can't be found is reported here; after a short
+  // pause, so typing "ft8battle.com" doesn't look up "ft8battle.c" and the rest on the way
+  nodeTimers.clearTimeout(GT.forwardHostCheckTimer);
+  GT.forwardHostCheckTimer = nodeTimers.setTimeout(checkForwardHostnames, 900);
 }
 
 function setForwardPort()
 {
   GT.settings.app.wsjtForwardUdpPort = udpForwardPortInput.value;
-  ValidateIPaddresses(udpForwardIpInput, null);
+  ValidateForwardHosts(udpForwardIpInput, null);
   if (ValidatePort(udpPortInput, null, CheckReceivePortIsNotForwardPort))
   {
     setUdpPort();

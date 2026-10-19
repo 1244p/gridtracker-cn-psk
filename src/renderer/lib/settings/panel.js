@@ -15,6 +15,8 @@ function showSettingsBox()
     helpDiv.style.display = "none";
     GT.helpShow = false;
     rootSettingsDiv.style.display = "inline-flex";
+    // Reopened on the About tab: its animation (aboutFx.js) starts again
+    if (aboutDiv.style.display != "none") startAboutFx();
   }
 }
 
@@ -134,6 +136,8 @@ function openSettingsTab(evt, tabName)
   document.getElementById(tabName).style.display = "";
   if (typeof evt.currentTarget != "undefined") { evt.currentTarget.className += " active"; }
   else evt.className += " active";
+  // About: its animation (aboutFx.js); it stops itself when another tab shows
+  if (tabName == "aboutDiv") startAboutFx();
 }
 
 function initSettingsTabs()

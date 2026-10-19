@@ -47,16 +47,23 @@ function changeMergeOverlayValue()
 }
 
 // Called from GridTracher.html
+// Settings -> Logbook: a new QSL Location Authority is saved at once and applied with its Apply Changes button, as the
+// Logbook Filters are (reloading the logbooks takes a while)
 function qslAuthorityChanged()
 {
+  GT.settings.app.qslAuthority = qslAuthority.value;
+  qslAuthorityApplyDiv.style.display = "";
+}
+
+function applyQslAuthority()
+{
+  qslAuthorityApplyDiv.style.display = "none";
   if (GT.qslAuthorityTimer != null)
   {
     nodeTimers.clearTimeout(GT.qslAuthorityTimer);
     GT.qslAuthorityTimer = null;
   }
 
-  GT.settings.app.qslAuthority = qslAuthority.value;
-  
   // we set the timer as calling directly will pause the input queue
   GT.qslAuthorityTimer = nodeTimers.setTimeout(reloadFromQslAuthorityChanged, 500);
 }

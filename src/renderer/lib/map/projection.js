@@ -293,6 +293,17 @@ function saveStationCallsign(input)
   openPskMqtt();
 }
 
+// While Station Callsign is blank, it takes the callsign WSJT-X / JTDX gives (its ini file, a status message); once it
+// has one it's left alone, so a callsign typed there is never replaced
+function fillStationCallsign(call)
+{
+  if (GT.settings.app.stationCallsign) return;
+  call = String(call || "").trim().toUpperCase();
+  if (call == "NOCALL" || !/\d/.test(call) || !/[A-Z]/.test(call)) return;
+  GT.settings.app.stationCallsign = call;
+  if (typeof stationCallsignInput != "undefined") stationCallsignInput.value = call;
+}
+
 function tryUpdateQTH(grid)
 {
   if (grid != GT.settings.app.myGrid)

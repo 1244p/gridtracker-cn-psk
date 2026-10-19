@@ -133,11 +133,15 @@ function addNewInstance(instanceId)
     instanceHash: hashAppString(instanceId)
   };
 
-  if (Object.keys(GT.instances).length > 1)
-  {
-    multiRigCRDiv.style.display = "inline-block";
-    haltTXDiv.style.display = "inline-block";
-  }
+  updateMultiRigViews();
+}
+
+// Settings -> General -> On QSO Reply (Halt TX on the others, switch view), a row of its own: shown while more than one
+// WSJT-X / JTDX instance is open (a logger such as AC Log or Log4OM isn't one); called when an instance is added or closed
+function updateMultiRigViews()
+{
+  const rigs = Object.keys(GT.instances).filter((id) => !isLoggerInstance(id)).length;
+  multiRigCRDiv.style.display = haltTXDiv.style.display = rigs > 1 ? "" : "none";
 }
 
 // ---- Main WSJT-X listener ----
@@ -489,7 +493,86 @@ function sendForwardUdpMessage(msg, length)
     const port = GT.settings.app.wsjtForwardUdpPort;
     for (let i = 0; i < GT.forwardIPs.length; i++)
     {
-      GT.forwardUdpServer.send(msg, 0, length, port, GT.forwardIPs[i]);
+      const host = GT.forwardIPs[i];
+      if (!isForwardHostname(host))
+      {
+        GT.forwardUdpServer.send(msg, 0, length, port, host);
+        continue;
+      }
+      // A hostname: sent to its cached address (no DNS per decode); none yet (or the last lookup failed): looked up,
+      // at most every FORWARD_RESOLVE_RETRY_MS, and this message skipped
+      const address = forwardHostAddress(host);
+      if (!address) continue;
+      // Its own callback: a failure drops the cached address (looked up again later) and doesn't close the socket
+      GT.forwardUdpServer.send(msg, 0, length, port, address, (err) =>
+      {
+        if (err && GT.forwardHostCache[host] && GT.forwardHostCache[host].address == address)
+        {
+          GT.forwardHostCache[host].address = null;
+        }
+      });
     }
   }
+}
+
+// ---- Forward UDP Messages to hostnames: each name is looked up once and its address cached for an hour, or until a
+// send fails ----
+// host -> { address, expiresAt, pending, failed, retryAt }
+GT.forwardHostCache = {};
+const FORWARD_RESOLVE_RETRY_MS = 30000;
+const FORWARD_RESOLVE_TTL_MS = 3600000;
+
+function forwardHostAddress(host)
+{
+  const entry = GT.forwardHostCache[host];
+  if (entry && entry.address)
+  {
+    // An hour old: looked up again in the background, the old address used meanwhile
+    if (!entry.pending && Date.now() >= entry.expiresAt) resolveForwardHost(host);
+    return entry.address;
+  }
+  if (!entry || (!entry.pending && Date.now() >= entry.retryAt)) resolveForwardHost(host);
+  return null;
+}
+
+function resolveForwardHost(host)
+{
+  const entry = GT.forwardHostCache[host] || (GT.forwardHostCache[host] = { address: null, expiresAt: 0, pending: false, failed: false, retryAt: 0 });
+  entry.pending = true;
+  entry.retryAt = Date.now() + FORWARD_RESOLVE_RETRY_MS;
+  window.require("dns").lookup(host, { family: 4 }, (err, address) =>
+  {
+    // A name removed from the setting meanwhile: forget it
+    if (GT.forwardHostCache[host] !== entry) return;
+    entry.pending = false;
+    entry.failed = !!err;
+    entry.address = err ? null : address;
+    entry.expiresAt = err ? 0 : Date.now() + FORWARD_RESOLVE_TTL_MS;
+    updateForwardResolveStatus();
+  });
+}
+
+// Settings -> General -> Forward UDP Messages changed (setForwardIp): forget names no longer listed, look up the new
+// ones now, so a name that can't be found (or no internet) is reported right away
+function checkForwardHostnames()
+{
+  const names = GT.forwardIPs.filter((host) => isForwardHostname(host));
+  for (const host in GT.forwardHostCache)
+  {
+    if (!names.includes(host)) delete GT.forwardHostCache[host];
+  }
+  for (const host of names)
+  {
+    if (!(host in GT.forwardHostCache)) resolveForwardHost(host);
+  }
+  updateForwardResolveStatus();
+}
+
+// The warning line in the Forward UDP Messages box: the names that couldn't be found
+function updateForwardResolveStatus()
+{
+  if (typeof forwardResolveStatus == "undefined") return;
+  const failed = Object.keys(GT.forwardHostCache).filter((host) => GT.forwardHostCache[host].failed);
+  forwardResolveStatusRow.style.display = failed.length ? "" : "none";
+  forwardResolveStatus.innerText = failed.length ? I18N("settings.general.Fwd.resolveFailed").replace("{0}", failed.join(", ")) : "";
 }

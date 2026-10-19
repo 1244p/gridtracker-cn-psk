@@ -591,24 +591,6 @@ a {
   display: block;
 }
 
-/* Settings -> Feeds: Feed Spots Max Age and Clear All Feeds */
-.feedGroups {
-  padding: 6px;
-}
-
-/* Settings -> Feeds: the boxes share one height, and Clear All Feeds is centered in its box */
-#feedsSettingsDiv > .mapItem {
-  display: inline-flex;
-  align-items: stretch;
-  gap: 3px;
-}
-
-#feedsClearDiv {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Logbook virtual scrolling (stats/logbook.js, renderLogbookRows): every row the same height, so the spacers'
    heights match the rows they stand in for (the flag image and symbol-font check marks would otherwise vary it) */
 #logTable > tbody > tr {
@@ -759,13 +741,6 @@ a {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-}
-
-/* Settings -> Feeds: Modes, Bands and Allow, each its own box under Max Age / Clear All Feeds (was the Feed Roster's
-   Spots tab) */
-#feedsSettingsDiv > .mapItem.feedSpotsBox {
-  display: inline-block;
-  padding: 4px;
 }
 
 .feedBands {
@@ -1310,6 +1285,769 @@ button:focus {
   margin: 0 auto !important;   
   justify-content: center !important;
   font-weight: bold;
+}
+
+/* Settings -> Map, Grids and Audio: labeled groups of rows */
+.mapGroups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 4px;
+  white-space: nowrap;
+}
+
+.mapGroup {
+  border: 1px solid #666;
+  border-radius: 6px;
+  padding: 3px 6px 5px 6px;
+  background-color: #00000066;
+}
+
+.mapGroupTitle {
+  color: cyan;
+  /* The settings tab buttons' size (a button's default) */
+  font-size: 13.3333px;
+  font-weight: bold;
+  text-align: left;
+  border-bottom: 1px solid #444;
+  margin-bottom: 3px;
+  padding-bottom: 1px;
+}
+
+.mapGroup table {
+  border-collapse: collapse;
+}
+
+.mapGroup th {
+  color: #ccc;
+  font-weight: bold;
+  font-size: 11px;
+  padding: 0 4px;
+}
+
+.mapGroup td {
+  padding: 2px 4px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.mapGroup td.mapRowLabel {
+  text-align: right;
+}
+
+/* The box under the mouse: its border inset and white, as .mapItem's */
+.mapGroup:hover {
+  border-color: #fff;
+  border-style: inset;
+}
+
+/* Row labels and the Display box's options, like the yellow values */
+.mapGroup td.mapRowLabel,
+.mapGroup .mapChecks td {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.mapGroup .mapChecks td {
+  padding: 1px 4px;
+}
+
+.mapGroup .mapChecks label {
+  margin-left: 1px;
+  vertical-align: middle;
+}
+
+/* Level with the row's label; no background of its own, so the box (and Map Settings Transparency) shows through */
+.mapGroup input[type="range"] {
+  width: 110px;
+  height: 14px;
+  margin: 0;
+  vertical-align: middle;
+  background: transparent;
+}
+
+.mapGroup input[type="checkbox"] {
+  vertical-align: middle;
+}
+
+/* Long names (sound cards, voices) don't widen the box; the list itself shows them in full */
+.mapGroup select {
+  max-width: 240px;
+}
+
+.mapValue {
+  display: inline-block;
+  min-width: 50px;
+  margin-left: 6px;
+  color: yellow;
+  font-size: 12px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+/* Boxes stacked in one column of the row (Features) */
+.mapColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* An option that depends on the one above it, and one that depends on that */
+.mapGroup .mapChecks td.mapIndent {
+  padding-left: 18px;
+}
+
+.mapGroup .mapChecks td.mapIndent2 {
+  padding-left: 32px;
+}
+
+.mapGroup .mapInlineButton {
+  display: inline-block;
+  text-align: center;
+}
+
+.mapGroup .mapInline {
+  display: inline-block;
+  margin-left: 4px;
+}
+
+/* A small note or status line across a box (General -> Receive / Forward UDP Messages) */
+.mapGroup td.mapNote {
+  color: #ccc;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* A status pill (General -> time since the last UDP message) */
+.mapGroup .roundBorderValue {
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* General -> Forward UDP Messages: "e.g." in the label column beside the examples, which read from the left */
+.mapGroup td.mapNote.mapEg {
+  text-align: right;
+  vertical-align: top;
+}
+
+.mapGroup td.mapNote.mapExample {
+  text-align: left;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* A warning under a field (a forward hostname that can't be found) */
+.mapGroup td.mapNote.mapWarn {
+  color: orange;
+  font-weight: bold;
+  text-align: left;
+  white-space: normal;
+  max-width: 260px;
+}
+
+/* Checkbox lines outside a table (General -> On QSO Reply) */
+.mapCheckLines {
+  font-size: 12px;
+  font-weight: bold;
+  text-align: left;
+  padding: 1px 4px;
+}
+
+.mapCheckLines label {
+  margin-left: 1px;
+  vertical-align: middle;
+}
+
+/* A stack of same-width buttons (General -> Settings) */
+.mapButtons {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  margin: 3px 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.mapButtons .button {
+  text-align: center;
+}
+
+/* Controls that belong together, side by side in a frame (Export / Import; Clear All Settings! and "Yes, I'm sure!") */
+.mapButtons.mapFramed {
+  flex-direction: row;
+  align-items: center;
+  border: 1px solid #888;
+  border-radius: 4px;
+  padding: 3px;
+}
+
+/* A frame inside a stack: no extra side margin */
+.mapButtons .mapButtons.mapFramed {
+  margin: 0;
+}
+
+/* Two buttons sharing the frame equally */
+.mapButtons.mapPair .button {
+  flex: 1;
+}
+
+.mapButtons.mapFramed .mapCheckLines {
+  padding: 0;
+}
+
+.mapButtons label {
+  vertical-align: middle;
+}
+
+/* Settings -> Feeds -> Modes / Bands: the ticks in the boxes' option style */
+.mapGroup .feedBands {
+  font-size: 12px;
+  font-weight: bold;
+  margin: 2px 4px;
+}
+
+.mapGroup .feedBand input {
+  vertical-align: middle;
+  margin-right: 3px;
+}
+
+/* Settings -> Logging: the two local boxes share the first row, Online Logbooks spans the second */
+/* Sized from their narrowest layout (stacked header words), not their widest, so the two fit side by side (the right
+   one is a column: Logging Programs with PSK-Reporter under it) */
+.mapHalf {
+  flex: 1 1 0;
+  min-width: min-content;
+}
+
+.mapGroup.mapFull {
+  flex: 1 1 100%;
+}
+
+/* Wider than the other tabs: Logs On This PC and Logging Programs share a row on a normal-width window */
+.mapGroups.mapLogging {
+  max-width: 1180px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+/* A little less space under the boxes, so a full setup fits without scrolling */
+#logSettingsDiv {
+  padding-bottom: 6px;
+}
+
+/* Each box's own table, not the file lists the code builds inside it */
+.mapLogging .mapGroup > table {
+  width: 100%;
+}
+
+.mapLogging .mapGroup > table > tbody > tr + tr > td {
+  border-top: 1px solid #333;
+}
+
+/* More room between the services' rows */
+.mapLogging .mapGroup > table > tbody > tr + tr > td {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+/* Logging -> App Log(s): the Enable ticks centered in their column (the list is built by adif.js, updateAppLogsUI) */
+#appLogsFilesDiv td:first-child {
+  text-align: center;
+}
+
+/* A note on a line of options (Logging -> PSK-Reporter's "24 Hour History") */
+.mapGroup span.mapNote {
+  color: #ccc;
+  font-size: 11px;
+  vertical-align: middle;
+}
+
+/* A note in the Details column reads from the left, like the fields */
+.mapGroup td.mapDetails.mapNote {
+  text-align: left;
+}
+
+/* The row under the mouse is shaded, as in the old table (.darkTable); not the header row */
+.mapLogging .mapGroup > table > tbody > tr + tr:hover > td {
+  box-shadow: inset 0px 11px 6px -8px #888, inset 0px -11px 6px -8px #888;
+}
+
+
+/* Menu Button / At Startup / Log QSO / Connect: each word on its own line, so the tick columns stay narrow */
+.mapGroup th.mapFlagHead {
+  white-space: normal;
+  width: 1%;
+  line-height: 1.1;
+  vertical-align: bottom;
+}
+
+/* A service's name, first column */
+.mapGroup td.mapName {
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* Logins and file lists: label + field pairs that wrap as whole pairs */
+.mapGroup td.mapDetails {
+  font-size: 12px;
+  font-weight: bold;
+  white-space: normal;
+}
+
+.mapFieldLine {
+  display: inline-block;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+/* IP and Port on one line; a program's options (rig control, QSL by) on the lines below */
+.mapGroup td.mapAddr {
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* A second test button under the first (LoTW: Test TQSL under Test Download) */
+.mapTestLine {
+  margin-top: 2px;
+}
+
+.mapGroup td.mapResult {
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* A label kept for screen readers only (the column header names the field) */
+.mapSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Settings -> Map: two boxes to a row in a grid, each column as wide as its widest box, so the tab is no wider than its
+   boxes (wrapped flex rows kept the full one-row width); boxes in a column share their edges, a row its height */
+#mapSettingsGroups {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  /* The grid is already as wide as its two columns; the boxes' usual cap would only make it overflow by a pixel */
+  max-width: none;
+}
+
+/* The Day and Night map lists a little narrower, so Base Map (two of them with Auto Night Map on) stays compact; an
+   opened list shows the full names */
+.mapBoxBase select {
+  max-width: 200px;
+}
+
+/* Settings -> Map with Auto Night Map on: the Night column widens Base Map and Paths, so the boxes pair up as
+   Base Map + Grayline, Paths + Grids, Overlays + Display (three rows instead of four) */
+.mapNightOn > .mapBoxBase { order: 1; }
+.mapNightOn > .mapBoxGrayline { order: 2; }
+.mapNightOn > .mapBoxPaths { order: 3; }
+.mapNightOn > .mapBoxGrids { order: 4; }
+.mapNightOn > .mapBoxOverlays { order: 5; }
+.mapNightOn > .mapBoxDisplay { order: 6; }
+
+/* A box title with its button at the right (Colors -> Reset Colors) */
+.mapGroupTitle.mapTitleBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 3px;
+}
+
+.mapTitleBar .button {
+  font-size: 11px;
+  font-weight: bold;
+  color: #eee;
+  min-width: 0;
+  padding: 1px 6px 0;
+}
+
+/* Settings -> Colors: both boxes the tab's full width */
+.mapColorsTab > .mapGroup {
+  flex: 1 1 100%;
+}
+
+/* Smaller swatches inside the settings boxes */
+.mapGroup input[type="color"] {
+  width: 32px;
+  height: 16px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  padding: 0;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.mapGroup input[type="color"]:hover {
+  border-color: #fff;
+}
+
+/* Gridsquare colors: a swatch and its name, four to a row */
+.mapColorGrid {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: space-between;
+  gap: 5px 18px;
+  padding: 3px 4px;
+}
+
+.mapColorItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Band colors: the band (in its color) and its swatch side by side, as many cells as fit a row */
+.mapGroup .bandColorsGrid {
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 4px;
+  margin-top: 4px;
+  padding: 0 2px 2px;
+}
+
+.mapGroup .bandColorCell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 12px;
+}
+
+.mapGroup .bandColorCell:hover {
+  border-color: #aaa;
+}
+
+.mapGroup .bandColorCell br {
+  display: none;
+}
+
+/* Logbook -> Logbook Filters: the Enable? ticks and the date */
+.mapGroup .mapFilters td {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.mapGroup .mapFilters label {
+  vertical-align: middle;
+}
+
+/* The callsign and grid fields as wide as the date row, so the fields line up */
+.mapGroup .mapFilters input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  /* A long found list (the placeholder) ends in "…" rather than running off the field */
+  text-overflow: ellipsis;
+}
+
+/* The callsigns / grids found in your logs, shown faintly while a field is empty (adif.js, setQsoFound) */
+.mapGroup .mapFilters input[type="text"]::placeholder {
+  color: #666;
+  font-style: italic;
+}
+
+.mapDatePill {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 1px 8px;
+}
+
+/* Apply Changes, at the box's bottom right once something changed */
+.mapApplyLine {
+  text-align: right;
+  padding: 2px 4px 0;
+}
+
+.mapApplyLine .button {
+  color: cyan;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 2px 8px 1px;
+}
+
+/* Settings -> About: an animated map header (aboutFx.js) with the logo and title over it, then the blurb and the
+   credits as callsign chips; .aboutPlay (added each time the tab opens) plays the entrance */
+.aboutWrap {
+  width: 820px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.aboutHero {
+  position: relative;
+  height: 210px;
+  border: 1px solid #2a4a7a;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 18px rgba(0, 160, 255, 0.25), inset 0 0 30px rgba(0, 0, 0, 0.6);
+}
+
+#aboutCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.aboutHeroContent {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 100%;
+  padding: 0 22px;
+  text-align: left;
+}
+
+.aboutLogo {
+  height: 150px;
+  filter: drop-shadow(0 0 12px rgba(255, 166, 0, 0.45));
+  animation: aboutFloat 6s ease-in-out infinite;
+}
+
+.aboutTitle {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  background: linear-gradient(90deg, #ffffff 0%, #7ff6ff 35%, #ffffff 50%, #7ff6ff 65%, #ffffff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 10px rgba(0, 220, 255, 0.55));
+  animation: aboutShine 6s linear infinite;
+}
+
+.aboutVersion {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 10px;
+  border: 1px solid rgba(255, 255, 0, 0.6);
+  border-radius: 999px;
+  background: rgba(0, 0, 60, 0.6);
+  color: #ffff00;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.aboutSupport {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.aboutUpdate {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.aboutBody {
+  padding: 10px 8px 4px;
+}
+
+.aboutBlurb {
+  margin: 4px 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: #e8eef8;
+}
+
+.aboutLink {
+  margin: 4px 0 10px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.aboutLink a {
+  color: cyan;
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px dotted cyan;
+}
+
+.aboutLink a:hover {
+  text-shadow: 0 0 8px cyan;
+}
+
+.aboutCopyright {
+  color: #9fb3cc;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.aboutChips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.aboutChip {
+  display: inline-block;
+  padding: 3px 10px;
+  border: 1px solid #355a8a;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #0d1d36, #081226);
+  color: #dfe8f5;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.aboutChip b {
+  margin-left: 4px;
+  color: #ffff00;
+}
+
+.aboutChip:hover {
+  border-color: cyan;
+  box-shadow: 0 0 10px rgba(0, 220, 255, 0.45);
+}
+
+.aboutChip.aboutOrg {
+  color: cyan;
+  border-color: rgba(0, 220, 255, 0.6);
+}
+
+/* The entrance, each time the tab opens */
+.aboutPlay .aboutHero {
+  animation: aboutReveal 0.7s ease-out both;
+}
+
+.aboutPlay .aboutLogo {
+  animation: aboutLogoIn 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.2) both, aboutFloat 6s ease-in-out 0.9s infinite;
+}
+
+.aboutPlay .aboutTitle {
+  animation: aboutRise 0.6s ease-out 0.25s both, aboutShine 6s linear 0.9s infinite;
+}
+
+.aboutPlay .aboutVersion {
+  animation: aboutRise 0.6s ease-out 0.4s both;
+}
+
+.aboutPlay .aboutSupport,
+.aboutPlay .aboutUpdate {
+  animation: aboutRise 0.6s ease-out 0.5s both;
+}
+
+.aboutPlay .aboutBlurb,
+.aboutPlay .aboutLink,
+.aboutPlay .aboutCopyright {
+  animation: aboutRise 0.6s ease-out 0.55s both;
+}
+
+.aboutPlay .aboutChip {
+  animation: aboutRise 0.5s ease-out both;
+  animation-delay: calc(0.65s + var(--i) * 55ms);
+}
+
+@keyframes aboutReveal {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes aboutRise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes aboutLogoIn {
+  from { opacity: 0; transform: translateX(-30px) rotate(-8deg) scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes aboutFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes aboutShine {
+  from { background-position: 0% center; }
+  to { background-position: -200% center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aboutWrap *,
+  .aboutPlay * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Settings -> Map -> Paths -> Animate off: About stays still too (aboutFx.js) */
+.aboutStill .aboutWrap * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* A table of values (Lookups -> Callsign Databases) */
+.mapGroup td.mapCenter {
+  text-align: center;
+}
+
+.mapGroup td.mapCellValue {
+  color: yellow;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.mapGroup td.mapCellDate {
+  color: lightgreen;
+}
+
+/* A line of fields under a box's table (Lookups -> Username / Password / Test) */
+.mapCredentials {
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.mapCredentials .button {
+  display: inline-block;
+}
+
+/* A color slider on its color (the map reads some of these backgrounds) */
+.mapSwatch {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 2px 4px;
+  border: 1px solid #888;
+}
+
+.mapSwatch input[type="range"] {
+  background: transparent;
+}
+
+.mapSwatch label {
+  font-size: smaller;
 }
 
 .flexItem {

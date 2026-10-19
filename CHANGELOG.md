@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
-## [v2.261018.0]
+## [v2.261019.0]
 
 ### MD Markup Format
 #### Call Roster / Feed Roster
@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - The Call Roster and Feed Roster keep their own colors; the hunting colors (Callsign, Grid, DXCC, State, County, Cont, POTA, CQz, ITUz, PX, DXM, Calling) also color a wanted entry's background
   - Band and Mode keep using the band and mode colors from the main window: click Band to open Settings -> Colors there
 - The column headers stick at the top of the window while the roster scrolls; returning long lost behavior
-- Faster with long rosters: only the rows on screen are drawn
+- Faster with long rosters
 - The SOTA column marks what a summit is worth to you with dots beside its reference
   - Two dots before it: you haven't chased a summit in that association yet; one dot: you've chased one there
   - A dot after it: you haven't chased a summit in that region yet
@@ -36,12 +36,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New Settings -> Features -> Online -> "SOTA Chasing" (shown while DX Feeds is on): Summits on the Air activators from DX Feeds spots
   - A "SOTA" column, right of POTA, shows the summit named in the spot; its hover gives the summit's name, height and points
   - A "SOTA" Wanted highlights summits you haven't chased today (from SOTA_REF in your logs), also in Settings -> Audio Alerts -> Feed Roster ("Wanted Feed Summit" / "Many Feed Summits")
-  - SOTA's summit list is downloaded while SOTA Chasing is on, and checked for a new one at startup and every 24 hours
   - A spot on a summit is placed there: its grid becomes the summit's (Feed Roster, distance, and a logged QSO that has no grid)
   - On the map, on their own layer with a new SOTA button in the button panel (shown while SOTA Chasing is on): one snow-capped double-peak marker per summit, black with an orange outline, or orange, for the same three states as the DX Feeds markers; its tooltip lists every spot on it
   - Like POTA Hunting, it turns on the GT backup log, and a QSO logged with a spotted activator gets the summit's SOTA_REF
   - A spot saying "QRT" ends that activation: the activator's spots on the summit leave the Feed Roster and the map until they're spotted again
-  - So does a spot with no frequency, which is how SOTLAS / Spothole mark an activator off the summit
+  - So does a spot with no frequency
   - An activator spotted on another summit leaves the old one at once
   - An activator still being decoded keeps their summit, even after the last spot of them ages out
   - A spot of an activator that doesn't name the summit (a skimmer's, say) gets the summit they're on
@@ -51,16 +50,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The roster's Feeds settings tab (Modes, Bands, "Allow Alert Script", "Allow Notifications") moved to the main window's Settings -> Feeds, under Feed Spots Max Age and Clear All Feeds
   - The map's DX Feeds and SOTA markers now follow the same Modes and Bands as the Feed Roster
 - Logbook choices say "Spots" instead of "Live" (e.g. "Spots Band & Mode"), in the Feed Roster and Settings -> Audio Alerts -> Feed Roster
+- New Logbook choices for Phone and CW, beside the Digi ones: "Spots Band, Phone Modes", "Spots Band, CW Mode", "Mix Band & Phone Modes" and "Mix Band & CW Mode" (Feed Roster and Settings -> Audio Alerts -> Feed Roster)
 - "DE DXCC" and "DE Cont" columns are now shown by default
 - Clicking a callsign works the spot from the right place
   - A rig already on the spot's band and mode (WSJT-X, JTDX, AC Log or Log4OM) gets it, as before
-  - Otherwise a connected AC Log gets it, on any band and mode: its entry tab is cleared and filled with the spot's frequency, band, mode (data modes as phone), call (tabbed out, so AC Log looks it up) and grid (6 characters when known)
-  - With "Enable Rig Control" (Settings -> Logging -> N3FJP Loggers), AC Log tunes the rig to the spot's frequency and mode instead (SSB on the band's sideband, data modes on USB)
+  - Otherwise a connected AC Log gets it, on any band and mode: its entry tab is cleared and filled with the spot's frequency, band, mode, call and grid
+  - With "Enable Rig Control" (Settings -> Logging -> N3FJP Loggers), AC Log tunes the rig to the spot's frequency and mode instead
   - Without AC Log, it goes to Gen Msgs on the active WSJT-X / JTDX
 - The ▲ before a callsign now only marks spots on the band and mode one of your rigs is on
 - A callsign in a rig's DX Call (WSJT-X, JTDX, or AC Log's entry tab) is highlighted green, like in the Call Roster
 - "Hide Self-Spotters" is now "Hide Self-Spot"
-- Faster with the Feed Roster on screen: it's rebuilt less than half as often (rig status updates no longer rebuild it, and new spots are gathered for a quarter second)
+- Faster with the Feed Roster on screen
 
 #### Map / UI
 
@@ -76,10 +76,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Where markers are stacked, only the top one is worked
 - A POTA, SOTA or DX Feeds marker of a callsign in a rig's [DX Call] is ringed for easy finding on the map
 - DX Feeds and SOTA markers leave the map once their spots expire, even while no new spots arrive
+- Settings -> Map is regrouped into Base Map, Paths, Grayline, Overlays and Display boxes: day and night side by side, each path's width and colors on one row, and the colors shown as swatches
+  - The Night column shows while "Auto Night Map" is on
+  - More options have hover help
+  - "Merge Award Overlay" is now "Keep Other Layers With Award View", and "'CQ' Highlighting" is now "Outline Directed CQ Areas"
+- The Grids tab is now a Grids box in Settings -> Map: its three sliders with their values, Split QSL Grids and Auto Mouseover Grids
+- So does Settings -> Audio: an Audio box (Device, notification sound, volume) and a Text-To-Speech box (Voice, rate, pitch, volume, phonetics)
+- And Settings -> Lookups: Callsign Lookup Service, Lookups and Callsign Databases boxes
+- And Settings -> Features: Operational, Service and Online boxes, with options indented under the one they depend on; the Simplepush and Pushover boxes show while each is on
+  - "Clear on CQ" is now "Clear WSJT-X / JTDX On CQ"
+- And Settings -> Logging: Logbooks On This Computer beside Logging Programs, above Online Logbooks, each with only the columns its services use; PSK-Reporter 24 Hour History has its own box at the bottom; no more scrolling to reach HRD Logbook
+  - The columns are now "Connect", "Menu Button", "Load At Startup" and "Log QSO"
+- And Settings -> Logbook: a QSL Location Authority box and a Logbook Filters box (Working Callsign(s), Grid(s) and Date, each with its Enable tick, and Apply Changes)
+  - An empty Working Callsign(s) / Grid(s) field shows the callsigns / grids found in your logs, faintly, until you type there
+  - A new QSL Location Authority is applied with its own Apply Changes button (it reloads your logbooks), no longer at once
+- And Settings -> Colors: Gridsquare Colors and Band Colors boxes, each with its Reset Colors button in the title, and smaller swatches beside their names
+- And Settings -> Feeds: a DX Feeds box (Max Age, Clear All Feeds, the Allow options) above Modes and Bands boxes side by side
+- And Settings -> General: the three UDP boxes, Station, Display and Settings boxes, and an On QSO Reply box shown while more than one WSJT-X / JTDX instance is open (it now hides again when you're back to one)
 
 #### Logbook
 
-- The whole logbook is one scrolling list instead of pages, and only the rows on screen are drawn, so even very large logs scroll smoothly
+- The whole logbook is one scrolling list instead of pages, and even very large logs scroll smoothly
 - The search boxes and column headers stay at the top while the list scrolls
 - The sorted column shows an arrow with the sort direction, like the rosters
   - Sorting by another column keeps the current direction; click the same column again to reverse it
@@ -95,25 +112,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New "Enable Rig Control" under the N3FJP Loggers details (shown while Connect is on): clicking a Feed Roster callsign tunes the rig through AC Log
 - AC Log's band and mode follow its entry tab when it has no rig frequency, and a rig frequency is shown in the main panel when it has one
 - The call and grid in AC Log's entry tab show in GridTracker even before tabbing out of the call, and clear with the entry tab
-- AC Log is polled for its band, mode and entry tab every 5 seconds
 - The status bar shows "CONNECTED" instead of "RECEIVE" while AC Log is the active rig
-- Clicking a spot also fills AC Log's Other fields titled POTA_REF / SOTA_REF with the spot's park / summit (the titles are read from AC Log; versions without that request skip it)
-- QSOs logged in AC Log reach GridTracker more reliably: several logged in quick succession all come over, and a failed download is retried
+- Clicking a spot also fills AC Log's Other fields titled POTA_REF / SOTA_REF with the spot's park / summit
+- QSOs logged in AC Log reach GridTracker more reliably: even several logged in quick succession
 - A QSO logged in AC Log with a park (its Other field titled POTA_REF) is spotted to POTA, like one logged from WSJT-X (with POTA Hunting on)
-- A QSO a logger broadcasts back (ADIF over UDP) within a minute of GridTracker sending it is no longer logged and sent out a second time
+- A QSO a logger broadcasts back is no longer logged and sent out a second time
 
 #### Logging / Log4OM
 
 - New "Connect" in Settings -> Logging -> Log4OM, through Log4OM's UDP remote control, with a green / red dot showing whether Log4OM is connected
   - Log4OM's rig frequency, band and mode show in the main panel, and the status bar shows "CONNECTED" while Log4OM is the active rig
-  - With Log4OM on the same PC, its station callsign, locator and remote control ports are read from its settings when connecting
+  - With Log4OM on the same PC, its station callsign and locator are read from its settings when connecting
 - Clicking a Feed Roster callsign, or a POTA, SOTA or DX Feeds marker, sends the spot's call to Log4OM's QSO entry (not over a call you typed there yourself)
-  - The main panel shows the call and grid sent, as Log4OM's entry can't be read back
+  - The main panel shows the call and grid sent
 - New "Enable Rig Control" (shown while Connect is on): clicking a spot also tunes the rig through Log4OM to the spot's frequency and mode
 
 #### App
 
-- New Settings -> General -> "Station Callsign": your callsign while no WSJT-X, JTDX, AC Log or Log4OM is connected; a callsign they report is always used for them
+- New Settings -> General -> Station -> "Callsign": your callsign while no WSJT-X, JTDX, AC Log or Log4OM is connected; a callsign they report is always used for them
+  - While it's blank, it takes the callsign WSJT-X / JTDX gives; you can change it, and it's never replaced
+- Settings -> General -> Forward UDP Messages accepts hostnames (e.g. ft8battle.com) as well as IP addresses, several comma separated: "IP(s)/Hostname(s)"
+  - A hostname that can't be found (a typo, or no internet) is reported under the field
 
 
 ### HTML List
@@ -131,7 +150,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
     </ul>
   </li>
   <li>The column headers stick at the top of the window while the roster scrolls; returning long lost behavior</li>
-  <li>Faster with long rosters: only the rows on screen are drawn</li>
+  <li>Faster with long rosters</li>
   <li>The SOTA column marks what a summit is worth to you with dots beside its reference
     <ul>
       <li>Two dots before it: you haven't chased a summit in that association yet; one dot: you've chased one there</li>
@@ -160,12 +179,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
     <ul>
       <li>A "SOTA" column, right of POTA, shows the summit named in the spot; its hover gives the summit's name, height and points</li>
       <li>A "SOTA" Wanted highlights summits you haven't chased today (from SOTA_REF in your logs), also in Settings -&gt; Audio Alerts -&gt; Feed Roster ("Wanted Feed Summit" / "Many Feed Summits")</li>
-      <li>SOTA's summit list is downloaded while SOTA Chasing is on, and checked for a new one at startup and every 24 hours</li>
       <li>A spot on a summit is placed there: its grid becomes the summit's (Feed Roster, distance, and a logged QSO that has no grid)</li>
       <li>On the map, on their own layer with a new SOTA button in the button panel (shown while SOTA Chasing is on): one snow-capped double-peak marker per summit, black with an orange outline, or orange, for the same three states as the DX Feeds markers; its tooltip lists every spot on it</li>
       <li>Like POTA Hunting, it turns on the GT backup log, and a QSO logged with a spotted activator gets the summit's SOTA_REF</li>
       <li>A spot saying "QRT" ends that activation: the activator's spots on the summit leave the Feed Roster and the map until they're spotted again</li>
-      <li>So does a spot with no frequency, which is how SOTLAS / Spothole mark an activator off the summit</li>
+      <li>So does a spot with no frequency</li>
       <li>An activator spotted on another summit leaves the old one at once</li>
       <li>An activator still being decoded keeps their summit, even after the last spot of them ages out</li>
       <li>A spot of an activator that doesn't name the summit (a skimmer's, say) gets the summit they're on</li>
@@ -183,19 +201,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
     </ul>
   </li>
   <li>Logbook choices say "Spots" instead of "Live" (e.g. "Spots Band &amp; Mode"), in the Feed Roster and Settings -&gt; Audio Alerts -&gt; Feed Roster</li>
+  <li>New Logbook choices for Phone and CW, beside the Digi ones: "Spots Band, Phone Modes", "Spots Band, CW Mode", "Mix Band &amp; Phone Modes" and "Mix Band &amp; CW Mode" (Feed Roster and Settings -&gt; Audio Alerts -&gt; Feed Roster)</li>
   <li>"DE DXCC" and "DE Cont" columns are now shown by default</li>
   <li>Clicking a callsign works the spot from the right place
     <ul>
       <li>A rig already on the spot's band and mode (WSJT-X, JTDX, AC Log or Log4OM) gets it, as before</li>
-      <li>Otherwise a connected AC Log gets it, on any band and mode: its entry tab is cleared and filled with the spot's frequency, band, mode (data modes as phone), call (tabbed out, so AC Log looks it up) and grid (6 characters when known)</li>
-      <li>With "Enable Rig Control" (Settings -&gt; Logging -&gt; N3FJP Loggers), AC Log tunes the rig to the spot's frequency and mode instead (SSB on the band's sideband, data modes on USB)</li>
+      <li>Otherwise a connected AC Log gets it, on any band and mode: its entry tab is cleared and filled with the spot's frequency, band, mode, call and grid</li>
+      <li>With "Enable Rig Control" (Settings -&gt; Logging -&gt; N3FJP Loggers), AC Log tunes the rig to the spot's frequency and mode instead</li>
       <li>Without AC Log, it goes to Gen Msgs on the active WSJT-X / JTDX</li>
     </ul>
   </li>
   <li>The ▲ before a callsign now only marks spots on the band and mode one of your rigs is on</li>
   <li>A callsign in a rig's DX Call (WSJT-X, JTDX, or AC Log's entry tab) is highlighted green, like in the Call Roster</li>
   <li>"Hide Self-Spotters" is now "Hide Self-Spot"</li>
-  <li>Faster with the Feed Roster on screen: it's rebuilt less than half as often (rig status updates no longer rebuild it, and new spots are gathered for a quarter second)</li>
+  <li>Faster with the Feed Roster on screen</li>
 </ul>
 <h4>Map / UI</h4>
 <ul>
@@ -217,10 +236,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   </li>
   <li>A POTA, SOTA or DX Feeds marker of a callsign in a rig's [DX Call] is ringed for easy finding on the map</li>
   <li>DX Feeds and SOTA markers leave the map once their spots expire, even while no new spots arrive</li>
+  <li>Settings -&gt; Map is regrouped into Base Map, Paths, Grayline, Overlays and Display boxes: day and night side by side, each path's width and colors on one row, and the colors shown as swatches
+    <ul>
+      <li>The Night column shows while "Auto Night Map" is on</li>
+      <li>More options have hover help</li>
+      <li>"Merge Award Overlay" is now "Keep Other Layers With Award View", and "'CQ' Highlighting" is now "Outline Directed CQ Areas"</li>
+    </ul>
+  </li>
+  <li>The Grids tab is now a Grids box in Settings -&gt; Map: its three sliders with their values, Split QSL Grids and Auto Mouseover Grids</li>
+  <li>So does Settings -&gt; Audio: an Audio box (Device, notification sound, volume) and a Text-To-Speech box (Voice, rate, pitch, volume, phonetics)</li>
+  <li>And Settings -&gt; Lookups: Callsign Lookup Service, Lookups and Callsign Databases boxes</li>
+  <li>And Settings -&gt; Features: Operational, Service and Online boxes, with options indented under the one they depend on; the Simplepush and Pushover boxes show while each is on
+    <ul>
+      <li>"Clear on CQ" is now "Clear WSJT-X / JTDX On CQ"</li>
+    </ul>
+  </li>
+  <li>And Settings -&gt; Logging: Logbooks On This Computer beside Logging Programs, above Online Logbooks, each with only the columns its services use; PSK-Reporter 24 Hour History has its own box at the bottom; no more scrolling to reach HRD Logbook
+    <ul>
+      <li>The columns are now "Connect", "Menu Button", "Load At Startup" and "Log QSO"</li>
+    </ul>
+  </li>
+  <li>And Settings -&gt; Logbook: a QSL Location Authority box and a Logbook Filters box (Working Callsign(s), Grid(s) and Date, each with its Enable tick, and Apply Changes)
+    <ul>
+      <li>An empty Working Callsign(s) / Grid(s) field shows the callsigns / grids found in your logs, faintly, until you type there</li>
+      <li>A new QSL Location Authority is applied with its own Apply Changes button (it reloads your logbooks), no longer at once</li>
+    </ul>
+  </li>
+  <li>And Settings -&gt; Colors: Gridsquare Colors and Band Colors boxes, each with its Reset Colors button in the title, and smaller swatches beside their names</li>
+  <li>And Settings -&gt; Feeds: a DX Feeds box (Max Age, Clear All Feeds, the Allow options) above Modes and Bands boxes side by side</li>
+  <li>And Settings -&gt; General: the three UDP boxes, Station, Display and Settings boxes, and an On QSO Reply box shown while more than one WSJT-X / JTDX instance is open (it now hides again when you're back to one)</li>
 </ul>
 <h4>Logbook</h4>
 <ul>
-  <li>The whole logbook is one scrolling list instead of pages, and only the rows on screen are drawn, so even very large logs scroll smoothly</li>
+  <li>The whole logbook is one scrolling list instead of pages, and even very large logs scroll smoothly</li>
   <li>The search boxes and column headers stay at the top while the list scrolls</li>
   <li>The sorted column shows an arrow with the sort direction, like the rosters
     <ul>
@@ -242,30 +290,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   <li>New "Enable Rig Control" under the N3FJP Loggers details (shown while Connect is on): clicking a Feed Roster callsign tunes the rig through AC Log</li>
   <li>AC Log's band and mode follow its entry tab when it has no rig frequency, and a rig frequency is shown in the main panel when it has one</li>
   <li>The call and grid in AC Log's entry tab show in GridTracker even before tabbing out of the call, and clear with the entry tab</li>
-  <li>AC Log is polled for its band, mode and entry tab every 5 seconds</li>
   <li>The status bar shows "CONNECTED" instead of "RECEIVE" while AC Log is the active rig</li>
-  <li>Clicking a spot also fills AC Log's Other fields titled POTA_REF / SOTA_REF with the spot's park / summit (the titles are read from AC Log; versions without that request skip it)</li>
-  <li>QSOs logged in AC Log reach GridTracker more reliably: several logged in quick succession all come over, and a failed download is retried</li>
+  <li>Clicking a spot also fills AC Log's Other fields titled POTA_REF / SOTA_REF with the spot's park / summit</li>
+  <li>QSOs logged in AC Log reach GridTracker more reliably: even several logged in quick succession</li>
   <li>A QSO logged in AC Log with a park (its Other field titled POTA_REF) is spotted to POTA, like one logged from WSJT-X (with POTA Hunting on)</li>
-  <li>A QSO a logger broadcasts back (ADIF over UDP) within a minute of GridTracker sending it is no longer logged and sent out a second time</li>
+  <li>A QSO a logger broadcasts back is no longer logged and sent out a second time</li>
 </ul>
 <h4>Logging / Log4OM</h4>
 <ul>
   <li>New "Connect" in Settings -&gt; Logging -&gt; Log4OM, through Log4OM's UDP remote control, with a green / red dot showing whether Log4OM is connected
     <ul>
       <li>Log4OM's rig frequency, band and mode show in the main panel, and the status bar shows "CONNECTED" while Log4OM is the active rig</li>
-      <li>With Log4OM on the same PC, its station callsign, locator and remote control ports are read from its settings when connecting</li>
+      <li>With Log4OM on the same PC, its station callsign and locator are read from its settings when connecting</li>
     </ul>
   </li>
   <li>Clicking a Feed Roster callsign, or a POTA, SOTA or DX Feeds marker, sends the spot's call to Log4OM's QSO entry (not over a call you typed there yourself)
     <ul>
-      <li>The main panel shows the call and grid sent, as Log4OM's entry can't be read back</li>
+      <li>The main panel shows the call and grid sent</li>
     </ul>
   </li>
   <li>New "Enable Rig Control" (shown while Connect is on): clicking a spot also tunes the rig through Log4OM to the spot's frequency and mode</li>
 </ul>
 <h4>App</h4>
 <ul>
-  <li>New Settings -&gt; General -&gt; "Station Callsign": your callsign while no WSJT-X, JTDX, AC Log or Log4OM is connected; a callsign they report is always used for them</li>
+  <li>New Settings -&gt; General -&gt; Station -&gt; "Callsign": your callsign while no WSJT-X, JTDX, AC Log or Log4OM is connected; a callsign they report is always used for them
+    <ul>
+      <li>While it's blank, it takes the callsign WSJT-X / JTDX gives; you can change it, and it's never replaced</li>
+    </ul>
+  </li>
+  <li>Settings -&gt; General -&gt; Forward UDP Messages accepts hostnames (e.g. ft8battle.com) as well as IP addresses, several comma separated: "IP(s)/Hostname(s)"
+    <ul>
+      <li>A hostname that can't be found (a typo, or no internet) is reported under the field</li>
+    </ul>
+  </li>
 </ul>
 ```

@@ -56,7 +56,9 @@ function changeNightMapEnable(check)
     GT.settings.map.nightMapEnable = false;
   }
 
-  nightMapSpan.style.display = GT.settings.map.nightMapEnable ? "" : "none";
+  // Settings -> Map: the Night column (night map, brightness and path colors), and the boxes' order for the wider layout
+  for (const el of document.querySelectorAll(".nightMapOnly")) el.style.display = GT.settings.map.nightMapEnable ? "" : "none";
+  mapSettingsGroups.classList.toggle("mapNightOn", GT.settings.map.nightMapEnable);
   changeMapLayer();
   styleAllFlightPaths();
   redrawSpots();

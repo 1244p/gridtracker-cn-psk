@@ -92,6 +92,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <script src="./lib/ui/hotkeys.js" type="text/javascript"></script>
   <script src="./lib/ui/buttonPanel.js" type="text/javascript"></script>
   <script src="./lib/ui/print.js" type="text/javascript"></script>
+  <script src="./lib/ui/aboutFx.js" type="text/javascript"></script>
   <script src="./lib/map/maidenhead.js" type="text/javascript"></script>
   <script src="./lib/services/updates.js" type="text/javascript"></script>
   <script src="./lib/ui/ui.js" type="text/javascript"></script>
@@ -778,8 +779,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           onclick="openSettingsTab(event, 'SpeechSettingsDiv')">Audio</button>
         <button data-i18n="settings.Map.label" class="settingsTablinks"
           onclick="openSettingsTab(event, 'mapSettingsDiv')">Map</button>
-        <button data-i18n="settings.Grids.label" class="settingsTablinks"
-          onclick="openSettingsTab(event, 'gridSettingsDiv')">Grids</button>
         <button data-i18n="settings.Colors.label" id="colorsSettingsButton" class="settingsTablinks"
           onclick="openSettingsTab(event, 'bandColorsSettingsDiv')">Colors</button>
         <button data-i18n="settings.Feeds.label" id="feedsSettingsButton" class="settingsTablinks" style="display:none;"
@@ -796,601 +795,293 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           onclick="openSettingsTab(event, 'aboutDiv')">About</button>
       </div>
     <div id="generalSettingsDiv" class="settingsTabcontent" style="display: block">
-  
-  <table align="center">
-    <tr>
-      <td>
-        <div class="mapItem">
-          <table align="center">
+      <div class="mapGroups">
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.general.UDP.Messages.label">Receive UDP Messages</div>
+          <table>
             <tr>
-              <td data-i18n="settings.general.UDP.Messages.label"><b>Receive UDP Messages</b></td>
+              <td colspan="2" id="lastMsgTimeDiv" class="mapNote"><span data-i18n="settings.general.UDP.noMessages">No messages yet.</span></td>
             </tr>
             <tr>
-              <td id="lastMsgTimeDiv"><span data-i18n="settings.general.UDP.noMessages">No messages yet.</span></td>
+              <td colspan="2" class="mapCenter"><div id="secondsAgoMsg" class="roundBorderValue">Never</div></td>
             </tr>
             <tr>
-              <td><div id="secondsAgoMsg" class="roundBorderValue">Never</div></td>
+              <td class="mapRowLabel"><label data-i18n="settings.general.UDP.Multicast.label" for="multicastEnable">Multicast?</label></td>
+              <td><input data-i18n="settings.general.UDP.MulticastEnable.hover" title="Enable / Disable Local Network Multicast" type="checkbox" id="multicastEnable" onclick="setMulticastEnable(this);" /></td>
+            </tr>
+            <!-- Shown while Multicast is on (network.js) -->
+            <tr id="multicastTD">
+              <td class="mapRowLabel"><label data-i18n="settings.general.UDP.IP.label" for="multicastIpInput">IP</label></td>
+              <td><input id="multicastIpInput" type="text" class="inputTextValue" maxlength="15" size="11" onkeypress="return validIpKeys(event.charCode);" oninput=" if ( ValidateMulticast(this) ) setMulticastIp();   " /></td>
             </tr>
             <tr>
-              <td>
-                <label data-i18n="settings.general.UDP.Multicast.label" for="multicastEnable">Multicast?</label>
-                <input data-i18n="settings.general.UDP.MulticastEnable.hover" title="Enable / Disable Local Network Multicast" type="checkbox" id="multicastEnable"
-                  onclick="setMulticastEnable(this);" />
-              </td>
-            </tr>
-            <tr>
-              <td id="multicastTD" >
-                <label data-i18n="settings.general.UDP.IP.label" for="multicastIpInput">IP</label>
-                <input id="multicastIpInput" type="text" class="inputTextValue" maxlength="15" size="11"
-                  onkeypress="return validIpKeys(event.charCode);"
-                  oninput=" if ( ValidateMulticast(this) ) setMulticastIp();   " />
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label data-i18n="settings.general.UDP.Port.label" for="udpPortInput">Port</label>
-                <input id="udpPortInput" type="text" class="inputTextValue" maxlength="5" size="5"
-                  onkeypress="return validNumberKeys(event.charCode);"
-                  oninput="if ( ValidatePort(this, null, CheckReceivePortIsNotForwardPort) ) setUdpPort();" />
-              </td>
+              <td class="mapRowLabel"><label data-i18n="settings.general.UDP.Port.label" for="udpPortInput">Port</label></td>
+              <td><input id="udpPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress="return validNumberKeys(event.charCode);" oninput="if ( ValidatePort(this, null, CheckReceivePortIsNotForwardPort) ) setUdpPort();" /></td>
             </tr>
           </table>
         </div>
-      </td>
-      <td>
-        <div class="mapItem">
-          <table align="center">
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.general.Fwd.Messages.label1">Forward UDP Messsages</div>
+          <table>
+            <!-- "e.g." beside the two examples -->
             <tr>
-              <td data-i18n="settings.general.Fwd.Messages.label1"><b>Forward UDP Messsages</b></td>
+              <td rowspan="2" class="mapNote mapEg" data-i18n="settings.general.Fwd.Messages.eg">e.g.</td>
+              <td class="mapNote mapExample" data-i18n="settings.general.Fwd.Messages.example">GridTracker on another host</td>
             </tr>
             <tr>
-              <td data-i18n="settings.general.Fwd.Messages.label2"><i>e.g. GridTracker on another host</i></td>
+              <td class="mapNote mapExample">ft8battle.com</td>
             </tr>
             <tr>
-              <td>
-                <label data-i18n="settings.general.Fwd.IP.label" for="udpForwardIpInput">IPs</label>
-                <input id="udpForwardIpInput" type="text" class="inputTextValue" size="15"
-                  onkeypress="return validIpsKeys(event.charCode);"
-                  oninput=" if ( ValidateIPaddresses(this, udpForwardEnable) ) setForwardIp();   " />
-              </td>
+              <td class="mapRowLabel"><label data-i18n="settings.general.Fwd.IP.label" for="udpForwardIpInput">IP(s)/Hostname(s)</label></td>
+              <td><input id="udpForwardIpInput" data-i18n="settings.general.Fwd.IP.hover" title="Comma separated, e.g. 192.168.1.20,ft8battle.com" type="text" class="inputTextValue" size="20" onkeypress="return validHostsKeys(event.charCode);" oninput=" if ( ValidateForwardHosts(this, udpForwardEnable) ) setForwardIp();   " /></td>
+            </tr>
+            <!-- Shown when a hostname can't be found (wsjtxUdp.js, updateForwardResolveStatus) -->
+            <tr id="forwardResolveStatusRow" style="display: none">
+              <td colspan="2" class="mapNote mapWarn" id="forwardResolveStatus"></td>
             </tr>
             <tr>
-              <td>
-                <label data-i18n="settings.general.Fwd.Port.label" for="udpForwardPortInput">Port</label>
-                <input id="udpForwardPortInput" type="text" class="inputTextValue" maxlength="5" size="5"
-                  onkeypress="return validNumberKeys(event.charCode);"
-                  oninput="if ( ValidatePort(this, udpForwardEnable, CheckForwardPortIsNotReceivePort) )  setForwardPort();  " />
-              </td>
+              <td class="mapRowLabel"><label data-i18n="settings.general.Fwd.Port.label" for="udpForwardPortInput">Port</label></td>
+              <td><input id="udpForwardPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress="return validNumberKeys(event.charCode);" oninput="if ( ValidatePort(this, udpForwardEnable, CheckForwardPortIsNotReceivePort) )  setForwardPort();  " /></td>
             </tr>
             <tr>
-              <td>
-                <label data-i18n="settings.general.Enabled.label" for="udpForwardEnable">Enabled?</label>
-                <input data-i18n="settings.general.Fwd.Enable.hover" title="Enable / Disable UDP Message forwarding" type="checkbox" id="udpForwardEnable"
-                  onclick="setUdpForwardEnable(this);" />
-              </td>
+              <td class="mapRowLabel"><label data-i18n="settings.general.Enabled.label" for="udpForwardEnable">Enabled?</label></td>
+              <td><input data-i18n="settings.general.Fwd.Enable.hover" title="Enable / Disable UDP Message forwarding" type="checkbox" id="udpForwardEnable" onclick="setUdpForwardEnable(this);" /></td>
             </tr>
           </table>
         </div>
-      </td>
-      <td>
-        <div class="mapItem">
-          <table align="center">
+        <div class="mapGroup">
+          <div class="mapGroupTitle"><span data-i18n="settings.general.adifBroadcastMessage.label1">Receive ADIF UDP</span> <span data-i18n="settings.general.adifBroadcastMessage.label2">Broadcasts For Logging</span></div>
+          <table>
             <tr>
-              <td data-i18n="settings.general.adifBroadcastMessage.label1"><b>Receive ADIF UDP</b></td>
+              <td class="mapRowLabel"><label data-i18n="settings.general.UDP.Multicast.label" for="adifBroadcastMulticast">Multicast?</label></td>
+              <td><input data-i18n="settings.general.ADIF.Multicast.hover" title="Enable / Disable Multicast" type="checkbox" id="adifBroadcastMulticast" onclick="setAdifBroadcastMulticast(this);" /></td>
+            </tr>
+            <!-- Shown while Multicast is on (network.js) -->
+            <tr id="adifBroadcastIpTD">
+              <td class="mapRowLabel"><label data-i18n="settings.general.UDP.IP.label" for="adifBroadcastIP">IP</label></td>
+              <td><input id="adifBroadcastIP" type="text" class="inputTextValue" maxlength="15" size="11" onkeypress="return validIpKeys(event.charCode);" oninput=" if ( ValidateMulticast(this) ) setAdifBroadcastIp();" /></td>
             </tr>
             <tr>
-              <td data-i18n="settings.general.adifBroadcastMessage.label2"><b>Broadcasts For Logging</b></td>
+              <td class="mapRowLabel"><label data-i18n="settings.general.UDP.Port.label" for="adifBroadcastPort">Port</label></td>
+              <td><input id="adifBroadcastPort" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress="return validNumberKeys(event.charCode);" oninput="if ( ValidatePort(this, adifBroadcastEnable, CheckAdifBroadcastPortIsNotReceivePort) ) setAdifBroadcastPort();" /></td>
             </tr>
             <tr>
-              <td>
-                <label data-i18n="settings.general.UDP.Multicast.label" for="adifBroadcastMulticast">Multicast?</label>
-                <input data-i18n="settings.general.ADIF.Multicast.hover" title="Enable / Disable Multicast" type="checkbox" id="adifBroadcastMulticast"
-                  onclick="setAdifBroadcastMulticast(this);" />
-              </td>
-            </tr>
-            <tr>
-              <td id="adifBroadcastIpTD" >
-                <label data-i18n="settings.general.UDP.IP.label" for="adifBroadcastIP">IP</label>
-                <input id="adifBroadcastIP" type="text" class="inputTextValue" maxlength="15" size="11"
-                  onkeypress="return validIpKeys(event.charCode);"
-                  oninput=" if ( ValidateMulticast(this) ) setAdifBroadcastIp();" />
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label data-i18n="settings.general.UDP.Port.label" for="adifBroadcastPort">Port</label>
-                <input id="adifBroadcastPort" type="text" class="inputTextValue" maxlength="5" size="5"
-                  onkeypress="return validNumberKeys(event.charCode);"
-                  oninput="if ( ValidatePort(this, adifBroadcastEnable, CheckAdifBroadcastPortIsNotReceivePort) ) setAdifBroadcastPort();" />
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label data-i18n="settings.general.Enabled.label" for="adifBroadcastEnable">Enabled?</label>
-                <input data-i18n="settings.general.ADIF.Enable.hover" title="Enable / Disable ADIF UDP Broadcast Logging" type="checkbox" id="adifBroadcastEnable"
-                  onclick="setAdifBroadcastEnable(this);" />
-              </td>
+              <td class="mapRowLabel"><label data-i18n="settings.general.Enabled.label" for="adifBroadcastEnable">Enabled?</label></td>
+              <td><input data-i18n="settings.general.ADIF.Enable.hover" title="Enable / Disable ADIF UDP Broadcast Logging" type="checkbox" id="adifBroadcastEnable" onclick="setAdifBroadcastEnable(this);" /></td>
             </tr>
           </table>
         </div>
-      </td>
-    </tr>
-  </table>
-
-  <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-    
-    <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
-      
-      <div id="CenterGridDiv" class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.general.CenterGrid.label">Center Gridsquare</td>
-          </tr>
-          <tr>
-            <td>
-              <input id="homeQTHInput" type="text" class="inputTextValue" maxlength="8" size="8"
-                oninput="{ if ( ValidateGridsquare(this,null) ) { saveCenterGridsquare(); }}" />
-            </td>
-          </tr>
-        </table>
       </div>
-
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.general.stationCallsign.label">Station Callsign</td>
-          </tr>
-          <tr>
-            <td>
-              <input id="stationCallsignInput" type="text" class="inputTextValue" maxlength="16" size="10"
-                data-i18n="settings.general.stationCallsign.hover"
-                title="Your callsign while no WSJT-X, JTDX or AC Log is connected; a callsign they report is always used for them"
-                oninput="saveStationCallsign(this);" />
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.general.DistanceUnits.label" title="Distance Units">Distance Units</td>
-          </tr>
-          <tr>
-            <td>
-              <select id="distanceUnit" value="KM" onchange="changeDistanceUnit();">
-                <option data-i18n="settings.general.Distance.km" value="KM">Kilometres</option>
-                <option data-i18n="settings.general.Distance.mi" value="MI">Statute Miles</option>
-                <option data-i18n="settings.general.Distance.nm" value="NM">Nautical Miles</option>
-                <option data-i18n="settings.general.Distance.dg" value="DG">Degrees</option>
-              </select>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="mapItem" id="haltTXDiv" style="display:none;">
-        <table align="center">
-          <tr align="center">
-            <td data-i18n="settings.callroster.MultiRig.label" align="center">On QSO Reply</td>
-          </tr>
-          <tr align="center">
-            <td data-i18n="settings.callroster.MultiRig.HaltTx.label" align="center">Halt TX On All Other Instances</td>
-          </tr>
-          <tr align="center">
-            <td colspan="2">
-              <input type="checkbox" id="haltAllOnTxValue" onchange="changeHaltOntTxValue(this);" />
-            </td>
-          </tr>
-        </table>
-      </div>
-
-    </div>
-
-    <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
-      
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.general.Language.label" title="Language">Language</td>
-          </tr>
-          <tr>
-            <td>
-              <select id="languageLocale" value="en" onchange="changeLocale();">
-                <option value="en">English</option>
-                <option value="de">Deutsch</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="it">Italiano</option>
-                <option value="nl">Nederlands</option>
-                <option value="pl">Polski</option>
-                <option value="br">Português (Brasil)</option>
-                <option value="pt">Português (Portugal)</option>
-                <option value="qb">Quebecois</option>
-                <option value="ja">日本語</option>
-                <option value="cn">简体中文</option>
-                <option value="cnt">繁體中文</option>
-              </select>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.general.WindowTheme.label" title="Window Theme">Window Theme</td>
-          </tr>
-          <tr>
-            <td>
-              <select id="windowTheme" value="dark" onchange="changeWindowTheme();">
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
-                <option value="system">System</option>
-              </select>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="mapItem" id="multiRigCRDiv" style="display:none;">
-        <table align="center">
-          <tr align="center">
-            <td data-i18n="settings.callroster.MultiRig.label" align="center">On QSO Reply</td>
-          </tr>
-          <tr align="center">
-            <td data-i18n="settings.callroster.MultiRig.SwitchView.label" align="center">Switch View To Transmitting Instance</td>
-          </tr>
-          <tr align="center">
-            <td colspan="2">
-              <input type="checkbox" id="focusRigValue" onchange="changeFocusRigValue(this);" />
-            </td>
-          </tr>
-        </table>
-      </div>
-
-    </div>
-
-    <div style="display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
-      
-      <div class="mapItem">
-        <table align="center">
-          <tr align="center">
-            <td data-i18n="settings.general.MapOnRightSide.label" align="center">map on right, place holder</td>
-          </tr>
-          <tr align="center">
-            <td >
-              <input type="checkbox" id="mapRightValue" onchange="changeMapRight(this);" />
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td>
-              <div data-i18n="settings.general.ExportSettings.label" class="button" id="exportSettingsButton">
-                Export Settings</div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div data-i18n="settings.general.ImportSettings.label" id="importSettingsButton" class="button">
-                Import Settings
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td id="importSettingsInfo"></td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="mapItem" style="display: flex; justify-content: center; align-items: center;" >
-        <div data-i18n="settings.general.ResetButtonPanel.label" class="flexButton" onclick="setButtonPanelOrder(GT.defaultButtons)">
-          Reset-Button-Panel
-         </div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- BOTTOM SECTION: Clear Settings -->
-  <table align="center">
-    <tr>
-      <td>
-        <div class="mapItem">
-          <table align="center">
+      <div class="mapGroups">
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="gt.qsoPage.Station">Station</div>
+          <table>
             <tr>
-              <td>
-                <div data-i18n="settings.general.ClearAllSettings.label" class="button"
-                  onclick="if ( imSureCheck.checked ) { clearAndReload(); }">
-                  Clear All Settings!
-                </div>
-              </td>
+              <td class="mapRowLabel"><label data-i18n="settings.general.stationCallsign.label" for="stationCallsignInput">Station Callsign</label></td>
+              <td><input id="stationCallsignInput" type="text" class="inputTextValue" maxlength="16" size="10" data-i18n="settings.general.stationCallsign.hover" title="Your callsign while no WSJT-X, JTDX or AC Log is connected; a callsign they report is always used for them" oninput="saveStationCallsign(this);" /></td>
             </tr>
-            <tr>
-              <td>
-                <label data-i18n="settings.general.ClearSettingSure.label" for="imSureCheck">Yes, I'm sure!</label>
-                <input type="checkbox" id="imSureCheck" data-i18n="settings.general.ClearSettingSure.check.hover" title="Must be checked to enable clearing of settings" />
-              </td>
+            <tr id="CenterGridDiv">
+              <td class="mapRowLabel"><label data-i18n="settings.general.CenterGrid.label" for="homeQTHInput">Center Gridsquare</label></td>
+              <td><input id="homeQTHInput" type="text" class="inputTextValue" maxlength="8" size="8" oninput="{ if ( ValidateGridsquare(this,null) ) { saveCenterGridsquare(); }}" /></td>
             </tr>
           </table>
         </div>
-      </td>
-    </tr>
-  </table>
-
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.map.group.display.label">Display</div>
+          <table>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.general.Language.label" for="languageLocale">Language</label></td>
+              <td>
+                <select id="languageLocale" value="en" onchange="changeLocale();">
+                  <option value="en">English</option>
+                  <option value="de">Deutsch</option>
+                  <option value="es">Español</option>
+                  <option value="fr">Français</option>
+                  <option value="it">Italiano</option>
+                  <option value="nl">Nederlands</option>
+                  <option value="pl">Polski</option>
+                  <option value="br">Português (Brasil)</option>
+                  <option value="pt">Português (Portugal)</option>
+                  <option value="qb">Quebecois</option>
+                  <option value="ja">日本語</option>
+                  <option value="cn">简体中文</option>
+                  <option value="cnt">繁體中文</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.general.WindowTheme.label" for="windowTheme">Window Theme</label></td>
+              <td>
+                <select id="windowTheme" value="dark" onchange="changeWindowTheme();">
+                  <option value="dark">Dark</option>
+                  <option value="light">Light</option>
+                  <option value="system">System</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.general.DistanceUnits.label" for="distanceUnit">Distance Units</label></td>
+              <td>
+                <select id="distanceUnit" value="KM" onchange="changeDistanceUnit();">
+                  <option data-i18n="settings.general.Distance.km" value="KM">Kilometres</option>
+                  <option data-i18n="settings.general.Distance.mi" value="MI">Statute Miles</option>
+                  <option data-i18n="settings.general.Distance.nm" value="NM">Nautical Miles</option>
+                  <option data-i18n="settings.general.Distance.dg" value="DG">Degrees</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.general.MapOnRightSide.label" for="mapRightValue">Map On Right Side</label></td>
+              <td><input type="checkbox" id="mapRightValue" onchange="changeMapRight(this);" /></td>
+            </tr>
+          </table>
+        </div>
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="roster.menu.Settings">Settings</div>
+          <div class="mapButtons">
+            <div data-i18n="settings.general.ResetButtonPanel.label" class="button" onclick="setButtonPanelOrder(GT.defaultButtons)">Reset-Button-Panel</div>
+            <div class="mapButtons mapFramed mapPair">
+              <div data-i18n="settings.general.ExportSettings.label" class="button" id="exportSettingsButton">Export Settings</div>
+              <div data-i18n="settings.general.ImportSettings.label" id="importSettingsButton" class="button">Import Settings</div>
+            </div>
+          </div>
+          <div id="importSettingsInfo"></div>
+          <div class="mapButtons mapFramed">
+            <div data-i18n="settings.general.ClearAllSettings.label" class="button" onclick="if ( imSureCheck.checked ) { clearAndReload(); }">Clear All Settings!</div>
+            <div class="mapCheckLines"><input type="checkbox" id="imSureCheck" data-i18n="settings.general.ClearSettingSure.check.hover" title="Must be checked to enable clearing of settings" /> <label data-i18n="settings.general.ClearSettingSure.label" for="imSureCheck">Yes, I'm sure!</label></div>
+          </div>
+        </div>
+      </div>
+      <!-- Its own row, shown while more than one WSJT-X / JTDX instance is open (updateMultiRigViews in wsjtxUdp.js) -->
+      <div class="mapGroups" id="multiRigCRDiv" style="display:none;">
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.callroster.MultiRig.label">On QSO Reply</div>
+          <div class="mapCheckLines">
+            <div id="haltTXDiv" style="display:none;"><input type="checkbox" id="haltAllOnTxValue" onchange="changeHaltOntTxValue(this);" /> <label data-i18n="settings.callroster.MultiRig.HaltTx.label" for="haltAllOnTxValue">Halt TX On All Other Instances</label></div>
+            <div><input type="checkbox" id="focusRigValue" onchange="changeFocusRigValue(this);" /> <label data-i18n="settings.callroster.MultiRig.SwitchView.label" for="focusRigValue">Switch View To Transmitting Instance</label></div>
+          </div>
+        </div>
+      </div>
 </div>
 
     <div id="featuresSettingsDiv" class="settingsTabcontent">
-      <div id="featureControlDiv" class="mapItem"  style="border:0">
-        <div class="mapItem" style="border:0">
-          <table align="center" class="darkTable">
-            <tr>
-              <th colspan="6" style="font-weight: bold; color: cyan">Operational</th>
-            </tr>
-            <tr>
-              <td data-i18n="settings.general.DecodeWaterfall.label">Decode Traffic Waterfall</td>
-              <td>
-                <input type="checkbox" id="trafficDecode" onclick="changeTrafficDecode()" />
-              </td>
-            </tr>
-            <tr>
-              <td data-i18n="settings.Features.BandMemory">CR Wanted+Audio Alerts Band+Mode Memory</td>
-              <td>
-                <input type="checkbox" id="wantedByBandMode" onclick="changeWantedByBandMode()" />
-              </td>
-            </tr>
-            <tr id="includeExceptionsRow">
-              <td data-i18n="settings.Features.IncludeExceptions" style="text-align: right;">... Include Exceptions</td>
-              <td>
-                <input type="checkbox" id="includeExceptions" onclick="changeIncludeExceptions()" />
-              </td>
-            </tr>
-            <tr id="includeCustomAlertsRow">
-              <td data-i18n="settings.Features.IncludeCustomAlerts" style="text-align: right;">... Include Custom Alerts</td>
-              <td>
-                <input type="checkbox" id="includeCustomAlerts" onclick="changeIncludeCustomAlerts()" />
-              </td>
-            </tr>
-             <tr>
-              <th colspan="6" style="font-weight: bold; color: yellow">WSJT-X</th>
-            </tr>
-            <tr>
-              <td data-i18n="settings.features.ClearOnCQ.label">Clear on CQ</td>
-              <td>
-                <input type="checkbox" id="clearOnCQ" onclick="changeClearOnCQ();" />
-              </td>
-            </tr>
+      <div id="featureControlDiv" class="mapGroups">
+        <div class="mapColumn">
+          <div class="mapGroup">
+            <div class="mapGroupTitle" data-i18n="settings.features.group.operational.label">Operational</div>
+            <table class="mapChecks">
+              <tr><td><input type="checkbox" id="trafficDecode" onclick="changeTrafficDecode()" /> <label data-i18n="settings.general.DecodeWaterfall.label" for="trafficDecode">Decode Traffic Waterfall</label></td></tr>
+              <tr><td><input type="checkbox" id="wantedByBandMode" onclick="changeWantedByBandMode()" /> <label data-i18n="settings.Features.BandMemory" for="wantedByBandMode">CR Wanted+Audio Alerts Band+Mode Memory</label></td></tr>
+              <!-- Shown while Band Memory is on (handlers.js) -->
+              <tr id="includeExceptionsRow"><td class="mapIndent"><input type="checkbox" id="includeExceptions" onclick="changeIncludeExceptions()" /> <label data-i18n="settings.Features.IncludeExceptions" for="includeExceptions">... Include Exceptions</label></td></tr>
+              <tr id="includeCustomAlertsRow"><td class="mapIndent"><input type="checkbox" id="includeCustomAlerts" onclick="changeIncludeCustomAlerts()" /> <label data-i18n="settings.Features.IncludeCustomAlerts" for="includeCustomAlerts">... Include Custom Alerts</label></td></tr>
+              <tr><td><input type="checkbox" id="clearOnCQ" onclick="changeClearOnCQ();" /> <label data-i18n="settings.features.ClearOnCQ.label" for="clearOnCQ">Clear on CQ</label></td></tr>
+            </table>
+          </div>
+          <div class="mapGroup">
+            <div class="mapGroupTitle" data-i18n="settings.logging.otherheader.service">Service</div>
+            <table>
               <tr>
-                <th colspan="6" style="font-weight: bold; color: orange" data-i18n="settings.logging.otherheader.service">Service</th>
+                <td class="mapRowLabel"><label data-i18n="settings.logging.pstrotator.label" for="pstrotatorCheckBox">CatRotator / PstRotator</label></td>
+                <td><input type="checkbox" class="inputTextValue" id="pstrotatorCheckBox" onclick="ValidateIPaddress(pstrotatorIpInput, this); ValidatePort(pstrotatorPortInput, this, null ); pstrotatorServiceChanged(); " /></td>
               </tr>
               <tr>
-                <td data-i18n="settings.logging.pstrotator.label">CatRotator / PstRotator</td>
-                <td>
-                  <input type="checkbox"   class="inputTextValue" id="pstrotatorCheckBox" onclick="
-                    ValidateIPaddress(pstrotatorIpInput, this); ValidatePort(pstrotatorPortInput, this, null ); pstrotatorServiceChanged(); " />
-                </td>
-              </tr>
-              <tr>  
-                <td colspan="2">
-                  <label data-i18n="settings.logging.pstrotator.details.IP" for="pstrotatorIpInput">IP</label>
-                  <input id="pstrotatorIpInput" type="text" class="inputTextValue" maxlength="15" size="11"
-                    onkeypress='return validIpKeys(event.charCode);'
-                    oninput="ValidateIPaddress(this, pstrotatorCheckBox); pstrotatorServiceChanged(); " />
-                </td>
+                <td class="mapRowLabel"><label data-i18n="settings.logging.pstrotator.details.IP" for="pstrotatorIpInput">IP</label></td>
+                <td><input id="pstrotatorIpInput" type="text" class="inputTextValue" maxlength="15" size="11" onkeypress='return validIpKeys(event.charCode);' oninput="ValidateIPaddress(this, pstrotatorCheckBox); pstrotatorServiceChanged(); " /></td>
               </tr>
               <tr>
-                <td colspan="2">
-                  <label data-i18n="settings.logging.pstrotator.details.Port" for="pstrotatorPortInput">UDP Port</label>
-                  <input id="pstrotatorPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return
-                      validNumberKeys(event.charCode);' oninput="ValidatePort(this, pstrotatorCheckBox, null );
-                      pstrotatorServiceChanged(); " />
-                </td>
+                <td class="mapRowLabel"><label data-i18n="settings.logging.pstrotator.details.Port" for="pstrotatorPortInput">UDP Port</label></td>
+                <td><input id="pstrotatorPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return validNumberKeys(event.charCode);' oninput="ValidatePort(this, pstrotatorCheckBox, null ); pstrotatorServiceChanged(); " /></td>
               </tr>
-
+            </table>
+          </div>
+        </div>
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.Online.label">Online</div>
+          <table class="mapChecks">
+            <tr><td><input type="checkbox" id="offlineModeEnable" onclick="changeOffline()" /> <label data-i18n="settings.OfflineMode.label" for="offlineModeEnable">Offline Mode</label></td></tr>
+            <!-- The rows below are shown and hidden by their features (pota.js, loaders.js, network.js, spots.js, bandActivity.js, sota.js) -->
+            <tr id="potaHuntingTr"><td><input type="checkbox" id="potaFeatureEnabled" onclick="changePotaEnable();" /> <label data-i18n="settings.POTA.hunting.label" for="potaFeatureEnabled">POTA Hunting</label></td></tr>
+            <tr id="simplepushMsgEnableTr"><td><input data-i18n="settings.OAMS.simplepush.enable.hover" title="Toggle Simplepush" type="checkbox" id="msgSimplepush" onclick="setOamsSimplepush(this);" /> <label data-i18n="settings.OAMS.simplepush.enable.label" for="msgSimplepush">Simplepush</label></td></tr>
+            <tr id="pushoverMsgEnableTr"><td><input data-i18n="settings.OAMS.pushover.enable.hover" title="Toggle Pushover" type="checkbox" id="msgPushover" onclick="setOamsPushover(this);" /> <label data-i18n="settings.OAMS.pushover.enable.label" for="msgPushover">Pushover</label></td></tr>
+            <tr id="offAirServicesTr"><td><input type="checkbox" id="offAirServicesEnable" onclick="changeOffAirServicesEnable();" /> <label data-i18n="settings.OffAirServices.label" for="offAirServicesEnable">Off-Air Services</label></td></tr>
+            <tr id="spottingEnableTr"><td class="mapIndent"><input data-i18n="settings.spotting.toggle.hover" title="Enable / Disable Spotting" type="checkbox" id="spottingEnable" onclick="setSpottingEnable(); redrawSpots();" /> <label data-i18n="settings.spotting.enable.label" for="spottingEnable">Spotting</label></td></tr>
+            <tr id="spotMergeTr"><td class="mapIndent2"><input type="checkbox" id="spotMergeValue" onclick="changeSpotValues(); redrawSpots();" /> <label data-i18n="settings.grids.spotsOverGrids.label" for="spotMergeValue">Spots Over Grids</label></td></tr>
+            <tr id="bandActivityEnableTr"><td class="mapIndent"><input type="checkbox" id="oamsBandActivity" onclick="setOamsBandActivity(this);" /> <label data-i18n="settings.BandActivity.enable.label" for="oamsBandActivity">Band Activity</label></td></tr>
+            <tr id="bandActivityNeighborTr"><td class="mapIndent2"><input type="checkbox" id="oamsBandActivityNeighbors" onclick="setOamsBandActivityNeighbors(this);" /> <label data-i18n="settings.BandActivity.neighbor.enable.label" for="oamsBandActivityNeighbors">Neighboring Grids</label></td></tr>
+            <tr id="dxFeedsTr"><td class="mapIndent"><input data-i18n="settings.feeds.dxFeeds.hover" title="DX Cluster and CW Skimmer spots in the Feed Roster and on the map" type="checkbox" id="dxFeedsEnable" onclick="setFeedSettings();" /> <label data-i18n="settings.feeds.dxFeeds.label" for="dxFeedsEnable">DX Feeds</label></td></tr>
+            <!-- Shown while DX Feeds is on: SOTA activators come from its spots -->
+            <tr id="sotaChasingTr"><td class="mapIndent2"><input data-i18n="settings.SOTA.chasing.hover" title="Summits on the Air activators from DX Feeds: the Feed Roster's SOTA column and Wanted" type="checkbox" id="sotaFeatureEnabled" onclick="changeSotaEnable();" /> <label data-i18n="settings.SOTA.chasing.label" for="sotaFeatureEnabled">SOTA Chasing</label></td></tr>
           </table>
         </div>
-        <div class="mapItem" style="border:0">
-          <table align="center" class="darkTable">
-          <tr>
-            <th data-i18n="settings.Online.label" colspan=2 style="font-weight: bold;color:yellow">Online</th>
-          </tr>
-          <tr>
-            <th data-i18n="settings.OfflineMode.label" for="offlineModeEnable">Offline Mode</th>
-            <td>
-              <input type="checkbox" id="offlineModeEnable" onclick="changeOffline()" />
-            </td>
-          </tr>
-          <tr id="potaHuntingTr">
-            <td data-i18n="settings.POTA.hunting.label" for="potaFeatureEnabled">POTA Hunting</td>
-            <td>
-              <input type="checkbox" id="potaFeatureEnabled" onclick="changePotaEnable();" />
-            </td>
-          </tr>
-          <tr id="simplepushMsgEnableTr">
-            <td data-i18n="settings.OAMS.simplepush.enable.label" for="msgSimplepush" >Simplepush</td>
-            <td>
-              <input data-i18n="settings.OAMS.simplepush.enable.hover" title="Toggle Simplepush" type="checkbox" id="msgSimplepush" onclick="setOamsSimplepush(this);" />
-            </td>
-          </tr>
-          <tr id="pushoverMsgEnableTr">
-            <td data-i18n="settings.OAMS.pushover.enable.label" for="msgPushover">Pushover</td>
-            <td>
-              <input data-i18n="settings.OAMS.pushover.enable.hover" title="Toggle Pushover" type="checkbox" id="msgPushover" onclick="setOamsPushover(this);" />
-            </td>
-          </tr>
-          <tr id="offAirServicesTr">
-            <td data-i18n="settings.OffAirServices.label" for="offAirServicesEnable">Off-Air Services</td>
-            <td>
-               <input type="checkbox" id="offAirServicesEnable" onclick="changeOffAirServicesEnable();" />
-            </td>
-          </tr>
-          <tr id="spottingEnableTr">
-            <td data-i18n="settings.spotting.enable.label" for="spottingEnable">Spotting</td>
-            <td>
-              <input data-i18n="settings.spotting.toggle.hover" title="Enable / Disable Spotting" type="checkbox" id="spottingEnable" onclick="setSpottingEnable(); redrawSpots();" />
-            </td>
-          </tr>
-          <tr id="spotMergeTr">
-            <td data-i18n="settings.grids.spotsOverGrids.label" for="spotMergeValue">Spots Over Grids</td>
-            <td>
-              <input type="checkbox" id="spotMergeValue" onclick="changeSpotValues(); redrawSpots();" />
-            </td>
-          </tr>
-          <tr id="bandActivityEnableTr">
-            <td data-i18n="settings.BandActivity.enable.label" for="oamsBandActivity">Band Activity</td>
-            <td>
-              <input  type="checkbox" id="oamsBandActivity" onclick="setOamsBandActivity(this);" />
-            </td>
-          </tr>
-          <tr id="bandActivityNeighborTr">
-            <td data-i18n="settings.BandActivity.neighbor.enable.label" for="oamsBandActivityNeighbors">Neighboring Grids</td>
-            <td>
-              <input  type="checkbox" id="oamsBandActivityNeighbors" onclick="setOamsBandActivityNeighbors(this);" />
-            </td>
-          </tr>
-          <tr id="dxFeedsTr">
-            <td data-i18n="settings.feeds.dxFeeds.label" for="dxFeedsEnable">DX Feeds</td>
-            <td>
-              <input data-i18n="settings.feeds.dxFeeds.hover" title="DX Cluster and CW Skimmer spots in the Feed Roster and on the map" type="checkbox" id="dxFeedsEnable" onclick="setFeedSettings();" />
-            </td>
-          </tr>
-          <!-- Shown while DX Feeds is on: SOTA activators come from its spots -->
-          <tr id="sotaChasingTr">
-            <td data-i18n="settings.SOTA.chasing.label" for="sotaFeatureEnabled">SOTA Chasing</td>
-            <td>
-              <input data-i18n="settings.SOTA.chasing.hover" title="Summits on the Air activators from DX Feeds: the Feed Roster's SOTA column and Wanted" type="checkbox" id="sotaFeatureEnabled" onclick="changeSotaEnable();" />
-            </td>
-          </tr>
-          </table>
-        </div>
-        <div class="mapItem" style="border:0">
-          <div class="mapItem" id="simplePushDiv">
-            <table align="center">
+        <!-- Simplepush / Pushover: each box shows while its feature is on (Online above); every field is optional -->
+        <div class="mapColumn">
+          <div class="mapGroup" id="simplePushDiv">
+            <div class="mapGroupTitle" data-i18n="settings.OAMS.simplepush.apitoken.label">SimplePush API Key</div>
+            <table>
               <tr>
-                <td data-i18n="settings.OAMS.simplepush.apitoken.label"
-                    title="SimplePush API Key to forward messages to your phone">SimplePush API Key</td>
+                <td class="mapRowLabel"><label data-i18n="settings.OAMS.pushover.token.label" for="msgSimplepushApiKey">API Token</label></td>
+                <td><input data-i18n="settings.OAMS.simplepush.apitoken.hover" title="SimplePush API Key to forward messages to your phone" type="text" id="msgSimplepushApiKey" class="inputTextValue" maxlength="255" size="16" oninput="ValidateText(this); newMessageSetting(this);" /></td>
               </tr>
               <tr>
-                <td>
-                  <input data-i18n="settings.OAMS.simplepush.apitoken.hover" title="SimplePush API Key to forward messages to your phone" type="text" id="msgSimplepushApiKey"
-                    class="inputTextValue" maxlength="255" size="16"
-                    oninput="ValidateText(this); newMessageSetting(this);" />
-                </td>
+                <td class="mapRowLabel"><label for="msgSimplepushNotifyOnly" data-i18n="settings.OAMS.simplepush.notify.label">Notification Only</label></td>
+                <td><input type="checkbox" id="msgSimplepushNotifyOnly" onclick="GT.settings.msg.msgSimplepushNotifyOnly = this.checked;" /></td>
               </tr>
               <tr>
-                <td>
-                  <label for="msgSimplepushNotifyOnly" data-i18n="settings.OAMS.simplepush.notify.label">Notification Only</label>
-                </td>
+                <td class="mapRowLabel"><label for="msgSimplepushDailySchedule" data-i18n="settings.usedailyschedule.label">Daily Schedule</label></td>
+                <td><input type="checkbox" id="msgSimplepushDailySchedule" onclick="simplepushDailySchedule(this);" /></td>
               </tr>
-              <tr><td><input type="checkbox" id="msgSimplepushNotifyOnly" onclick="GT.settings.msg.msgSimplepushNotifyOnly = this.checked;" /></td></tr>
+              <!-- Shown while Use Daily Schedule is on (notifications.js, loaders.js) -->
+              <tbody id="simplepushDailyScheduleDiv">
+                <tr>
+                  <td class="mapRowLabel"><label data-i18n="settings.starttime" for="msgSimplepushScheduleStart">Start Time</label></td>
+                  <td><input type="time" id="msgSimplepushScheduleStart" class="inputTextValue" oninput="newScheduleTimeSetting(this);displaySimplepushSchedule();" /></td>
+                </tr>
+                <tr>
+                  <td class="mapRowLabel"><label data-i18n="settings.endtime" for="msgSimplepushScheduleEnd">End Time</label></td>
+                  <td><input type="time" id="msgSimplepushScheduleEnd" class="inputTextValue" oninput="newScheduleTimeSetting(this);displaySimplepushSchedule();" /><span id="simplepushScheduleDiv" class="mapValue">24h</span></td>
+                </tr>
+              </tbody>
               <tr>
+                <td></td>
                 <td>
-                  <label for="msgSimplepushDailySchedule" data-i18n="settings.usedailyschedule.label">Daily Schedule</label>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" id="msgSimplepushDailySchedule" onclick="simplepushDailySchedule(this);" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div id="simplepushDailyScheduleDiv" >
-                    <table align="center">
-                      <tr>
-                        <td data-i18n="settings.starttime">Start Time</td>
-                        <td data-i18n="settings.endtime">End Time</td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <input type="time" id="msgSimplepushScheduleStart" class="inputTextValue"
-                            oninput="newScheduleTimeSetting(this);displaySimplepushSchedule();" />
-                        </td>
-                        <td>
-                          <input type="time" id="msgSimplepushScheduleEnd" class="inputTextValue"
-                            oninput="newScheduleTimeSetting(this);displaySimplepushSchedule();" />
-                        </td>
-                      </tr>
-                    </table>
-                    <div id="simplepushScheduleDiv">24h</div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div data-i18n="settings.OAMS.simplepush.test" class="button"
-                    onclick="sendSimplePushTestMessage({'call' : 'Test', 'msg' : 'Test Message'});">Test</div>
-                  <div id="simplepushResponseDiv"></div>
+                  <div data-i18n="settings.OAMS.simplepush.test" class="button mapInlineButton" onclick="sendSimplePushTestMessage({'call' : 'Test', 'msg' : 'Test Message'});">Test</div>
+                  <div id="simplepushResponseDiv" class="mapInline"></div>
                 </td>
               </tr>
             </table>
           </div>
-          <br>
-          <div class="mapItem" id="pushOverDiv">
+          <div class="mapGroup" id="pushOverDiv">
+            <div class="mapGroupTitle" data-i18n="settings.OAMS.pushover.credentials.label">Pushover Credentials</div>
             <table>
               <tr>
-                <td data-i18n="settings.OAMS.pushover.credentials.label"
-                    title="Pushover Credentials to forward messages to your phone">Pushover Credentials</td>
+                <td class="mapRowLabel"><label data-i18n="settings.OAMS.pushover.userkey.label" for="msgPushoverUserKey">User Key</label></td>
+                <td><input data-i18n="settings.OAMS.pushover.userkey.input.hover" title="Pushover User Key to forward messages to your phone" type="text" id="msgPushoverUserKey" class="inputTextValue" maxlength="255" size="16" oninput="ValidateText(this); newMessageSetting(this);" /></td>
               </tr>
               <tr>
-                <td>
-                  <label data-i18n="settings.OAMS.pushover.userkey.label" for="msgPushoverUserKey">User Key</label>
-                  <input data-i18n="settings.OAMS.pushover.userkey.input.hover" title="Pushover User Key to forward messages to your phone" type="text" id="msgPushoverUserKey"
-                         class="inputTextValue" maxlength="255" size="16"
-                         oninput="ValidateText(this); newMessageSetting(this);" />
-                </td>
+                <td class="mapRowLabel"><label data-i18n="settings.OAMS.pushover.token.label" for="msgPushoverToken">API Token</label></td>
+                <td><input data-i18n="settings.OAMS.pushover.token.input.hover" title="Pushover API Token to forward messages to your phone" type="text" id="msgPushoverToken" class="inputTextValue" maxlength="255" size="16" oninput="ValidateText(this); newMessageSetting(this);" /></td>
               </tr>
               <tr>
-                <td>
-                  <label data-i18n="settings.OAMS.pushover.token.label" for="msgPushoverToken">API Token</label>
-                  <input data-i18n="settings.OAMS.pushover.token.input.hover" title="Pushover API Token to forward messages to your phone" type="text" id="msgPushoverToken"
-                         class="inputTextValue" maxlength="255" size="16"
-                         oninput="ValidateText(this); newMessageSetting(this);" />
-                </td>
+                <td class="mapRowLabel"><label for="msgPushoverDailySchedule" data-i18n="settings.usedailyschedule.label">Daily Schedule</label></td>
+                <td><input type="checkbox" id="msgPushoverDailySchedule" onclick="pushoverDailySchedule(this);" /></td>
               </tr>
+              <!-- Shown while Use Daily Schedule is on (notifications.js, loaders.js) -->
+              <tbody id="pushoverDailyScheduleDiv">
+                <tr>
+                  <td class="mapRowLabel"><label data-i18n="settings.starttime" for="msgPushoverScheduleStart">Start Time</label></td>
+                  <td><input type="time" id="msgPushoverScheduleStart" class="inputTextValue" oninput="newScheduleTimeSetting(this);displayPushoverSchedule();" /></td>
+                </tr>
+                <tr>
+                  <td class="mapRowLabel"><label data-i18n="settings.endtime" for="msgPushoverScheduleEnd">End Time</label></td>
+                  <td><input type="time" id="msgPushoverScheduleEnd" class="inputTextValue" oninput="newScheduleTimeSetting(this);displayPushoverSchedule();" /><span id="pushoverScheduleDiv" class="mapValue">24h</span></td>
+                </tr>
+              </tbody>
               <tr>
+                <td></td>
                 <td>
-                  <label for="msgPushoverDailySchedule" data-i18n="settings.usedailyschedule.label">Daily Schedule</label>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="checkbox" id="msgPushoverDailySchedule" onclick="pushoverDailySchedule(this);" />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div id="pushoverDailyScheduleDiv" >
-                    <table align="center">
-                      <tr>
-                        <td data-i18n="settings.starttime">Start Time</td>
-                        <td data-i18n="settings.endtime">End Time</td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <input type="time" id="msgPushoverScheduleStart" class="inputTextValue"
-                            oninput="newScheduleTimeSetting(this);displayPushoverSchedule();" />
-                        </td>
-                        <td>
-                          <input type="time" id="msgPushoverScheduleEnd" class="inputTextValue"
-                            oninput="newScheduleTimeSetting(this);displayPushoverSchedule();" />
-                        </td>
-                      </tr>
-                    </table>
-                    <div id="pushoverScheduleDiv">24h</div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div data-i18n="settings.OAMS.pushover.test" class="button" onclick="sendPushOverMessage({'call' : 'Test', 'msg' : 'Test Message'}, true);">Test
-                  </div>
-                  <div id="pushOverTestResultsDiv"></div>
+                  <div data-i18n="settings.OAMS.pushover.test" class="button mapInlineButton" onclick="sendPushOverMessage({'call' : 'Test', 'msg' : 'Test Message'}, true);">Test</div>
+                  <div id="pushOverTestResultsDiv" class="mapInline"></div>
                 </td>
               </tr>
             </table>
@@ -1399,1142 +1090,743 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       </div>
     </div>
     <div id="lookupsSettingsDiv" class="settingsTabcontent">
-      <div class="mapItem">
-        <table align="center">
-          <tr align="center">
-            <td data-i18n="settings.lookup.label" align="center" style="font-weight: bold; color: cyan">Callsign Lookup
-              Service</td>
-          </tr>
-          <tr align="center">
-            <td colspan="1">
-              <select id="lookupService" value="CALLOOK" onchange="lookupValueChanged();">
-                <option data-i18n="settings.lookup.Callook" value="CALLOOK">C A L L O O K (US only)</option>
-                <option data-i18n="settings.lookup.HamQTH" value="HAMQTH">HamQTH (Free Login Required)</option>
-                <option data-i18n="settings.lookup.QRZcom" value="QRZ">QRZ.com (Free and Paid Members Only)</option>
-                <option data-i18n="settings.lookup.QRZCQ" value="QRZCQ">QRZCQ.com (Paid Members Only)</option>
-              </select>
-            </td>
-          </tr>
-          <tr align="center" id="lookupCredentials" style="display: none">
-            <td data-i18n="settings.lookup.Username.label">Username</td>
-            <td><input id="lookupLogin" type="text" class="inputTextValue" size="8" oninput="lookupValueChanged();" /></td>
-            <td data-i18n="settings.lookup.Password.label">Password</td>
-            <td><input id="lookupPassword" type="password"    class="inputTextValue" size="8" oninput="lookupValueChanged();" /></td>
-            <td>
-              <div data-i18n="settings.lookup.QRZTest" class="button" onclick="getSessionId(lookupQrzTestResult);">Test
-              </div>
-            </td>
-            <td id="lookupQrzTestResult">&nbsp;</td>
-          </tr>
-        </table>
-      </div>
-      <br />
-      <div id="callsignDatabaseDiv" class="mapItem">
-        <table align="center" class="darkTable">
-          <tr>
-            <th colspan="6" style="font-weight: bold; color: lightgreen">Lookups</th>
-          </tr>
-          <tr>
-            <td data-i18n="settings.lookup.AddData.label">Add Lookup Data to QSO Log Event</td>
-            <td data-i18n="settings.lookup.AddData.hover" title="When finishing a QSO ...&#10;add extra data from Lookup service">
-              <input type="checkbox" id="lookupMerge" onclick="changeLookupMerge(this)" />
-            </td>
-          </tr>
-          <tr id="lookupMissingGridTr" disabled="true">
-            <td data-i18n="settings.lookup.AddGrid.label">Add Lookup Grid if QSO Grid missing</td>
-            <td data-i18n="settings.lookup.AddGrid.hover" title="Add Lookup Grid if QSO Grid Missing">
-              <input type="checkbox" id="lookupMissingGrid" onclick="changeLookupMerge(this)" />
-            </td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.lookup.OpenOnTx.label">Open Lookup On Transmit</td>
-            <td data-i18n="settings.lookup.OpenOnTx.hover" title="Open Lookup Window On Transmit">
-              <input type="checkbox" id="lookupOnTx" onclick="changelookupOnTx()" />
-            </td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.lookup.CloseOnLog.label">Close Lookup After Logging</td>
-            <td data-i18n="settings.lookup.CloseOnLog.hover" title="Close Lookup Window After Logging">
-              <input type="checkbox" id="lookupCloseLog" onclick="changelookupOnTx()" />
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div id="callsignDatabaseDiv" class="mapItem">
-        <table align="center" class="darkTable">
-          <tr>
-            <th data-i18n="settings.lookup.Databases.label" colspan="6" style="font-weight: bold; color: yellow">Callsign Databases</th>
-          </tr>
-          <tr>
-            <th data-i18n="settings.lookup.Databases.header">Database</th>
-            <th data-i18n="settings.lookup.Enabled.header">Enabled</th>
-            <th data-i18n="settings.lookup.LastDwnld.header">Last Download</th>
-            <th data-i18n="gt.lookup.details">Details</th>
-          </tr>
-          <tr>
-            <td>Big CTY</td>
-            <td>&#10004;</td>
-            <td id="bigctyUpdatedTd">Never</td>
-            <td id="bigctyDetailsTd"></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.lookup.db.ULS">US Callsigns</td>
-            <td>
-              <input type="checkbox" id="ulsUseEnable" onclick="ulsValuesChanged();" />
-            </td>
-            <td id="ulsUpdatedTd">Never</td>
-            <td id="ulsCountTd">0</td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.callsigns.canada.label">Canada Callsigns</td>
-            <td>
-              <input type="checkbox" id="cacUseEnable" onclick="cacValuesChanged();" />
-            </td>
-            <td id="cacUpdatedTd">Never</td>
-            <td id="cacCountTd">0</td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.lookup.db.LoTW">Logbook of The World</td>
-            <td>
-              <input type="checkbox" id="lotwUseEnable" onclick="lotwValuesChanged();" />
-            </td>
-            <td id="lotwUpdatedTd">Never</td>
-            <td id="lotwCountTd">0</td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.lookup.db.eQSL">eQSL</td>
-            <td>
-              <input type="checkbox" id="eqslUseEnable" onclick="eqslValuesChanged();" />
-            </td>
-            <td id="eqslUpdatedTd">Never</td>
-            <td id="eqslCountTd">0</td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.lookup.db.OQRS">ClubLog OQRS</td>
-            <td>
-              <input type="checkbox" id="oqrsUseEnable" onclick="oqrsValuesChanged();" />
-            </td>
-            <td id="oqrsUpdatedTd">Never</td>
-            <td id="oqrsCountTd">0</td>
-          </tr>
-            </table>
+      <div class="mapGroups">
+        <div class="mapColumn">
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.lookup.label">Callsign Lookup Service</div>
+          <table>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.logging.otherheader.service">Service</td>
+              <td>
+                <select id="lookupService" value="CALLOOK" onchange="lookupValueChanged();">
+                  <option data-i18n="settings.lookup.Callook" value="CALLOOK">C A L L O O K (US only)</option>
+                  <option data-i18n="settings.lookup.HamQTH" value="HAMQTH">HamQTH (Free Login Required)</option>
+                  <option data-i18n="settings.lookup.QRZcom" value="QRZ">QRZ.com (Free and Paid Members Only)</option>
+                  <option data-i18n="settings.lookup.QRZCQ" value="QRZCQ">QRZCQ.com (Paid Members Only)</option>
+                </select>
+              </td>
+            </tr>
+          </table>
+          <!-- lookup.js shows this with display "block" (not CALLOOK) -->
+          <div id="lookupCredentials" class="mapCredentials" style="display: none">
+            <label data-i18n="settings.lookup.Username.label" for="lookupLogin">Username</label>
+            <input id="lookupLogin" type="text" class="inputTextValue" size="8" oninput="lookupValueChanged();" />
+            <label data-i18n="settings.lookup.Password.label" for="lookupPassword">Password</label>
+            <input id="lookupPassword" type="password"    class="inputTextValue" size="8" oninput="lookupValueChanged();" />
+            <div data-i18n="settings.lookup.QRZTest" class="button" onclick="getSessionId(lookupQrzTestResult);">Test</div>
+            <span id="lookupQrzTestResult">&nbsp;</span>
           </div>
-   
+        </div>
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.Lookups.label">Lookups</div>
+          <table class="mapChecks">
+            <tr><td><input type="checkbox" id="lookupMerge" data-i18n="settings.lookup.AddData.hover" title="When finishing a QSO ...&#10;add extra data from Lookup service" onclick="changeLookupMerge(this)" /> <label data-i18n="settings.lookup.AddData.label" for="lookupMerge">Add Lookup Data to QSO Log Event</label></td></tr>
+            <!-- Shown while Add Lookup Data is on (lookup.js, loaders.js) -->
+            <tr id="lookupMissingGridTr" disabled="true"><td><input type="checkbox" id="lookupMissingGrid" data-i18n="settings.lookup.AddGrid.hover" title="Add Lookup Grid if QSO Grid Missing" onclick="changeLookupMerge(this)" /> <label data-i18n="settings.lookup.AddGrid.label" for="lookupMissingGrid">Add Lookup Grid if QSO Grid missing</label></td></tr>
+            <tr><td><input type="checkbox" id="lookupOnTx" data-i18n="settings.lookup.OpenOnTx.hover" title="Open Lookup Window On Transmit" onclick="changelookupOnTx()" /> <label data-i18n="settings.lookup.OpenOnTx.label" for="lookupOnTx">Open Lookup On Transmit</label></td></tr>
+            <tr><td><input type="checkbox" id="lookupCloseLog" data-i18n="settings.lookup.CloseOnLog.hover" title="Close Lookup Window After Logging" onclick="changelookupOnTx()" /> <label data-i18n="settings.lookup.CloseOnLog.label" for="lookupCloseLog">Close Lookup After Logging</label></td></tr>
+          </table>
+        </div>
+        </div>
+        <div id="callsignDatabaseDiv" class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.lookup.Databases.label">Callsign Databases</div>
+          <table class="mapData">
+            <tr>
+              <th data-i18n="settings.lookup.Databases.header">Database</th>
+              <th data-i18n="settings.lookup.Enabled.header">Enabled</th>
+              <th data-i18n="settings.lookup.LastDwnld.header">Last Download</th>
+              <th data-i18n="gt.lookup.details">Details</th>
+            </tr>
+            <tr>
+              <td class="mapRowLabel">Big CTY</td>
+              <td class="mapCenter">&#10004;</td>
+              <td id="bigctyUpdatedTd" class="mapCellValue mapCellDate">Never</td>
+              <td id="bigctyDetailsTd" class="mapCellValue"></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.lookup.db.ULS">US Callsigns</td>
+              <td class="mapCenter"><input type="checkbox" id="ulsUseEnable" onclick="ulsValuesChanged();" /></td>
+              <td id="ulsUpdatedTd" class="mapCellValue mapCellDate">Never</td>
+              <td id="ulsCountTd" class="mapCellValue">0</td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.callsigns.canada.label">Canada Callsigns</td>
+              <td class="mapCenter"><input type="checkbox" id="cacUseEnable" onclick="cacValuesChanged();" /></td>
+              <td id="cacUpdatedTd" class="mapCellValue mapCellDate">Never</td>
+              <td id="cacCountTd" class="mapCellValue">0</td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.lookup.db.LoTW">Logbook of The World</td>
+              <td class="mapCenter"><input type="checkbox" id="lotwUseEnable" onclick="lotwValuesChanged();" /></td>
+              <td id="lotwUpdatedTd" class="mapCellValue mapCellDate">Never</td>
+              <td id="lotwCountTd" class="mapCellValue">0</td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.lookup.db.eQSL">eQSL</td>
+              <td class="mapCenter"><input type="checkbox" id="eqslUseEnable" onclick="eqslValuesChanged();" /></td>
+              <td id="eqslUpdatedTd" class="mapCellValue mapCellDate">Never</td>
+              <td id="eqslCountTd" class="mapCellValue">0</td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.lookup.db.OQRS">ClubLog OQRS</td>
+              <td class="mapCenter"><input type="checkbox" id="oqrsUseEnable" onclick="oqrsValuesChanged();" /></td>
+              <td id="oqrsUpdatedTd" class="mapCellValue mapCellDate">Never</td>
+              <td id="oqrsCountTd" class="mapCellValue">0</td>
+            </tr>
+          </table>
+        </div>
+      </div>
     </div>
     <div id="SpeechSettingsDiv" class="settingsTabcontent">
-      <div class="mapItem" >
-        <table class="darkTable">
-          <tr>
-            <th data-i18n="settings.audio.Device.label" colspan="3" style="font-weight: bold; color: yellow">Audio Device</th>            
-          </tr>
-          <tr>
-            <td colspan="3">
-              <div id="soundCardDiv"></div>
-            </td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.audio.QSOLogEventFile.label">QSO Log Event Notification</td>
-            <td colspan="2">
-              <select id="logEventMedia" onchange="newLogEventSetting(this); alertLogMessage();"></select>
-            </td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.audio.File.Volume.label">File Audio Volume</td>
-            <td>
-              <input type="range" min="0.00" max="1" value="1" step="0.01" class="slider" id="audioVolume"
-                oninput="changeAudioValues()" />
-            </td>
-            <td id="audioVolumeTd">1</td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.audio.warnOnSoundcardsChanged.label">Warning On Change</td>
-            <td colspan="2">
-              <input type="checkbox" id="warnOnSoundcardsChanged" onclick="changeWarnOnSoundcardsChanged()" />
-            </td>
-          </tr>
-          <tr>
-            <td colspan="3" data-i18n="settings.audio.TextToSpeech.label" style="font-weight: bold; color: cyan">Text-to-speech Voice</td>
-          </tr>
-          <tr>
-            <td colspan="3" id="voicesDiv"><select id="alertVoiceInput"></select></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.audio.Speech.Rate.label" >Speech Rate</td>
-            <td>
-              <input type="range" min="0.1" max="10" value="1" step="0.1" class="slider" id="speechRate"
-                oninput="changeSpeechValues()" />
-            </td>
-            <td id="speechRateTd">1</td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.audio.Speech.Pitch.label" >Speech Pitch</td>
-            <td >
-              <input type="range" min="0" max="2" value="1" step="0.1" class="slider" id="speechPitch"
-                oninput="changeSpeechValues()" />
-            </td>
-            <td id="speechPitchTd">1</td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.audio.Speech.Volume.label" >Speech Volume</td>
-            <td>
-              <input type="range" min="0.1" max="1" value="1" step="0.05" class="slider" id="speechVolume"
-                oninput="changeSpeechValues()" />
-            </td>
-            <td id="speechVolumeTd">1</td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.audio.Speech.Phonetics.label"
-              title="Speak Callsigns and Gridsquares phonetically">Phonetics</td>
-            <td data-i18n="settings.audio.Speech.Phonetics.hover" title="Speak Callsigns and Gridsquares phonetically">
-              <input type="checkbox" id="speechPhonetics" onclick="changeSpeechValues()" />
-            </td>
-          </tr>
-        </table>
-
+      <div class="mapGroups">
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.Audio.label">Audio</div>
+          <table>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.audio.row.device.label">Device</td>
+              <td><div id="soundCardDiv"></div></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.audio.QSOLogEventFile.label">QSO Log Event Notification</td>
+              <td><select id="logEventMedia" onchange="newLogEventSetting(this); alertLogMessage();"></select></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.audio.File.Volume.label">File Audio Volume</td>
+              <td><input type="range" min="0.00" max="1" value="1" step="0.01" class="slider" id="audioVolume" oninput="changeAudioValues()" /><span id="audioVolumeTd" class="mapValue">1</span></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.audio.warnOnSoundcardsChanged.label" for="warnOnSoundcardsChanged">Warning On Change</label></td>
+              <td><input type="checkbox" id="warnOnSoundcardsChanged" onclick="changeWarnOnSoundcardsChanged()" /></td>
+            </tr>
+          </table>
+        </div>
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.alerts.CustomAlerts.new.notify.textToSpeech">Text-To-Speech</div>
+          <table>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.audio.row.voice.label">Voice</td>
+              <td id="voicesDiv"><select id="alertVoiceInput"></select></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.audio.Speech.Rate.label">Speech Rate</td>
+              <td><input type="range" min="0.1" max="10" value="1" step="0.1" class="slider" id="speechRate" oninput="changeSpeechValues()" /><span id="speechRateTd" class="mapValue">1</span></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.audio.Speech.Pitch.label">Speech Pitch</td>
+              <td><input type="range" min="0" max="2" value="1" step="0.1" class="slider" id="speechPitch" oninput="changeSpeechValues()" /><span id="speechPitchTd" class="mapValue">1</span></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.audio.Speech.Volume.label">Speech Volume</td>
+              <td><input type="range" min="0.1" max="1" value="1" step="0.05" class="slider" id="speechVolume" oninput="changeSpeechValues()" /><span id="speechVolumeTd" class="mapValue">1</span></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.audio.Speech.Phonetics.label" for="speechPhonetics">Phonetics</label></td>
+              <td><input type="checkbox" id="speechPhonetics" data-i18n="settings.audio.Speech.Phonetics.hover" title="Speak Callsigns and Gridsquares phonetically" onclick="changeSpeechValues()" /></td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
     <div id="logbookSettingsDiv" class="settingsTabcontent" style="padding: 5px">
-      <div  style="padding: 5px" class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.logbook.qslAuthority.label">QSL Location Authority</td>
-          </tr>
-          <tr>
-            <td>
-              <select id="qslAuthority" onchange="qslAuthorityChanged();">
-                <option value="L">LoTW</option>
-                <option value="Q">QRZ.com</option>
-                <option value="e">eQSL</option>
-                <option value="C">Clublog</option>
-                <option value="A">N3FJP</option>
-                <option value="O">Other</option>
-                <option value="0" data-i18n="settings.logbook.qslAuthority.lastLoaded">Last Loaded</option>
-                <option value="1">None</option>
-              </select>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <br />
-      <div style="padding: 5px" class="mapItem">
-        <div style="padding: 5px" class="mapItem"
-          data-i18n="settings.logbook.callsigns.hover" title="Filter Logbook QSOs to include these Callsigns only&#10;(comma separated)">
-          <table align="center" id="qsoCallsignsFound">
-            <tr>
-              <td data-i18n="settings.logbook.callsigns.label">Working Callsign(s)</td>
-            </tr>
-            <tr>
-              <td id="workingCallsignEnableTd" >
-                <label data-i18n="settings.logbook.callsigns.enable" for="workingCallsignEnable">Enable?</label>
-                <input data-i18n="settings.logbook.enableFiltering.hover" title="Enable Filtering" type="checkbox" id="workingCallsignEnable"
-                  onclick="workingCallsignEnableChanged(this);" />
-              </td>
-            </tr>
-            <tr>
-              <td id="workingCallsignsTd">
-                <label data-i18n="settings.logbook.callsigns.callsigns" for="workingCallsignsValue">Callsign(s)</label>
-                <input id="workingCallsignsValue" type="text" class="inputTextValue" size="15"
-                  onkeypress="return validCallsignsKeys(event.charCode);"
-                  oninput="workingCallsignsChanged(this);" />
-              </td>
-            </tr>
-          </table>
-        </div>
-        <div style="padding: 5px" class="mapItem"
-        data-i18n="settings.logbook.grids.hover" title="Filter Logbook QSOs to include these Grids only&#10;(comma separated)">
-        <table align="center" id="qsoGridsFound">
-          <tr>
-            <td data-i18n="settings.logbook.grids.label">Working Grid(s)</td>
-          </tr>
-          <tr>
-            <td id="workingGridEnableTd">
-              <label data-i18n="settings.logbook.callsigns.enable" for="workingGridEnable">Enable?</label>
-              <input data-i18n="settings.logbook.enableFiltering.hover" title="Enable Filtering" type="checkbox" id="workingGridEnable"
-                onclick="workingGridEnableChanged(this);" />
-            </td>
-          </tr>
-          <tr>
-            <td id="workingGridsTd">
-              <label data-i18n="settings.logbook.grids.grids" for="workingGridsValue">Grid(s)</label>
-              <input id="workingGridsValue" type="text" class="inputTextValue" size="15"
-                onkeypress="return validGridKeys(event.charCode);"
-                oninput="workingGridsChanged(this);" />
-            </td>
-          </tr>
-        </table>
-      </div>
-        <br />
-        <div style="padding: 5px" class="mapItem" data-i18n="settings.logbook.date.hover" title="Filter Logbook QSOs from before this Date">
-          <table align="center">
-            <tr>
-              <td data-i18n="settings.logbook.date.label"><b>Working Date</b></td>
-            </tr>
-            <tr>
-              <td id="workingDateEnableTd">
-                <label data-i18n="settings.logbook.date.enable" for="workingDateEnable">Enable?</label>
-                <input data-i18n="settings.logbook.enableFiltering.hover" title="Enable Filtering" type="checkbox" id="workingDateEnable"
-                  onclick="workingDateEnableChanged(this);" />
-              </td>
-            </tr>
+      <div class="mapGroups">
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.logbook.qslAuthority.label">QSL Location Authority</div>
+          <table>
             <tr>
               <td>
-                <div class="roundBorderValue" style="margin-bottom:5px; width: auto; font-size: larger; font-weight: bold"
-                 id="workingDateString">
-                  <span data-i18n="settings.logbook.date.none">No Date</span>
-                </div>
-              </td>
-              <td></td>
-            </tr>
-            <tr>
-              <td id="workingDateTd" data-i18n="settings.logbook.date.utc.hover" title="Date/Time is UTC">
-                <label data-i18n="settings.logbook.date.date" for="workingDateValue">UTC</label> <input type="datetime-local" id="workingDateValue" value="1970-01-01T00:00" style="background-color: green; color: yellow;" onchange="workingDateChanged()" />
+                <select id="qslAuthority" onchange="qslAuthorityChanged();">
+                  <option value="L">LoTW</option>
+                  <option value="Q">QRZ.com</option>
+                  <option value="e">eQSL</option>
+                  <option value="C">Clublog</option>
+                  <option value="A">N3FJP</option>
+                  <option value="O">Other</option>
+                  <option value="0" data-i18n="settings.logbook.qslAuthority.lastLoaded">Last Loaded</option>
+                  <option value="1">None</option>
+                </select>
               </td>
             </tr>
           </table>
+          <!-- Shown once the authority changes (handlers.js): reloads the logbooks, keeping the files on disk -->
+          <div class="mapApplyLine">
+            <div data-i18n="settings.logbook.apply.label" style="display: none" id="qslAuthorityApplyDiv" class="button" onclick="applyQslAuthority();" title="Apply Changes and Re-Import Logbook(s)">Apply Changes</div>
+          </div>
         </div>
-        <br />
-        <div data-i18n="settings.logbook.apply.label"
-          style="padding: 5px; display: none; font-size: larger; font-weight: bold; color: cyan"
-         id="applyCallsignsAndDateDiv" class="button" onclick="applyCallsignsAndDates();"
-          title="Apply Changes and Re-Import Logbook(s)">
-          Apply Changes
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.logbook.group.filters.label">Logbook Filters</div>
+          <table class="mapFilters">
+            <!-- adif.js titles the row labels with the callsigns / grids found in your logs -->
+            <tr>
+              <td class="mapRowLabel" id="qsoCallsignsFound" data-i18n="settings.logbook.callsigns.label">Working Callsign(s)</td>
+              <td id="workingCallsignsTd">
+                <label class="mapSrOnly" data-i18n="settings.logbook.callsigns.callsigns" for="workingCallsignsValue">Callsign(s)</label>
+                <input id="workingCallsignsValue" type="text" class="inputTextValue" size="15" data-i18n="settings.logbook.callsigns.hover" title="Filter Logbook QSOs to include these Callsigns only&#10;(comma separated)" onkeypress="return validCallsignsKeys(event.charCode);" oninput="workingCallsignsChanged(this);" />
+              </td>
+              <!-- Shown once there's something to filter by (workingFilters.js, loaders.js) -->
+              <td id="workingCallsignEnableTd">
+                <input data-i18n="settings.logbook.enableFiltering.hover" title="Enable Filtering" type="checkbox" id="workingCallsignEnable" onclick="workingCallsignEnableChanged(this);" />
+                <label data-i18n="settings.logbook.callsigns.enable" for="workingCallsignEnable">Enable?</label>
+              </td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" id="qsoGridsFound" data-i18n="settings.logbook.grids.label">Working Grid(s)</td>
+              <td id="workingGridsTd">
+                <label class="mapSrOnly" data-i18n="settings.logbook.grids.grids" for="workingGridsValue">Grid(s)</label>
+                <input id="workingGridsValue" type="text" class="inputTextValue" size="15" data-i18n="settings.logbook.grids.hover" title="Filter Logbook QSOs to include these Grids only&#10;(comma separated)" onkeypress="return validGridKeys(event.charCode);" oninput="workingGridsChanged(this);" />
+              </td>
+              <td id="workingGridEnableTd">
+                <input data-i18n="settings.logbook.enableFiltering.hover" title="Enable Filtering" type="checkbox" id="workingGridEnable" onclick="workingGridEnableChanged(this);" />
+                <label data-i18n="settings.logbook.callsigns.enable" for="workingGridEnable">Enable?</label>
+              </td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.logbook.date.hover" title="Filter Logbook QSOs from before this Date"><span data-i18n="settings.logbook.date.label">Working Date</span></td>
+              <td id="workingDateTd" data-i18n="settings.logbook.date.utc.hover" title="Date/Time is UTC">
+                <label data-i18n="settings.logbook.date.date" for="workingDateValue">UTC</label> <input type="datetime-local" id="workingDateValue" class="inputTextValue" value="1970-01-01T00:00" onchange="workingDateChanged()" />
+              </td>
+              <td id="workingDateEnableTd">
+                <input data-i18n="settings.logbook.enableFiltering.hover" title="Enable Filtering" type="checkbox" id="workingDateEnable" onclick="workingDateEnableChanged(this);" />
+                <label data-i18n="settings.logbook.date.enable" for="workingDateEnable">Enable?</label>
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td colspan="2">
+                <div class="roundBorderValue mapDatePill" id="workingDateString"><span data-i18n="settings.logbook.date.none">No Date</span></div>
+              </td>
+            </tr>
+          </table>
+          <!-- Shown once a filter changes (workingFilters.js) -->
+          <div class="mapApplyLine">
+            <div data-i18n="settings.logbook.apply.label" style="display: none" id="applyCallsignsAndDateDiv" class="button" onclick="applyCallsignsAndDates();" title="Apply Changes and Re-Import Logbook(s)">Apply Changes</div>
+          </div>
         </div>
-      </div>
-    </div>
-    <div id="gridSettingsDiv" class="settingsTabcontent">
-
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.grids.opacity.label" align="center">Grid Opacity</td>
-            <td align="left" id="showOpacityTd">10%</td>
-          </tr>
-          <tr align="center">
-            <td colspan="2">
-              <input type="range" min="16" max="255" value="136" step="1" class="slider" id="opacityValue"
-                oninput="changeGridOpacity()" onkeyup="redrawGrids()" onmouseup="redrawGrids()" />
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.grids.splitQSL.label" align="center">Split QSL Grids</td>
-          </tr>
-          <tr align="center">
-            <td data-i18n="settings.grids.splitQSL.hover" title="Toggle Split QSL Grids with Live Grids">
-              <input type="checkbox" id="splitQSLValue" onclick="changeSplitQSL()" />
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td data-i18n="settings.grids.AutoMouseOver.label" align="center">Auto Mouseover Grids</td>
-          </tr>
-          <tr align="center">
-            <td data-i18n="settings.grids.AutoMouseOver.hover" title="Toggle Auto Mouseover Grid Tables">
-              <input type="checkbox" id="mouseOverValue" onclick="changeMouseOverValue()" />
-            </td>
-          </tr>
-        </table>
-      </div>
-      <br />
-      <div class="mapItem" id="decayRateDiv">
-        <table align="center">
-          <tr align="center">
-            <td data-i18n="settings.grids.liveDecay.label" align="center">Live Grid Decay</td>
-          </tr>
-          <tr>
-            <td align="center" id="decayRateTd">10m</td>
-          </tr>
-          <tr align="center">
-            <td colspan="2">
-              <input type="range" min="0" max="86400" value="600" step="60" class="slider" id="gridDecay"
-                oninput="changeGridDecay()" onkeyup="redrawGrids()" onmouseup="redrawGrids()" />
-            </td>
-          </tr>
-        </table>
-      </div>
-      <div class="mapItem">
-        <table align="center">
-          <tr>
-            <td align="center" data-i18n="settings.grids.allGridOpacity.label">'All Grid Overlay' Opacity</td>
-            <td align="left" id="allGridOpacityTd">100%</td>
-          </tr>
-          <tr align="center">
-            <td colspan="2">
-              <input type="range" min="0.01" max="1" value="1" step="0.01" class="slider" id="allGridOpacityValue" oninput="setAllGridOpacity();" />
-            </td>
-          </tr>
-        </table>
       </div>
     </div>
     <div id="bandColorsSettingsDiv" class="settingsTabcontent">
-      <div class="mapItem" style="padding:10px;">
-        <div class="mapItem" style="height:49px;">
-          <table align="center">
-            <tr align="center">
-              <td data-i18n="settings.grids.reset.title" align="center"><b><i>Gridsquare Colors</i></b>
-            </tr>
-            <tr align="center">
-              <td data-i18n="settings.grids.reset.hover" title="Reset Gridsquare Colors To Default">
-                <div data-i18n="settings.grids.reset.label" class="button" onclick="resetGridsquareColors()">Reset Colors
-                </div>
-              </td>
-            </tr>
-          </table>
+      <div class="mapGroups mapColorsTab">
+        <div class="mapGroup">
+          <div class="mapGroupTitle mapTitleBar">
+            <span data-i18n="settings.grids.reset.title">Gridsquare Colors</span>
+            <span data-i18n="settings.grids.reset.hover" title="Reset Gridsquare Colors To Default"><div data-i18n="settings.grids.reset.label" class="button" onclick="resetGridsquareColors()">Reset Colors</div></span>
+          </div>
+          <div class="mapColorGrid">
+            <label class="mapColorItem" id="QSOgridDiv"><input type="color" id="QSOgridValue" value="#000000" oninput="changeGridsquareColor(this)" /><span data-i18n="settings.grids.QSO.label">QSO / Worked</span></label>
+            <label class="mapColorItem" id="QSLgridDiv"><input type="color" id="QSLgridValue" value="#000000" oninput="changeGridsquareColor(this)" /><span data-i18n="settings.grids.QSL.label">QSL / Confirmed</span></label>
+            <label class="mapColorItem" id="QSXgridDiv"><input type="color" id="QSXgridValue" value="#000000" oninput="changeGridsquareColor(this)" /><span data-i18n="settings.grids.QSX.label">QSX / Station-2-Station</span></label>
+            <label class="mapColorItem" id="QTHgridDiv"><input type="color" id="QTHgridValue" value="#000000" oninput="changeGridsquareColor(this)" /><span data-i18n="settings.grids.QTH.label">QTH / Home Gridsquare</span></label>
+            <label class="mapColorItem" id="CQgridDiv"><input type="color" id="CQgridValue" value="#000000" oninput="changeGridsquareColor(this)" /><span data-i18n="settings.grids.CQ.label">'CQ' Stations</span></label>
+            <label class="mapColorItem" id="CQDXgridDiv"><input type="color" id="CQDXgridValue" value="#000000" oninput="changeGridsquareColor(this)" /><span data-i18n="settings.grids.CQDX.label">'CQ DX' Stations</span></label>
+            <label class="mapColorItem" id="QRZgridDiv"><input type="color" id="QRZgridValue" value="#000000" oninput="changeGridsquareColor(this)" /><span data-i18n="settings.grids.QRZ.label">QRZ / Your Traffic</span></label>
+          </div>
         </div>
-
-        <div class="mapItem" id="QSOgridDiv">
-          <table align="center">
-            <tr align="center">
-              <td align="center" data-i18n="settings.grids.QSO.label"><b>QSO / Worked</b></td>
-            </tr>
-            <tr align="center">
-              <td colspan="2">
-                <input type="color" id="QSOgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
-              </td>
-            </tr>
-          </table>
+        <div class="mapGroup" id="bandColorsBox">
+          <div class="mapGroupTitle mapTitleBar">
+            <span data-i18n="settings.BandColors.label">Band Colors</span>
+            <span data-i18n="settings.BandColors.reset.hover" title="Reset Band Colors To Default"><div data-i18n="settings.grids.reset.label" class="button" onclick="resetBandColors()">Reset Colors</div></span>
+          </div>
+          <!-- One cell per band, built by mapSettings.js (renderBandColorSettings): the band in its color, then its swatch -->
+          <div id="bandColorsDiv" class="bandColorsGrid"></div>
         </div>
-        <div class="mapItem" id="QSLgridDiv">
-          <table align="center">
-            <tr align="center">
-              <td align="center" data-i18n="settings.grids.QSL.label"><b>QSL / Confirmed</b></td>
-            </tr>
-            <tr align="center">
-              <td colspan="2">
-                <input type="color" id="QSLgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
-              </td>
-            </tr>
-          </table>
-        </div>
-        <div class="mapItem" id="QSXgridDiv">
-          <table align="center">
-            <tr align="center">
-              <td align="center" data-i18n="settings.grids.QSX.label"><b>QSX / Station-2-Station</b></td>
-            </tr>
-            <tr align="center">
-              <td colspan="2">
-                <input type="color" id="QSXgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
-              </td>
-            </tr>
-          </table>
-        </div>
-        <br />
-        <div class="mapItem" id="CQgridDiv">
-          <table align="center">
-            <tr align="center">
-              <td align="center" data-i18n="settings.grids.CQ.label"><b>'CQ' Stations</b></td>
-            </tr>
-            <tr align="center">
-              <td colspan="2">
-                <input type="color" id="CQgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
-              </td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="mapItem" id="CQDXgridDiv">
-          <table align="center">
-            <tr align="center">
-              <td align="center" data-i18n="settings.grids.CQDX.label"><b>'CQ DX' Stations</b></td>
-            </tr>
-            <tr align="center">
-              <td colspan="2">
-                <input type="color" id="CQDXgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
-              </td>
-            </tr>
-          </table>
-        </div>
-        <div class="mapItem" id="QRZgridDiv">
-          <table align="center">
-            <tr align="center">
-              <td align="center" data-i18n="settings.grids.QRZ.label"><b>QRZ / Your Traffic</b></td>
-            </tr>
-            <tr align="center">
-              <td colspan="2">
-                <input type="color" id="QRZgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
-              </td>
-            </tr>
-          </table>
-        </div>
-        <div class="mapItem" id="QTHgridDiv">
-          <table align="center">
-            <tr align="center">
-              <td align="center" data-i18n="settings.grids.QTH.label"><b>QTH / Home Gridsquare</b></td>
-            </tr>
-            <tr align="center">
-              <td colspan="2">
-                <input type="color" id="QTHgridValue" value="#000000" oninput="changeGridsquareColor(this)" />
-              </td>
-            </tr>
-          </table>
-        </div>
-
-      </div>
-      <br />
-      <div class="mapItem" id="bandColorsBox" style="padding:10px;">
-        <div class="mapItem" style="height:49px;">
-          <table align="center">
-            <tr align="center">
-              <td data-i18n="settings.BandColors.label" align="center"><b><i>Band Colors</i></b></td>
-            </tr>
-            <tr align="center">
-              <td data-i18n="settings.BandColors.reset.hover" title="Reset Band Colors To Default">
-                <div data-i18n="settings.grids.reset.label" class="button" onclick="resetBandColors()">Reset Colors</div>
-              </td>
-            </tr>
-          </table>
-        </div>
-        <div id="bandColorsDiv" class="bandColorsGrid"></div>
       </div>
     </div>
     <div id="feedsSettingsDiv" class="settingsTabcontent">
-      <!-- The sources temp/feeds.js (the RTSN server's feeds worker) takes spots from; names stay English -->
-      <div style="text-align:center; font-weight:bold; margin:4px 0 2px 0;"><span data-i18n="settings.feeds.dxFeeds.label">DX Feeds</span><br /><span style="font-weight:normal;">(G7VRD: DX Cluster / CW Skimmer, Spothole)</span></div>
-      <div class="mapItem" style="padding:10px;">
-        <div class="mapItem feedGroups" id="feedMaxAgeDiv">
-          <div data-i18n="settings.feeds.maxAge.label">Feed Spots Max Age</div>
-          <input type="range" min="60" max="3600" value="300" step="60" class="slider" id="feedMaxAge"
-            data-i18n="settings.feeds.maxAge.hover" title="How long a feed spot is kept on the map after it was last spotted"
-            oninput="changeFeedMaxAge()" onkeyup="redrawDxcwSpots()" onmouseup="redrawDxcwSpots()" />
-          <div id="feedMaxAgeTd">5m</div>
+      <div class="mapGroups">
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="settings.feeds.dxFeeds.label">DX Feeds</div>
+          <table>
+            <!-- The sources temp/feeds.js (the RTSN server's feeds worker) takes spots from; names stay English -->
+            <tr>
+              <td colspan="2" class="mapNote">G7VRD: DX Cluster / CW Skimmer, Spothole</td>
+            </tr>
+            <tr id="feedMaxAgeDiv">
+              <td class="mapRowLabel" data-i18n="settings.feeds.maxAge.label">Feed Spots Max Age</td>
+              <td><input type="range" min="60" max="3600" value="300" step="60" class="slider" id="feedMaxAge" data-i18n="settings.feeds.maxAge.hover" title="How long a feed spot is kept on the map after it was last spotted" oninput="changeFeedMaxAge()" onkeyup="redrawDxcwSpots()" onmouseup="redrawDxcwSpots()" /><span id="feedMaxAgeTd" class="mapValue">5m</span></td>
+            </tr>
+            <tr id="feedsClearDiv">
+              <td></td>
+              <td><div data-i18n="settings.feeds.clear.label" class="button mapInlineButton" title="Clears all feed data received" onclick="clearFeedCallsigns()">Clear All Feeds</div></td>
+            </tr>
+          </table>
+          <!-- What the Feed Roster may alert through (network.js, renderFeedSpotsSettings) -->
+          <table class="mapChecks">
+            <tr><td><input type="checkbox" id="feedAlertScriptEnable" onchange="feedSpotAllowChanged()" /> <label data-i18n="roster.feeds.alertScript.label" for="feedAlertScriptEnable">Allow Alert Script</label></td></tr>
+            <tr><td><input type="checkbox" id="feedNotificationsEnable" onchange="feedSpotAllowChanged()" /> <label data-i18n="roster.feeds.notifications.label" for="feedNotificationsEnable">Allow Notifications (Pushover, Simplepush)</label></td></tr>
+          </table>
         </div>
-        <div class="mapItem feedGroups" id="feedsClearDiv">
-          <div data-i18n="settings.feeds.clear.label" class="button" title="Clears all feed data received" onclick="clearFeedCallsigns()">Clear All Feeds</div>
+      </div>
+      <!-- Which feed spots the Feed Roster and the map show; the ticks are drawn by network.js (renderFeedSpotsSettings) -->
+      <div class="mapGroups">
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="roster.feeds.modes.label">Modes</div>
+          <div id="feedSpotModesDiv" class="feedBands"></div>
         </div>
-      </div>
-      <!-- Which feed spots the Feed Roster and the map show, and the Feed Roster's alerts (network.js, renderFeedSpotsSettings) -->
-      <br />
-      <div class="mapItem feedSpotsBox" align="center">
-        <div data-i18n="roster.feeds.modes.label">Modes</div>
-        <div id="feedSpotModesDiv" class="feedBands"></div>
-      </div>
-      <br />
-      <div class="mapItem feedSpotsBox" align="center">
-        <div data-i18n="roster.feeds.bands.label">Bands</div>
-        <div id="feedSpotBandsDiv" class="feedBands"></div>
-      </div>
-      <br />
-      <div class="mapItem feedSpotsBox" align="center">
-        <table>
-          <tr>
-            <td align="left">
-              <input type="checkbox" id="feedAlertScriptEnable" onchange="feedSpotAllowChanged()" />
-              <label data-i18n="roster.feeds.alertScript.label" for="feedAlertScriptEnable">Allow Alert Script</label>
-            </td>
-          </tr>
-          <tr>
-            <td align="left">
-              <input type="checkbox" id="feedNotificationsEnable" onchange="feedSpotAllowChanged()" />
-              <label data-i18n="roster.feeds.notifications.label" for="feedNotificationsEnable">Allow Notifications (Pushover, Simplepush)</label>
-            </td>
-          </tr>
-        </table>
+        <div class="mapGroup">
+          <div class="mapGroupTitle" data-i18n="roster.feeds.bands.label">Bands</div>
+          <div id="feedSpotBandsDiv" class="feedBands"></div>
+        </div>
       </div>
     </div>
     <div id="mapSettingsDiv" class="settingsTabcontent" style="background-color: #00000044; text-shadow: 0 0 5px #000000ff">
-      <div class="flexSettingDiv" >
-        <div class="flexItem">
-            <label data-i18n="settings.map.current.label">Current Map</label>
-
-            <div>
-              <select id="mapSelect" value="terrain-background" onchange="changeMapValues();"></select>
-              <select id="offlineMapSelect" value="terrain-background" onchange="changeOfflineMap();"></select>
-              <br>
-              <div id="mapApiKeyTr">
-                <label data-i18n="settings.logging.QRZcom.details.apikey" for="mapApiKeyInput">API Key</label>
-                <input id="mapApiKeyInput" type="text" class="inputTextValue"  size="21" oninput="mapApiKeyInputChanged()" /><br>
-                <div id="mapApiKeyApplyDiv" data-i18n="settings.Update.label" class="button" onclick="changeMapLayer()">Apply Changes</div>
-            </div>
-            </div>
+      <div class="mapGroups" id="mapSettingsGroups">
+        <div class="mapGroup mapBoxBase">
+          <div class="mapGroupTitle" data-i18n="settings.map.group.baseMap.label">Base Map</div>
+          <table>
+            <tr>
+              <th></th>
+              <th data-i18n="settings.map.col.day.label">Day</th>
+              <th class="nightMapOnly" data-i18n="settings.map.col.night.label">Night</th>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.map.row.map.label">Map</td>
+              <td>
+                <select id="mapSelect" data-i18n="settings.map.current.hover" value="terrain-background" onchange="changeMapValues();"></select>
+                <select id="offlineMapSelect" value="terrain-background" onchange="changeOfflineMap();"></select>
+                <div id="mapApiKeyTr">
+                  <label data-i18n="settings.logging.QRZcom.details.apikey" for="mapApiKeyInput">API Key</label>
+                  <input id="mapApiKeyInput" type="text" class="inputTextValue"  size="21" oninput="mapApiKeyInputChanged()" /><br>
+                  <div id="mapApiKeyApplyDiv" data-i18n="settings.Update.label" class="button" onclick="changeMapLayer()">Apply Changes</div>
+                </div>
+              </td>
+              <td class="nightMapOnly">
+                <select id="mapNightSelect" data-i18n="settings.map.NightMap.select.hover" value="18" onchange="changeMapNightValues();"></select>
+                <select id="offlineMapNightSelect" value="terrain-background" onchange="changeOfflineNightMap();"></select>
+                <div id="nightMapApiKeyTr">
+                  <label data-i18n="settings.logging.QRZcom.details.apikey" for="nightMapApiKeyInput">API Key</label>
+                  <input id="nightMapApiKeyInput" type="text" class="inputTextValue"  size="21" oninput="nightMapApiKeyInputChanged()" /><br>
+                  <div id="nightMapApiKeyApplyDiv" data-i18n="settings.Update.label" class="button" onclick="changeMapLayer()">Apply Changes</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.map.Brightness.label">Brightness</td>
+              <td><input type="range" min="0" max="1" value="1" step="0.01" class="slider" id="brightnessValue" oninput="changeMapValues()" /></td>
+              <td class="nightMapOnly"><input type="range" min="0" max="1" value="1" step="0.01" class="slider" id="nightBrightnessValue" oninput="changeMapNightValues()" /></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.map.backgroundColor.label" for="mapBackgroundColor">Background Color</label></td>
+              <td><input type="color" value="#000000" id="mapBackgroundColor" style="cursor:pointer;" oninput="changeMapBackgroundColor()" /></td>
+              <td class="nightMapOnly"></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.map.AutoNight.enable.label" for="nightMapEnable">Auto Night Map</label></td>
+              <td><input type="checkbox" id="nightMapEnable" data-i18n="settings.map.AutoNight.enable.hover" onclick="changeNightMapEnable(this);" /></td>
+              <td class="nightMapOnly"></td>
+            </tr>
+          </table>
         </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.NightMap.select.label" >Night Map</label>
-          <div>
-            <select id="mapNightSelect" value="18" onchange="changeMapNightValues();"></select>
-            <select id="offlineMapNightSelect" value="terrain-background" onchange="changeOfflineNightMap();"></select>
-            <br>
-            <div id="nightMapApiKeyTr">
-              <label data-i18n="settings.logging.QRZcom.details.apikey" for="nightMapApiKeyInput">API Key</label>
-              <input id="nightMapApiKeyInput" type="text" class="inputTextValue"  size="21" oninput="nightMapApiKeyInputChanged()" /><br>
-              <div id="nightMapApiKeyApplyDiv" data-i18n="settings.Update.label" class="button" onclick="changeMapLayer()">Apply Changes</div>
-            </div>
-          </div>
+        <div class="mapGroup mapBoxPaths">
+          <div class="mapGroupTitle" data-i18n="settings.map.group.paths.label">Paths</div>
+          <table>
+            <tr>
+              <th></th>
+              <th data-i18n="settings.map.col.width.label">Width</th>
+              <th data-i18n="settings.map.col.color.label">Color</th>
+              <th class="nightMapOnly" data-i18n="settings.map.col.nightColor.label">Night Color</th>
+            </tr>
+            <tr>
+              <td class="mapRowLabel">QSX</td>
+              <td><input type="range" min="0.0" max="8" value="1.5" step="0.1" class="slider" id="pathWidthValue" oninput="changePathValues()" /><span id="pathWidthTd" class="mapValue">1.5</span></td>
+              <td><div class="mapSwatch" id="pathColorDiv"><input type="range" min="0" max="361" value="0" class="slider" id="pathColorValue" oninput="changePathValues()" /></div></td>
+              <td class="nightMapOnly"><div class="mapSwatch" id="pathNightColorDiv"><input type="range" min="0" max="361" value="0" class="slider" id="nightPathColorValue" oninput="changeMapNightPathValues()" /></div></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel">QRZ</td>
+              <td><input type="range" min="0.0" max="10" value="1.5" step="0.1" class="slider" id="qrzPathWidthValue" oninput="changePathValues()" /><span id="qrzPathWidthTd" class="mapValue">1.5</span></td>
+              <td><div class="mapSwatch" id="qrzPathColorDiv"><input type="range" min="0" max="361" value="360" class="slider" id="qrzPathColorValue" oninput="changePathValues()" /></div></td>
+              <td class="nightMapOnly"><div class="mapSwatch" id="pathNightQrzColorDiv"><input type="range" min="0" max="361" value="0" class="slider" id="nightQrzPathColorValue"  oninput="changeMapNightPathValues()" /></div></td>
+            </tr>
+            <!-- spots.js hides this row (spotPathWidthDiv) and spotPathColorDiv while RX spotting is off -->
+            <tr id="spotPathWidthDiv">
+              <td class="mapRowLabel" data-i18n="settings.map.row.rxSpot.label">RX Spot</td>
+              <td><input type="range" min="0" max="5" value="1.5" step="0.05" class="slider" id="spotWidthValue" oninput="spotPathChange();" onkeyup="redrawSpots();" onmouseup="redrawSpots();" /><span id="spotWidthTd" class="mapValue">1.5</span></td>
+              <td>
+                <div class="mapSwatch" id="spotPathColorDiv">
+                  <input type="range" min="-1" max="361" value="-1" class="slider" id="spotPathColorValue" oninput="spotPathChange();" onkeyup="redrawSpots();" onmouseup="redrawSpots();" />
+                  <div><label data-i18n="settings.map.RXSpotPath.color.default" id="spotPathInfoLabel">Band Colors Palette</label></div>
+                </div>
+              </td>
+              <td class="nightMapOnly"><div class="mapSwatch" id="spotNightPathColorDiv"><input type="range" min="-1" max="361" value="-1" class="slider" id="spotNightPathColorValue" oninput="spotPathChange();" onkeyup="redrawSpots();" onmouseup="redrawSpots();" /></div></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.map.row.animate.label" for="animateValue">Animate</label></td>
+              <td colspan="3">
+                <input type="checkbox" id="animateValue" data-i18n="settings.map.animatePaths.hover" onclick="changeAnimate()" />
+                <input data-i18n="settings.map.animateSpeed.hover" title="Animation Speed" type="range" min="1" max="20" value="10" step="1" class="slider" id="animateSpeedValue" oninput="changeAnimateSpeedValue()" />
+              </td>
+            </tr>
+          </table>
         </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.backgroundColor.label" for="mapBackgroundColor">Background Color</label>
-          <div>
-            <input type="color" value="#000000" id="mapBackgroundColor" style="cursor:pointer;" oninput="changeMapBackgroundColor()" />
-          </div>
+        <div class="mapGroup mapBoxGrayline">
+          <div class="mapGroupTitle" data-i18n="settings.map.group.grayline.label">Grayline</div>
+          <table>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.map.row.darkness.label">Darkness</td>
+              <td><input type="range" min="0.03" max="0.70" value="0.1" step="0.01" class="slider" id="graylineValue" oninput="changeGrayline()" /><span id="showDarknessTd" class="mapValue">10%</span></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.map.row.terminator.label">Terminator</td>
+              <td><input type="range" min="0" max="3" value="1" step="0" class="slider" id="mapTerminatorValue" oninput="mapTerminatorChange();" /><span id="mapTerminatorTd" class="mapValue">Civil</span></td>
+            </tr>
+          </table>
         </div>
-        <br>
-        <div class="flexItem">
-          <label data-i18n="settings.map.Brightness.label">Brightness</label>
-          <input type="range" min="0" max="1" value="1" step="0.01" class="slider" id="brightnessValue" oninput="changeMapValues()" />
+        <div class="mapGroup mapBoxOverlays">
+          <div class="mapGroupTitle" data-i18n="settings.map.group.overlays.label">Overlays</div>
+          <table>
+            <tr>
+              <th></th>
+              <th></th>
+              <th data-i18n="settings.map.col.color.label">Color</th>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.map.row.rangeRings.label">Range Rings Spacing</td>
+              <td><input type="range" min="100" max="19500" value="2500" step="100" class="slider" id="rangeRingDistanceValue" oninput="changeRangeRingDistance(event)" /><span id="rangeRingDistanceTd" class="mapValue">2500 km</span></td>
+              <!-- overlays.js draws the rings and the meridians in these swatches' background colors -->
+              <td><div class="mapSwatch" id="rangeRingColorDiv"><input type="range" min="0" max="361" value="0" class="slider" id="rangeRingColorValue" oninput="changeRangeRingColor()" /></div></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.map.row.meridians.label" for="equatorColorValue">Meridians &amp; Parallels</label></td>
+              <td></td>
+              <td><div class="mapSwatch" id="equatorColorDiv"><input type="range" min="0" max="361" value="0" class="slider" id="equatorColorValue" oninput="changeEquatorColor()" /></div></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.map.row.predOpacity.label">Prediction Opacity</td>
+              <td><input type="range" min="0.05" max="1" value="0.3" step="0.01" class="slider" id="predOpacityValue" oninput="changePredOpacityValue();" /><span id="predOpacityTd" class="mapValue">0.3</span></td>
+              <td></td>
+            </tr>
+          </table>
         </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.animatePaths.label" for="animateValue">Animate Active Paths</label>
-          <input type="checkbox" id="animateValue" onclick="changeAnimate()" />
-          <input data-i18n="settings.map.animateSpeed.hover" title="Animation Speed" type="range" min="1" max="20" value="10" step="1" class="slider" id="animateSpeedValue" oninput="changeAnimateSpeedValue()" />
+        <div class="mapGroup mapBoxGrids">
+          <div class="mapGroupTitle" data-i18n="settings.Grids.label">Grids</div>
+          <table>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.grids.opacity.label">Grid Opacity</td>
+              <td><input type="range" min="16" max="255" value="136" step="1" class="slider" id="opacityValue" oninput="changeGridOpacity()" onkeyup="redrawGrids()" onmouseup="redrawGrids()" /><span id="showOpacityTd" class="mapValue">10%</span></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel" data-i18n="settings.grids.allGridOpacity.label">'All Grid Overlay' Opacity</td>
+              <td><input type="range" min="0.01" max="1" value="1" step="0.01" class="slider" id="allGridOpacityValue" oninput="setAllGridOpacity();" /><span id="allGridOpacityTd" class="mapValue">100%</span></td>
+            </tr>
+            <tr id="decayRateDiv">
+              <td class="mapRowLabel" data-i18n="settings.grids.liveDecay.label">Live Grid Decay</td>
+              <td><input type="range" min="0" max="86400" value="600" step="60" class="slider" id="gridDecay" oninput="changeGridDecay()" onkeyup="redrawGrids()" onmouseup="redrawGrids()" /><span id="decayRateTd" class="mapValue">10m</span></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.grids.splitQSL.label" for="splitQSLValue">Split QSL Grids</label></td>
+              <td><input type="checkbox" id="splitQSLValue" data-i18n="settings.grids.splitQSL.hover" title="Toggle Split QSL Grids with Live Grids" onclick="changeSplitQSL()" /></td>
+            </tr>
+            <tr>
+              <td class="mapRowLabel"><label data-i18n="settings.grids.AutoMouseOver.label" for="mouseOverValue">Auto Mouseover Grids</label></td>
+              <td><input type="checkbox" id="mouseOverValue" data-i18n="settings.grids.AutoMouseOver.hover" title="Toggle Auto Mouseover Grid Tables" onclick="changeMouseOverValue()" /></td>
+            </tr>
+          </table>
         </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.GraylineDarkness.label">Grayline Darkness</label>
-          <input type="range" min="0.03" max="0.70" value="0.1" step="0.01" class="slider" id="graylineValue" oninput="changeGrayline()" />
-          <label id="showDarknessTd">10%</label>
+        <div class="mapGroup mapBoxDisplay">
+          <div class="mapGroupTitle" data-i18n="settings.map.group.display.label">Display</div>
+          <table class="mapChecks">
+            <tr><td><input type="checkbox" id="fitQRZvalue" data-i18n="settings.map.FitMapToQRZ.hover" onclick="changeFitQRZvalue()" /> <label data-i18n="settings.map.FitMapToQRZ.label" for="fitQRZvalue">Fit Map To QRZ</label></td></tr>
+            <tr><td><input type="checkbox" id="CqHiliteValue" data-i18n="settings.map.CQHighlight.hover" onclick="changeCqHiliteValue(this);" /> <label data-i18n="settings.map.CQHighlight.label" for="CqHiliteValue">Outline Directed CQ Areas</label></td></tr>
+            <tr><td><input type="checkbox" id="qrzDxccFallbackValue" data-i18n="settings.map.MissingGrid.hover" onclick="changeQrzDxccFallbackValue();" /> <label data-i18n="settings.map.MissingGrid.label" for="qrzDxccFallbackValue">QRZ DXCC Fallback</label></td></tr>
+            <tr><td><input type="checkbox" id="mergeOverlayValue" data-i18n="settings.map.MergeAward.hover" onclick="changeMergeOverlayValue()" /> <label data-i18n="settings.map.MergeAward.label" for="mergeOverlayValue">Keep Other Layers With Award View</label></td></tr>
+            <tr><td><input type="checkbox" id="groupSpotsEnable" data-i18n="settings.map.groupSpots.hover" title="POTA, SOTA and DX Feeds spots whose markers would overlap are shown as one marker" onclick="changeGroupSpots(this);" /> <label data-i18n="settings.map.groupSpots.label" for="groupSpotsEnable">Group Overlapping Spots</label></td></tr>
+            <tr><td><label data-i18n="settings.map.transparency.label" for="mapTransValue">Map Settings Transparency</label> <input type="range" min="0" max="1" value="0.5" step="0.01" class="slider" id="mapTransValue" oninput="mapTransChange();" /><span id="mapTransTd" class="mapValue">50%</span></td></tr>
+          </table>
         </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.MergeAward.label" for="mergeOverlayValue">Merge Award Overlay</label>
-          <input type="checkbox" id="mergeOverlayValue" onclick="changeMergeOverlayValue()" />
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.FitMapToQRZ.label" for="fitQRZvalue" >Fit Map To QRZ</label>
-          <input type="checkbox" id="fitQRZvalue" onclick="changeFitQRZvalue()" />
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.CQHighlight.label" for="CqHiliteValue">'CQ' Highlighting</label>
-          <input type="checkbox" id="CqHiliteValue" onclick="changeCqHiliteValue(this);" />
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.MissingGrid.label" for="qrzDxccFallbackValue" >QRZ DXCC Fallback</label>
-          <input type="checkbox" id="qrzDxccFallbackValue" onclick="changeQrzDxccFallbackValue();" />
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.predOpacity.label">Prediction Layer Opacity</label>
-          <input type="range" min="0.05" max="1" value="0.3" step="0.01" class="slider" id="predOpacityValue" oninput="changePredOpacityValue();" />
-          <label id="predOpacityTd">0.3</label>
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.QSXPath.width.label" >QSX Path Width</label>
-          <input type="range" min="0.0" max="8" value="1.5" step="0.1" class="slider" id="pathWidthValue" oninput="changePathValues()" />
-          <label id="pathWidthTd">1.5</label>
-        </div>
-        <div class="flexItem" id="pathColorDiv">
-          <label data-i18n="settings.map.QSXPath.color.label">QSX Path Color</label>
-          <input type="range" min="0" max="361" value="0" class="slider" id="pathColorValue" oninput="changePathValues()" />
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.QRZPath.width.label" >QRZ Path Width</label>
-          <input type="range" min="0.0" max="10" value="1.5" step="0.1" class="slider" id="qrzPathWidthValue" oninput="changePathValues()" />
-          <label id="qrzPathWidthTd">1.5</label>
-        </div>
-        <div class="flexItem" id="qrzPathColorDiv">
-          <label data-i18n="settings.map.QRZPath.color.label" >QRZ Path Color</label>
-          <input type="range" min="0" max="361" value="360" class="slider" id="qrzPathColorValue" oninput="changePathValues()" />
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.RangeRings.spacing.label">Range Rings Spacing</label>
-          <input type="range" min="100" max="19500" value="2500" step="100" class="slider" id="rangeRingDistanceValue" oninput="changeRangeRingDistance(event)" />
-          <label id="rangeRingDistanceTd">2500 km</label>
-        </div> 
-        <div class="flexItem" id="rangeRingColorDiv">
-          <label data-i18n="settings.map.RangeRings.color.label">Range Rings Color</label>
-          <input type="range" min="0" max="361" value="0" class="slider" id="rangeRingColorValue" oninput="changeRangeRingColor()" />
-        </div>
-        <div class="flexItem" id="spotPathColorDiv">
-          <label data-i18n="settings.map.RXSpotPath.color.label">RX Spot Color</label>
-          <input type="range" min="-1" max="361" value="-1" class="slider" id="spotPathColorValue" oninput="spotPathChange();" onkeyup="redrawSpots();" onmouseup="redrawSpots();" />
-          <label data-i18n="settings.map.RXSpotPath.color.default" id="spotPathInfoLabel">Band Colors Palette</label>
-        </div>
-        <div class="flexItem" id="spotPathWidthDiv">
-          <label data-i18n="settings.map.RXSpotPath.width.label" >Spot Path Width</label>
-          <input type="range" min="0" max="5" value="1.5" step="0.05" class="slider" id="spotWidthValue" oninput="spotPathChange();" onkeyup="redrawSpots();" onmouseup="redrawSpots();" />
-          <label id="spotWidthTd">1.5</label>
-        </div>
-        <div class="flexItem" id="equatorColorDiv">
-          <label data-i18n="settings.map.equator.color.label" for="equatorColorValue">Meridians and Parallels Color</label>
-          <input type="range" min="0" max="361" value="0" class="slider" id="equatorColorValue" oninput="changeEquatorColor()" />
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.terminator.label" >Grayline Terminator</label>
-          <input type="range" min="0" max="3" value="1" step="0" class="slider" id="mapTerminatorValue" oninput="mapTerminatorChange();" />
-          <label id="mapTerminatorTd">Civil</label>
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.transparency.label" >Map Settings Transparency</label>
-          <input type="range" min="0" max="1" value="0.5" step="0.01" class="slider" id="mapTransValue" oninput="mapTransChange();" />
-          <label id="mapTransTd">50%</label>
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.groupSpots.label" for="groupSpotsEnable">Group Overlapping Spots</label>
-          <input type="checkbox" id="groupSpotsEnable" data-i18n="settings.map.groupSpots.hover" title="POTA, SOTA and DX Feeds spots whose markers would overlap are shown as one marker" onclick="changeGroupSpots(this);" />
-        </div>
-        <div class="flexItem">
-          <label data-i18n="settings.map.AutoNight.enable.label" for="nightMapEnable">Auto Night Map</label>
-          <input type="checkbox" id="nightMapEnable" onclick="changeNightMapEnable(this);" />
-        </div>
-        <span id="nightMapSpan">
-          <br>
-          <div class="flexItem" id="pathNightColorDiv">
-            <label data-i18n="settings.map.NightQSXPath.color.label" >Night QSX Path Color</label>
-            <input type="range" min="0" max="361" value="0" class="slider" id="nightPathColorValue" oninput="changeMapNightPathValues()" />
-          </div>
-          <div class="flexItem" id="pathNightQrzColorDiv">
-            <label data-i18n="settings.map.NightQRZPath.color.label">Night QRZ Path Color</label>
-            <input type="range" min="0" max="361" value="0" class="slider" id="nightQrzPathColorValue"  oninput="changeMapNightPathValues()" />
-          </div>
-          <div class="flexItem" id="spotNightPathColorDiv">
-            <label data-i18n="settings.map.NightRXSpot.color.label">Night Spot Color</label>
-            <input type="range" min="-1" max="361" value="-1" class="slider" id="spotNightPathColorValue" oninput="spotPathChange();" onkeyup="redrawSpots();" onmouseup="redrawSpots();" />
-          </div>
-          <div class="flexItem">
-            <label data-i18n="settings.map.NightBrightness.label" >Night Brightness</label>
-            <input type="range" min="0" max="1" value="1" step="0.01" class="slider" id="nightBrightnessValue" oninput="changeMapNightValues()" />
-          </div>
-        </span>
       </div>
     </div>
     <div id="logSettingsDiv" class="settingsTabcontent">
-        <table class="darkTable" align="center">
-          <tr>
-            <th data-i18n="settings.logging.tableheader.source">Source/Sync</th>
-            <th>Connect?</th>
-            <th data-i18n="settings.logging.tableheader.menu">Menu?</th>
-            <th data-i18n="settings.logging.tableheader.startup">Startup?</th>
-            <th data-i18n="settings.logging.tableheader.log">Log?</th>
-            <th data-i18n="settings.logging.tableheader.details">Details</th>
-            <th data-i18n="settings.logging.tableheader.test">Test</th>
-            <th data-i18n="settings.logging.tableheader.result">Result</th>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.appLogs.label">App Log(s)</td>
-            <td></td>
-            <td></td>
-            <td>
-               <div data-i18n="settings.logging.LocalFiles.details.add" class="button" onclick="GT.appLogsFileSelector.click()">Add File</div>
-            </td>
-            <td>
-            </td>
-            <td>
-                <table align="center" class="subtable">
-                  <tr>
-                    <td>
-                      <div id="appLogsFilesDiv"></div>
-                    </td>
-                  </tr>
-                </table>
-            </td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.gridtracker.source">GridTracker2</td>
-            <td></td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="loadGTCheckBox" onclick="adifStartupCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <input type="checkbox" id="logGTqsoCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" />
-            </td>
-            <td><div onClick="openBackupLogsFolder()" data-i18n="settings.logging.gridtracker.details" class="button">Backup Logs</div></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.LocalFiles.source">Local File(s)</td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="buttonAdifCheckBox" onclick="adifMenuCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <input type="checkbox" id="loadAdifCheckBox"
-                onclick="adifStartupCheckBoxChanged(this);" />
-            </td>
-            <td></td>
-            <td>
-              <div id="selectFileOnStartupDiv" style="display: none">
-                <table align="center" class="subtable">
-                  <tr>
-                    <td>
-                      <div data-i18n="settings.logging.LocalFiles.details.add" class="button" onClick="adifLoadDialog()">Add File</div>
-                    </td>
-                    <td>
-                      <div id="startupLogFileDiv"></div>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-            </td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr id="pskTr">
-            <td data-i18n="settings.logging.PSKReporter.source">PSK-Reporter</td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="buttonPsk24CheckBox"
-                onclick="adifMenuCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <input type="checkbox" id="loadPsk24CheckBox"
-                onclick="adifStartupCheckBoxChanged(this);" />
-            </td>
-            <td></td>
-            <td>
-              <div data-i18n="settings.logging.PSKReporter.details" id="pskDaysDiv">24 Hour History</div>
-            </td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.QRZcom.source">QRZ.com</td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="buttonQRZCheckBox" onclick="adifMenuCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <input type="checkbox" id="loadQRZCheckBox" onclick="adifStartupCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <input type="checkbox" id="logQRZqsoCheckBox"
-                onclick="adifLogQsoCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.QRZcom.details.apikey" for="qrzApiKey">API Key</label>
-              <input id="qrzApiKey" type="password" class="inputTextValue" size="21"
-                oninput="ValidateQrzApi(this); adifTextValueChange(this);" />
-            </td>
-            <td>
-              <div data-i18n="settings.logging.QRZcom.test.button" class="button"
-                onclick="if ( ValidateQrzApi(qrzApiKey ) ) grabQrzComLog(true);">Test</div>
-            </td>
-            <td id="qrzTestResult"></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.ClubLog.source">ClubLog</td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="buttonClubCheckBox" onclick="adifMenuCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <input type="checkbox" id="loadClubCheckBox"
-                onclick="adifStartupCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <input type="checkbox" id="logClubqsoCheckBox"
-                onclick="adifLogQsoCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.ClubLog.details.callsign" for="clubCall">Callsign</label>
-              <input id="clubCall" type="text" class="inputTextValue" size="8" oninput=" ValidateText(this);
-                  adifTextValueChange(this);" />
-              <label data-i18n="settings.logging.ClubLog.details.password" for="clubPassword">Password</label>
-              <input id="clubPassword" type="password" class="inputTextValue" size="8"
-                oninput=" ValidateText(this); adifTextValueChange(this);" />
-              <br />
-              <label data-i18n="settings.logging.ClubLog.details.email" for="clubEmail">Email</label>
-              <input id="clubEmail" type="text" class="inputTextValue" size="20"
-                oninput="ValidateText(this); adifTextValueChange(this);" />
-            </td>
-            <td>
-              <div data-i18n="settings.logging.ClubLog.test.button" class="button"
-                onclick="if ( ValidateText(clubEmail) && ValidateText(clubPassword) ) grabClubLog(true);">
-                Test
-              </div>
-            </td>
-            <td id="clubTestResult"></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.HRDLogNet.source">HRDLOG.net</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="logHRDLOGqsoCheckBox"
-                onclick="adifLogQsoCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.HRDLogNet.details.callsign" for="HRDLOGCallsign">Callsign</label>
-              <input id="HRDLOGCallsign" type="text" class="inputTextValue" size="12"
-                oninput="ValidateText(this); adifTextValueChange(this);" />
-              <label data-i18n="settings.logging.HRDLogNet.details.upcode" for="HRDLOGUploadCode">Upload Code</label>
-              <input id="HRDLOGUploadCode" type="password" class="inputTextValue" size="8"
-                oninput=" ValidateText(this); adifTextValueChange(this);" />
-              <br />
-              <a href="http://www.hrdlog.net/docs/Tips.aspx#upcode" target="_blank"
-                data-i18n="settings.logging.HRDLogNet.details.help.label"
-                title="Click to learn how to get upload code">*** How to get upload code ***</a>
-            </td>
-            <td>
-              <div data-i18n="settings.logging.HRDLogNet.test.button" class="button"
-                onclick="if ( ValidateText(HRDLOGCallsign) && ValidateText(HRDLOGUploadCode) ) hrdCredentialTest(true);">
-                Test
-              </div>
-            </td>
-            <td id="HRDLogTestResult"></td>
-          </tr>
-          <tr>
-            <td>Cloudlog/Wavelog</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="logCloudlogQSOCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.CloudLog.details.URL" for="CloudlogURL">URL</label>
-              <input id="CloudlogURL" type="text" class="inputTextValue" size="35"
-                oninput="ValidateText(this); CloudLogCorrectURL(false); adifTextValueChange(this);" />
-              <br />
-              <label data-i18n="settings.logging.CloudLog.details.API" for="CloudlogAPI">API Key</label>
-              <input id="CloudlogAPI" type="password" class="inputTextValue" size="12"
-                oninput="ValidateText(this); adifTextValueChange(this);" />
-              <br />
-              <label data-i18n="settings.logging.CloudLog.details.StationProfile" for="CloudlogStationProfileID">Station Profile</label>
-              <select id="CloudlogStationProfileID" onchange="CloudLogProfileChanged(this)">
-                <option value="1" selected="true" data-i18n="settings.logging.Cloudlog.pressTest">Press Test</option>
-              </select>
-            </td>
-            <td>
-              <div data-i18n="settings.logging.CloudLog.test.button" class="button" onclick="CloudlogTest(true);">Test</div>
-            </td>
-            <td id="CloudlogTestResult"></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.eQSLcc.source">eQSL.cc</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="logeQSLQSOCheckBox"
-                onclick="adifLogQsoCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.eQSLcc.details.user" for="eQSLUser">User</label>
-              <input id="eQSLUser" type="text" class="inputTextValue" size="8"
-                oninput="ValidateText(this); adifTextValueChange(this);" />
-              <label data-i18n="settings.logging.eQSLcc.details.password" for="eQSLPassword">Password</label>
-              <input id="eQSLPassword" type="password" class="inputTextValue" size="8"
-                oninput=" ValidateText(this); adifTextValueChange(this);" /><br />
-              <label data-i18n="settings.logging.eQSLcc.details.QTHnick" for="nicknameeQSLCheckBox">QTH Nickname</label>
-              <input type="checkbox" id="nicknameeQSLCheckBox"
-                onclick="adifNicknameCheckBoxChanged(this);" />
-              <input id="eQSLNickname" style="display: none" type="text" class="inputTextValue" size="12"
-                oninput=" ValidateText(this); adifTextValueChange(this);" />
-            </td>
-            <td>
-              <div data-i18n="settings.logging.eQSLcc.test.button" class="button"
-                onclick="if ( ValidateText(eQSLUser) && ValidateText(eQSLPassword) ) eQSLTest(true);">
-                Test
-              </div>
-            </td>
-            <td id="eQSLTestResult"></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.LoTW.source">LotW</td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="buttonLOTWCheckBox" onclick="adifMenuCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <input type="checkbox" id="loadLOTWCheckBox"
-                onclick="adifStartupCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <input type="checkbox" id="logLOTWqsoCheckBox"
-                onclick="adifLogQsoCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.LoTW.details.login" for="lotwLogin">Login</label>
-              <input id="lotwLogin" type="text" class="inputTextValue" size="8" oninput="ValidateText(this);
-                  adifTextValueChange(this);" />
-              <label data-i18n="settings.logging.LoTW.details.password" for="lotwPassword">Password</label>
-              <input id="lotwPassword" type="password" class="inputTextValue" size="8"
-                oninput="ValidateText(this); adifTextValueChange(this);" /><br />
-              <div id="lotwUpload">
-                <div style="display: inline-block">
-                <div data-i18n="settings.logging.LoTW.details.TQSLPath" class="flexButton" style="display: inline-block" id="selectTQSLButton">TQSL Path
+      <div class="mapGroups mapLogging">
+        <div class="mapGroup mapHalf">
+          <div class="mapGroupTitle" data-i18n="settings.logging.group.pc.label">Logbooks On This Computer</div>
+          <table>
+            <tr>
+              <th></th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.menu">Menu Button</th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.startup.hover" title="Load at Startup"><span data-i18n="settings.logging.tableheader.startup">Load&nbsp;At Startup</span></th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.log">Log QSO</th>
+              <th data-i18n="settings.logging.tableheader.details">Details</th>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.appLogs.label">App Log(s)</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="mapDetails">
+                <div data-i18n="settings.logging.LocalFiles.details.add" class="button" onclick="GT.appLogsFileSelector.click()">Add File</div>
+                <div id="appLogsFilesDiv"></div>
+              </td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.gridtracker.source">GridTracker2</td>
+              <td></td>
+              <td class="mapCenter"><input type="checkbox" id="loadGTCheckBox" onclick="adifStartupCheckBoxChanged(this);" /></td>
+              <td class="mapCenter"><input type="checkbox" id="logGTqsoCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" /></td>
+              <td class="mapDetails"><div onClick="openBackupLogsFolder()" data-i18n="settings.logging.gridtracker.details" class="button">Backup Logs</div></td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.LocalFiles.source">Local File(s)</td>
+              <td class="mapCenter"><input type="checkbox" id="buttonAdifCheckBox" onclick="adifMenuCheckBoxChanged(this);" /></td>
+              <td class="mapCenter"><input type="checkbox" id="loadAdifCheckBox" onclick="adifStartupCheckBoxChanged(this);" /></td>
+              <td></td>
+              <td class="mapDetails">
+                <!-- Shown while Startup is ticked (adif.js) -->
+                <div id="selectFileOnStartupDiv" style="display: none">
+                  <div data-i18n="settings.logging.LocalFiles.details.add" class="button" onClick="adifLoadDialog()">Add File</div>
+                  <span id="startupLogFileDiv"></span>
                 </div>
-                <div id="tqslFileDiv" style="display: inline-block; margin:3px;" class="roundBorderValue"><span data-i18n="settings.logging.tqsl.noFile">No file selected</span></div>
-              </div><br>
-                <label data-i18n="settings.logging.LoTW.details.TQSLPass" for="lotwTrusted">TQSL Password</label>
-                <input id="lotwTrusted" type="password" class="inputTextValue" size="8"
-                  oninput="ValidateText(this); adifTextValueChange(this);" /><br />
-                <label data-i18n="settings.logging.LoTW.details.station" for="lotwStation">Station Name</label>
-                <select id="lotwStation" class="inputTextValue"
-                  onchange="ValidateText(this); adifTextValueChange(this);"></select>
-              </div>
-            </td>
-            <td>
-              <div data-i18n="settings.logging.LoTW.test.downloadButton" class="button"
-                onclick="if ( ValidateText(lotwLogin) && ValidateText(lotwPassword) ) grabLOtWLog(true);">
-                Test Download
-              </div>
-              <br />
-              <div data-i18n="settings.logging.LoTW.test.TQSLButton" id="trustedTestButton" style="margin-top: 25px"
-                class="button" onclick="testTrustedQSL(true);">
-                Test TQSL
-              </div>
-            </td>
-            <td id="lotwTestResult"></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.HamCQ.source">HamCQ.cn</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-              <input type="checkbox" id="logHamCQqsoCheckBox"
-                onclick="adifLogQsoCheckBoxChanged(this);" />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.HamCQ.details.apiKey" for="HamCQApiKey">API Key</label>
-              <input id="HamCQApiKey" type="password" class="inputTextValue" size="21"
-                oninput=" ValidateText(this); adifTextValueChange(this);" />
-            
-            </td>
-            <td>
-              <div data-i18n="settings.logging.HamCQ.test.button" class="button"
-                onclick="if ( ValidateText(HamCQApiKey) ) HamCQTest(true);">
-                Test
-              </div>
-            </td>
-            <td id="HamCQTestResult"></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.N1MM.source">N1MM Logger+</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-              <input type="checkbox"   class="inputTextValue" id="buttonN1MMCheckBox"
-                onclick=" ValidateIPaddress(N1MMIpInput,this); ValidatePort(N1MMPortInput,this, null ); n1mmLoggerChanged(); " />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.N1MM.details.IP" for="N1MMIpInput">IP</label>
-              <input id="N1MMIpInput" type="text" class="inputTextValue" maxlength="15" size="11"
-                onkeypress='return validIpKeys(event.charCode);' oninput="ValidateIPaddress(this,buttonN1MMCheckBox);
-                  n1mmLoggerChanged(); " />
-              <label data-i18n="settings.logging.N1MM.details.Port" for="N1MMPortInput">Port</label>
-              <input id="N1MMPortInput" type="text" class="inputTextValue" maxlength="5" size="5"
-                onkeypress='return validNumberKeys(event.charCode);'
-                oninput="ValidatePort(this,buttonN1MMCheckBox, null ); n1mmLoggerChanged(); " />
-            </td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.Log4OM.source">Log4OM</td>
-            <td>
-              <input type="checkbox" id="log4OMConnectCheckbox" onclick="log4OMLoggerChanged()" /><span id="log4OMConnectStatus"></span>
-            </td>
-            <td></td>
-            <td></td>
-            <td>
-              <input type="checkbox"   class="inputTextValue" id="buttonLog4OMCheckBox"
-                onclick=" ValidateIPaddress(log4OMIpInput,this); ValidatePort(log4OMPortInput,this, null ); log4OMLoggerChanged(); " />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.Log4OM.details.IP" for="log4OMIpInput">IP</label>
-              <input id="log4OMIpInput" type="text" class="inputTextValue" maxlength="15" size="11"
-                onkeypress='return validIpKeys(event.charCode);'
-                oninput="ValidateIPaddress(this,buttonLog4OMCheckBox); log4OMLoggerChanged(); " />
-              <label data-i18n="settings.logging.Log4OM.details.Port" for="log4OMPortInput">Port</label>
-              <input id="log4OMPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return
-                  validNumberKeys(event.charCode);' oninput="ValidatePort(this,buttonLog4OMCheckBox, null );
-                  log4OMLoggerChanged(); " />
-              <span id="log4OMRigControlSpan" data-i18n="settings.logging.Log4OM.rigControl.hover"
-                title="Clicking a Feed Roster callsign tunes the rig to the spot's frequency and mode through Log4OM. Needs a rig connected (CAT) in Log4OM.">
-                <br />
-                <input type="checkbox" id="log4OMRigControlCheckbox" onclick="log4OMLoggerChanged()" />
-                <label data-i18n="settings.logging.N3FJP.rigControl.label" for="log4OMRigControlCheckbox">Enable Rig Control</label>
-              </span>
-            </td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.N3FJP.source">N3FJP Loggers</td>
-            <td>
-              <input type="checkbox" id="acLogConnectCheckbox" onclick="acLogLoggerChanged()" /><span id="acLogConnectStatus"></span>
-            </td>
-            <td>
-              <input type="checkbox" id="acLogMenuCheckbox" onclick="acLogLoggerChanged()" />
-            </td>
-            <td>
-              <input type="checkbox" id="acLogStartupCheckbox" onclick="acLogLoggerChanged()" />
-            <td>
-              <input type="checkbox" class="inputTextValue" id="acLogCheckbox" onclick="acLogLoggerChanged()" />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.N3FJP.details.IP" for="acLogIpInput">IP</label>
-              <input id="acLogIpInput" type="text" class="inputTextValue" maxlength="15" size="11"
-                onkeypress='return validIpKeys(event.charCode);' oninput="ValidateIPaddress(this,acLogCheckbox);
-                  acLogLoggerChanged(); " />
-              <label data-i18n="settings.logging.N3FJP.details.Port" for="acLogPortInput">Port</label>
-              <input id="acLogPortInput" type="text" class="inputTextValue" maxlength="5" size="5"
-                onkeypress='return validNumberKeys(event.charCode);'
-                oninput="ValidatePort(this,acLogCheckbox, null ); acLogLoggerChanged(); " />
-              <span id="acLogQslSpan">
-                <label data-i18n="settings.logging.N3FJP.qslBy" for="acLogQsl">QSL By</label>
-                <select id="acLogQsl" onchange="acLogLoggerChanged();">
-                  <option value="A">Any</option>
-                  <option value="C">Card</option>
-                  <option value="E">eQSL</option>
-                  <option value="L">LoTW</option>
-                  <option value="Q">QRZ.com</option>
-                  <option value="B">Clublog</option>
-                </select>
-              </span>
-              <span id="acLogRigControlSpan" data-i18n="settings.logging.N3FJP.rigControl.hover"
-                title="Clicking a Feed Roster callsign tunes the rig to the spot's frequency through AC Log. Needs rig control set up in AC Log.">
-                <br />
-                <input type="checkbox" id="acLogRigControlCheckbox" onclick="acLogLoggerChanged()" />
-                <label data-i18n="settings.logging.N3FJP.rigControl.label" for="acLogRigControlCheckbox">Enable Rig Control</label>
-              </span>            </td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td data-i18n="settings.logging.DXKeeper.source">DXKeeper</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-              <input type="checkbox"   class="inputTextValue" id="buttondxkLogCheckBox"
-                onclick=" ValidateIPaddress(dxkLogIpInput,this); ValidatePort(dxkLogPortInput,this, null ); dxkLogLoggerChanged(); " />
-            </td>
-            <td>
-              <label data-i18n="settings.logging.DXKeeper.details.IP" for="dxkLogIpInput">IP</label>
-              <input id="dxkLogIpInput" type="text" class="inputTextValue" maxlength="15" size="11"
-                onkeypress='return validIpKeys(event.charCode);'
-                oninput="ValidateIPaddress(this,buttondxkLogCheckBox); dxkLogLoggerChanged(); " />
-              <label data-i18n="settings.logging.DXKeeper.details.Port" for="dxkLogPortInput">Port</label>
-              <input id="dxkLogPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return
-                  validNumberKeys(event.charCode);' oninput="ValidatePort(this,buttondxkLogCheckBox, null );
-                  dxkLogLoggerChanged(); " />
-            </td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>HRD Logbook &lt;= v6.8.x</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-              <input type="checkbox" class="inputTextValue" id="buttonHrdLogbookCheckBox"
-                onclick=" ValidateIPaddress(hrdLogbookIpInput,this); ValidatePort(hrdLogbookPortInput,this, null ); hrdLogbookLoggerChanged(); " />
-            </td>
-            <td>
-              <label for="hrdLogbookIpInput">IP</label>
-              <input id="hrdLogbookIpInput" type="text" class="inputTextValue" maxlength="15" size="11"
-                onkeypress='return validIpKeys(event.charCode);'
-                oninput="ValidateIPaddress(this,buttonHrdLogbookCheckBox); hrdLogbookLoggerChanged(); " />
-              <label for="hrdLogbookPortInput">Port</label>
-              <input id="hrdLogbookPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return
-                  validNumberKeys(event.charCode);' oninput="ValidatePort(this,buttonHrdLogbookCheckBox, null );
-                  hrdLogbookLoggerChanged(); " />
-            </td>
-            <td></td>
-            <td></td>
-          </tr>
-        </table>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="mapGroup mapHalf">
+          <div class="mapGroupTitle" data-i18n="settings.logging.group.programs.label">Logging Programs</div>
+          <table>
+            <tr>
+              <th></th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.connect">Connect</th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.menu">Menu Button</th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.startup.hover" title="Load at Startup"><span data-i18n="settings.logging.tableheader.startup">Load&nbsp;At Startup</span></th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.log">Log QSO</th>
+              <th><span data-i18n="settings.general.UDP.IP.label">IP</span> · <span data-i18n="settings.general.UDP.Port.label">Port</span></th>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.N1MM.source">N1MM Logger+</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="mapCenter"><input type="checkbox" class="inputTextValue" id="buttonN1MMCheckBox" onclick=" ValidateIPaddress(N1MMIpInput,this); ValidatePort(N1MMPortInput,this, null ); n1mmLoggerChanged(); " /></td>
+              <td class="mapAddr">
+                <label class="mapSrOnly" data-i18n="settings.logging.N1MM.details.IP" for="N1MMIpInput">IP</label>
+                <input id="N1MMIpInput" type="text" class="inputTextValue" maxlength="15" size="11" onkeypress='return validIpKeys(event.charCode);' oninput="ValidateIPaddress(this,buttonN1MMCheckBox); n1mmLoggerChanged(); " />
+                <label class="mapSrOnly" data-i18n="settings.logging.N1MM.details.Port" for="N1MMPortInput">Port</label>
+                <input id="N1MMPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return validNumberKeys(event.charCode);' oninput="ValidatePort(this,buttonN1MMCheckBox, null ); n1mmLoggerChanged(); " />
+              </td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.Log4OM.source">Log4OM</td>
+              <td class="mapCenter"><input type="checkbox" id="log4OMConnectCheckbox" onclick="log4OMLoggerChanged()" /><span id="log4OMConnectStatus"></span></td>
+              <td></td>
+              <td></td>
+              <td class="mapCenter"><input type="checkbox" class="inputTextValue" id="buttonLog4OMCheckBox" onclick=" ValidateIPaddress(log4OMIpInput,this); ValidatePort(log4OMPortInput,this, null ); log4OMLoggerChanged(); " /></td>
+              <td class="mapAddr">
+                <label class="mapSrOnly" data-i18n="settings.logging.Log4OM.details.IP" for="log4OMIpInput">IP</label>
+                <input id="log4OMIpInput" type="text" class="inputTextValue" maxlength="15" size="11" onkeypress='return validIpKeys(event.charCode);' oninput="ValidateIPaddress(this,buttonLog4OMCheckBox); log4OMLoggerChanged(); " />
+                <label class="mapSrOnly" data-i18n="settings.logging.Log4OM.details.Port" for="log4OMPortInput">Port</label>
+                <input id="log4OMPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return validNumberKeys(event.charCode);' oninput="ValidatePort(this,buttonLog4OMCheckBox, null ); log4OMLoggerChanged(); " />
+                <!-- Shown while Connect is ticked (adif.js, loaders.js) -->
+                <span id="log4OMRigControlSpan" data-i18n="settings.logging.Log4OM.rigControl.hover" title="Clicking a Feed Roster callsign tunes the rig to the spot's frequency and mode through Log4OM. Needs a rig connected (CAT) in Log4OM.">
+                  <br />
+                  <input type="checkbox" id="log4OMRigControlCheckbox" onclick="log4OMLoggerChanged()" />
+                  <label data-i18n="settings.logging.N3FJP.rigControl.label" for="log4OMRigControlCheckbox">Enable Rig Control</label>
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.N3FJP.source">N3FJP Loggers</td>
+              <td class="mapCenter"><input type="checkbox" id="acLogConnectCheckbox" onclick="acLogLoggerChanged()" /><span id="acLogConnectStatus"></span></td>
+              <td class="mapCenter"><input type="checkbox" id="acLogMenuCheckbox" onclick="acLogLoggerChanged()" /></td>
+              <td class="mapCenter"><input type="checkbox" id="acLogStartupCheckbox" onclick="acLogLoggerChanged()" /></td>
+              <td class="mapCenter"><input type="checkbox" class="inputTextValue" id="acLogCheckbox" onclick="acLogLoggerChanged()" /></td>
+              <td class="mapAddr">
+                <label class="mapSrOnly" data-i18n="settings.logging.N3FJP.details.IP" for="acLogIpInput">IP</label>
+                <input id="acLogIpInput" type="text" class="inputTextValue" maxlength="15" size="11" onkeypress='return validIpKeys(event.charCode);' oninput="ValidateIPaddress(this,acLogCheckbox); acLogLoggerChanged(); " />
+                <label class="mapSrOnly" data-i18n="settings.logging.N3FJP.details.Port" for="acLogPortInput">Port</label>
+                <input id="acLogPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return validNumberKeys(event.charCode);' oninput="ValidatePort(this,acLogCheckbox, null ); acLogLoggerChanged(); " />
+                <!-- Shown while Menu or Startup is ticked (adif.js, loaders.js) -->
+                <span id="acLogQslSpan">
+                  <br />
+                  <label data-i18n="settings.logging.N3FJP.qslBy" for="acLogQsl">QSL By</label>
+                  <select id="acLogQsl" onchange="acLogLoggerChanged();">
+                    <option value="A">Any</option>
+                    <option value="C">Card</option>
+                    <option value="E">eQSL</option>
+                    <option value="L">LoTW</option>
+                    <option value="Q">QRZ.com</option>
+                    <option value="B">Clublog</option>
+                  </select>
+                </span>
+                <!-- Shown while Connect is ticked (adif.js, loaders.js) -->
+                <span id="acLogRigControlSpan" data-i18n="settings.logging.N3FJP.rigControl.hover" title="Clicking a Feed Roster callsign tunes the rig to the spot's frequency through AC Log. Needs rig control set up in AC Log.">
+                  <br />
+                  <input type="checkbox" id="acLogRigControlCheckbox" onclick="acLogLoggerChanged()" />
+                  <label data-i18n="settings.logging.N3FJP.rigControl.label" for="acLogRigControlCheckbox">Enable Rig Control</label>
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.DXKeeper.source">DXKeeper</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="mapCenter"><input type="checkbox" class="inputTextValue" id="buttondxkLogCheckBox" onclick=" ValidateIPaddress(dxkLogIpInput,this); ValidatePort(dxkLogPortInput,this, null ); dxkLogLoggerChanged(); " /></td>
+              <td class="mapAddr">
+                <label class="mapSrOnly" data-i18n="settings.logging.DXKeeper.details.IP" for="dxkLogIpInput">IP</label>
+                <input id="dxkLogIpInput" type="text" class="inputTextValue" maxlength="15" size="11" onkeypress='return validIpKeys(event.charCode);' oninput="ValidateIPaddress(this,buttondxkLogCheckBox); dxkLogLoggerChanged(); " />
+                <label class="mapSrOnly" data-i18n="settings.logging.DXKeeper.details.Port" for="dxkLogPortInput">Port</label>
+                <input id="dxkLogPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return validNumberKeys(event.charCode);' oninput="ValidatePort(this,buttondxkLogCheckBox, null ); dxkLogLoggerChanged(); " />
+              </td>
+            </tr>
+            <tr>
+              <td class="mapName">HRD Logbook &lt;= v6.8.x</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="mapCenter"><input type="checkbox" class="inputTextValue" id="buttonHrdLogbookCheckBox" onclick=" ValidateIPaddress(hrdLogbookIpInput,this); ValidatePort(hrdLogbookPortInput,this, null ); hrdLogbookLoggerChanged(); " /></td>
+              <td class="mapAddr">
+                <label class="mapSrOnly" for="hrdLogbookIpInput">IP</label>
+                <input id="hrdLogbookIpInput" type="text" class="inputTextValue" maxlength="15" size="11" onkeypress='return validIpKeys(event.charCode);' oninput="ValidateIPaddress(this,buttonHrdLogbookCheckBox); hrdLogbookLoggerChanged(); " />
+                <label class="mapSrOnly" for="hrdLogbookPortInput">Port</label>
+                <input id="hrdLogbookPortInput" type="text" class="inputTextValue" maxlength="5" size="5" onkeypress='return validNumberKeys(event.charCode);' oninput="ValidatePort(this,buttonHrdLogbookCheckBox, null ); hrdLogbookLoggerChanged(); " />
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="mapGroup mapFull">
+          <div class="mapGroupTitle" data-i18n="settings.logging.group.online.label">Online Logbooks</div>
+          <table>
+            <tr>
+              <th></th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.menu">Menu Button</th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.startup.hover" title="Load at Startup"><span data-i18n="settings.logging.tableheader.startup">Load&nbsp;At Startup</span></th>
+              <th class="mapFlagHead" data-i18n="settings.logging.tableheader.log">Log QSO</th>
+              <th data-i18n="settings.logging.tableheader.details">Details</th>
+              <th data-i18n="settings.logging.tableheader.test">Test</th>
+              <th data-i18n="settings.logging.tableheader.result">Result</th>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.QRZcom.source">QRZ.com</td>
+              <td class="mapCenter"><input type="checkbox" id="buttonQRZCheckBox" onclick="adifMenuCheckBoxChanged(this);" /></td>
+              <td class="mapCenter"><input type="checkbox" id="loadQRZCheckBox" onclick="adifStartupCheckBoxChanged(this);" /></td>
+              <td class="mapCenter"><input type="checkbox" id="logQRZqsoCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" /></td>
+              <td class="mapDetails">
+                <span class="mapFieldLine"><label data-i18n="settings.logging.QRZcom.details.apikey" for="qrzApiKey">API Key</label>
+                <input id="qrzApiKey" type="password" class="inputTextValue" size="21" oninput="ValidateQrzApi(this); adifTextValueChange(this);" /></span>
+              </td>
+              <td class="mapCenter"><div data-i18n="settings.logging.QRZcom.test.button" class="button" onclick="if ( ValidateQrzApi(qrzApiKey ) ) grabQrzComLog(true);">Test</div></td>
+              <td class="mapResult" id="qrzTestResult"></td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.ClubLog.source">ClubLog</td>
+              <td class="mapCenter"><input type="checkbox" id="buttonClubCheckBox" onclick="adifMenuCheckBoxChanged(this);" /></td>
+              <td class="mapCenter"><input type="checkbox" id="loadClubCheckBox" onclick="adifStartupCheckBoxChanged(this);" /></td>
+              <td class="mapCenter"><input type="checkbox" id="logClubqsoCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" /></td>
+              <td class="mapDetails">
+                <span class="mapFieldLine"><label data-i18n="settings.logging.ClubLog.details.callsign" for="clubCall">Callsign</label>
+                <input id="clubCall" type="text" class="inputTextValue" size="8" oninput=" ValidateText(this); adifTextValueChange(this);" /></span>
+                <span class="mapFieldLine"><label data-i18n="settings.logging.ClubLog.details.password" for="clubPassword">Password</label>
+                <input id="clubPassword" type="password" class="inputTextValue" size="8" oninput=" ValidateText(this); adifTextValueChange(this);" /></span>
+                <span class="mapFieldLine"><label data-i18n="settings.logging.ClubLog.details.email" for="clubEmail">Email</label>
+                <input id="clubEmail" type="text" class="inputTextValue" size="20" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
+              </td>
+              <td class="mapCenter"><div data-i18n="settings.logging.ClubLog.test.button" class="button" onclick="if ( ValidateText(clubEmail) && ValidateText(clubPassword) ) grabClubLog(true);">Test</div></td>
+              <td class="mapResult" id="clubTestResult"></td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.LoTW.source">LotW</td>
+              <td class="mapCenter"><input type="checkbox" id="buttonLOTWCheckBox" onclick="adifMenuCheckBoxChanged(this);" /></td>
+              <td class="mapCenter"><input type="checkbox" id="loadLOTWCheckBox" onclick="adifStartupCheckBoxChanged(this);" /></td>
+              <td class="mapCenter"><input type="checkbox" id="logLOTWqsoCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" /></td>
+              <td class="mapDetails">
+                <span class="mapFieldLine"><label data-i18n="settings.logging.LoTW.details.login" for="lotwLogin">Login</label>
+                <input id="lotwLogin" type="text" class="inputTextValue" size="8" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
+                <span class="mapFieldLine"><label data-i18n="settings.logging.LoTW.details.password" for="lotwPassword">Password</label>
+                <input id="lotwPassword" type="password" class="inputTextValue" size="8" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
+                <!-- Shown while Log? is ticked (adif.js, loaders.js) -->
+                <div id="lotwUpload">
+                  <span class="mapFieldLine"><div data-i18n="settings.logging.LoTW.details.TQSLPath" class="flexButton" style="display: inline-block" id="selectTQSLButton">TQSL Path</div>
+                  <div id="tqslFileDiv" style="display: inline-block; margin:3px;" class="roundBorderValue"><span data-i18n="settings.logging.tqsl.noFile">No file selected</span></div></span>
+                  <span class="mapFieldLine"><label data-i18n="settings.logging.LoTW.details.TQSLPass" for="lotwTrusted">TQSL Password</label>
+                  <input id="lotwTrusted" type="password" class="inputTextValue" size="8" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
+                  <span class="mapFieldLine"><label data-i18n="settings.logging.LoTW.details.station" for="lotwStation">Station Name</label>
+                  <select id="lotwStation" class="inputTextValue" onchange="ValidateText(this); adifTextValueChange(this);"></select></span>
+                </div>
+              </td>
+              <td class="mapCenter">
+                <div data-i18n="settings.logging.LoTW.test.downloadButton" class="button" onclick="if ( ValidateText(lotwLogin) && ValidateText(lotwPassword) ) grabLOtWLog(true);">Test Download</div>
+                <!-- Shown while Log QSO is ticked (adif.js, loaders.js, as inline-block): its own line under Test Download -->
+                <div class="mapTestLine"><div data-i18n="settings.logging.LoTW.test.TQSLButton" id="trustedTestButton" class="button" onclick="testTrustedQSL(true);">Test TQSL</div></div>
+              </td>
+              <td class="mapResult" id="lotwTestResult"></td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.eQSLcc.source">eQSL.cc</td>
+              <td></td>
+              <td></td>
+              <td class="mapCenter"><input type="checkbox" id="logeQSLQSOCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" /></td>
+              <td class="mapDetails">
+                <span class="mapFieldLine"><label data-i18n="settings.logging.eQSLcc.details.user" for="eQSLUser">User</label>
+                <input id="eQSLUser" type="text" class="inputTextValue" size="8" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
+                <span class="mapFieldLine"><label data-i18n="settings.logging.eQSLcc.details.password" for="eQSLPassword">Password</label>
+                <input id="eQSLPassword" type="password" class="inputTextValue" size="8" oninput=" ValidateText(this); adifTextValueChange(this);" /></span>
+                <span class="mapFieldLine"><label data-i18n="settings.logging.eQSLcc.details.QTHnick" for="nicknameeQSLCheckBox">QTH Nickname</label>
+                <input type="checkbox" id="nicknameeQSLCheckBox" onclick="adifNicknameCheckBoxChanged(this);" />
+                <!-- Shown while QTH Nickname is ticked (adif.js, loaders.js) -->
+                <input id="eQSLNickname" style="display: none" type="text" class="inputTextValue" size="12" oninput=" ValidateText(this); adifTextValueChange(this);" /></span>
+              </td>
+              <td class="mapCenter"><div data-i18n="settings.logging.eQSLcc.test.button" class="button" onclick="if ( ValidateText(eQSLUser) && ValidateText(eQSLPassword) ) eQSLTest(true);">Test</div></td>
+              <td class="mapResult" id="eQSLTestResult"></td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.HRDLogNet.source">HRDLOG.net</td>
+              <td></td>
+              <td></td>
+              <td class="mapCenter"><input type="checkbox" id="logHRDLOGqsoCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" /></td>
+              <td class="mapDetails">
+                <span class="mapFieldLine"><label data-i18n="settings.logging.HRDLogNet.details.callsign" for="HRDLOGCallsign">Callsign</label>
+                <input id="HRDLOGCallsign" type="text" class="inputTextValue" size="12" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
+                <span class="mapFieldLine"><label data-i18n="settings.logging.HRDLogNet.details.upcode" for="HRDLOGUploadCode">Upload Code</label>
+                <input id="HRDLOGUploadCode" type="password" class="inputTextValue" size="8" oninput=" ValidateText(this); adifTextValueChange(this);" /></span>
+                <span class="mapFieldLine"><a href="http://www.hrdlog.net/docs/Tips.aspx#upcode" target="_blank" data-i18n="settings.logging.HRDLogNet.details.help.label" title="Click to learn how to get upload code">*** How to get upload code ***</a></span>
+              </td>
+              <td class="mapCenter"><div data-i18n="settings.logging.HRDLogNet.test.button" class="button" onclick="if ( ValidateText(HRDLOGCallsign) && ValidateText(HRDLOGUploadCode) ) hrdCredentialTest(true);">Test</div></td>
+              <td class="mapResult" id="HRDLogTestResult"></td>
+            </tr>
+            <tr>
+              <td class="mapName">Cloudlog/Wavelog</td>
+              <td></td>
+              <td></td>
+              <td class="mapCenter"><input type="checkbox" id="logCloudlogQSOCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" /></td>
+              <td class="mapDetails">
+                <span class="mapFieldLine"><label data-i18n="settings.logging.CloudLog.details.URL" for="CloudlogURL">URL</label>
+                <input id="CloudlogURL" type="text" class="inputTextValue" size="35" oninput="ValidateText(this); CloudLogCorrectURL(false); adifTextValueChange(this);" /></span>
+                <span class="mapFieldLine"><label data-i18n="settings.logging.CloudLog.details.API" for="CloudlogAPI">API Key</label>
+                <input id="CloudlogAPI" type="password" class="inputTextValue" size="12" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
+                <span class="mapFieldLine"><label data-i18n="settings.logging.CloudLog.details.StationProfile" for="CloudlogStationProfileID">Station Profile</label>
+                <select id="CloudlogStationProfileID" onchange="CloudLogProfileChanged(this)">
+                  <option value="1" selected="true" data-i18n="settings.logging.Cloudlog.pressTest">Press Test</option>
+                </select></span>
+              </td>
+              <td class="mapCenter"><div data-i18n="settings.logging.CloudLog.test.button" class="button" onclick="CloudlogTest(true);">Test</div></td>
+              <td class="mapResult" id="CloudlogTestResult"></td>
+            </tr>
+            <tr>
+              <td class="mapName" data-i18n="settings.logging.HamCQ.source">HamCQ.cn</td>
+              <td></td>
+              <td></td>
+              <td class="mapCenter"><input type="checkbox" id="logHamCQqsoCheckBox" onclick="adifLogQsoCheckBoxChanged(this);" /></td>
+              <td class="mapDetails">
+                <span class="mapFieldLine"><label data-i18n="settings.logging.HamCQ.details.apiKey" for="HamCQApiKey">API Key</label>
+                <input id="HamCQApiKey" type="password" class="inputTextValue" size="21" oninput=" ValidateText(this); adifTextValueChange(this);" /></span>
+              </td>
+              <td class="mapCenter"><div data-i18n="settings.logging.HamCQ.test.button" class="button" onclick="if ( ValidateText(HamCQApiKey) ) HamCQTest(true);">Test</div></td>
+              <td class="mapResult" id="HamCQTestResult"></td>
+            </tr>
+          </table>
+        </div>
+        <!-- PSK Reporter: reception reports of your signal (its 24 hour history), not QSOs -->
+        <div class="mapGroup">
+          <div class="mapGroupTitle"><span data-i18n="settings.logging.PSKReporter.source">PSK-Reporter</span> <span data-i18n="settings.logging.PSKReporter.details" id="pskDaysDiv">24 Hour History</span></div>
+          <!-- One line: its two ticks with their words (the title says what it loads) -->
+          <table class="mapChecks">
+            <tr id="pskTr">
+              <td>
+                <span class="mapFieldLine"><input type="checkbox" id="buttonPsk24CheckBox" onclick="adifMenuCheckBoxChanged(this);" /> <label data-i18n="settings.logging.tableheader.menu" for="buttonPsk24CheckBox">Menu Button</label></span>
+                <span class="mapFieldLine"><input type="checkbox" id="loadPsk24CheckBox" data-i18n="settings.logging.tableheader.startup.hover" title="Load at Startup" onclick="adifStartupCheckBoxChanged(this);" /> <label data-i18n="settings.logging.tableheader.startup" for="loadPsk24CheckBox">Load&nbsp;At Startup</label></span>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
     </div>
     <div id="audioAlertsDiv" class="settingsTabcontent">
       <div id="audioAlertsRosterTabs" style="display:none;">
@@ -2699,9 +1991,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                   <option data-i18n="roster.controls.logbook.liveBandMode" value="0" selected="true">Live Band &amp; Mode</option>
                   <option data-i18n="roster.controls.logbook.liveBandMixMode" value="1">Live Band, Mix Modes</option>
                   <option data-i18n="roster.controls.logbook.liveBandDigiMode" value="2">Live Band, Digi Modes</option>
+                  <option data-i18n="roster.controls.logbook.spotsBandPhoneMode" value="7" class="feedLogbookOption">Spots Band, Phone Modes</option>
+                  <option data-i18n="roster.controls.logbook.spotsBandCwMode" value="8" class="feedLogbookOption">Spots Band, CW Mode</option>
                   <option data-i18n="roster.controls.logbook.mixBandLiveMode" value="3">Mix Band, Live Mode</option>
                   <option data-i18n="roster.controls.logbook.mixBandMode" value="4">Mix Band &amp; Modes</option>
                   <option data-i18n="roster.controls.logbook.mixBandDigiMode" value="5">Mix Band &amp; Digi Modes</option>
+                  <option data-i18n="roster.controls.logbook.mixBandPhoneMode" value="9" class="feedLogbookOption">Mix Band &amp; Phone Modes</option>
+                  <option data-i18n="roster.controls.logbook.mixBandCwMode" value="10" class="feedLogbookOption">Mix Band &amp; CW Mode</option>
                 </select>
               </div>
               <div id="HuntModeControls">
@@ -2838,25 +2134,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       </div>
     </div>
     <div id="aboutDiv" class="settingsTabcontent">
-      <div class="mapItem" style="padding: 4px">
-        <h2>
-          <div id="aboutTitle" >GridTracker2</div>
-          <div style="font-size:small; font-weight: normal;" id="aboutVersionText"></div>
-          <div style="font-size:smaller; font-weight: normal;" id="supportVersionsText"></div>
-          <div style="font-size:small; font-weight: bolder;" id="updateVersionText"></div>
-        </h2>
-        <p>
-          <span data-i18n="settings.about.blurb">GridTracker2 is a warehouse of amateur radio information presented in an easy to use interface</span><br />
-          <br>
-          <span data-i18n="settings.about.learnMore">Learn more at</span>
-          <a href="https://gridtracker.org" target="_blank" style="cursor: pointer; font-weight: bold; color:cyan;">GridTracker.org!</a>
-        </p>
-        <p>Copyright &copy; 2026 Stephen Loomis, NØTTL, Henry Forte, N2VFL, Matthew Chambers, NRØQ<br>
-        Sebastian Delmont, KI2D, Christian Bayer, WA4YA, Paul Traina, K6PST<br>
-        Jon Angliss, KF5QHQ, Beau Gunderson, N7YHF, Jonathan Fick, KEØYBL<br>
-        Florian Wolters, DF2ET, GridTracker.org</p>
-        
-        <img src="img/gridtracker.png" /> <br />
+      <div class="aboutWrap">
+        <!-- An animated map behind the title (aboutFx.js); it runs only while this tab is showing -->
+        <div class="aboutHero">
+          <canvas id="aboutCanvas"></canvas>
+          <div class="aboutHeroContent">
+            <img class="aboutLogo" src="img/gridtracker.png" alt="" />
+            <div class="aboutTitleBlock">
+              <div class="aboutTitle" id="aboutTitle">GridTracker2</div>
+              <div class="aboutVersion" id="aboutVersionText"></div>
+              <div class="aboutSupport" id="supportVersionsText"></div>
+              <div class="aboutUpdate" id="updateVersionText"></div>
+            </div>
+          </div>
+        </div>
+        <div class="aboutBody">
+          <p class="aboutBlurb"><span data-i18n="settings.about.blurb">GridTracker2 is a warehouse of amateur radio information presented in an easy to use interface</span></p>
+          <p class="aboutLink"><span data-i18n="settings.about.learnMore">Learn more at</span> <a href="https://gridtracker.org" target="_blank">GridTracker.org!</a></p>
+          <div class="aboutCredits">
+            <div class="aboutCopyright">Copyright &copy; 2026</div>
+            <div class="aboutChips">
+              <span class="aboutChip" style="--i:0">Stephen Loomis <b>NØTTL</b></span>
+              <span class="aboutChip" style="--i:1">Henry Forte <b>N2VFL</b></span>
+              <span class="aboutChip" style="--i:2">Matthew Chambers <b>NRØQ</b></span>
+              <span class="aboutChip" style="--i:3">Sebastian Delmont <b>KI2D</b></span>
+              <span class="aboutChip" style="--i:4">Christian Bayer <b>WA4YA</b></span>
+              <span class="aboutChip" style="--i:5">Paul Traina <b>K6PST</b></span>
+              <span class="aboutChip" style="--i:6">Jon Angliss <b>KF5QHQ</b></span>
+              <span class="aboutChip" style="--i:7">Beau Gunderson <b>N7YHF</b></span>
+              <span class="aboutChip" style="--i:8">Jonathan Fick <b>KEØYBL</b></span>
+              <span class="aboutChip" style="--i:9">Florian Wolters <b>DF2ET</b></span>
+              <span class="aboutChip aboutOrg" style="--i:10">GridTracker.org</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

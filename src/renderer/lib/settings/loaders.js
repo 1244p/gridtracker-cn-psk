@@ -370,7 +370,7 @@ function loadPortSettings()
   udpForwardPortInput.value = GT.settings.app.wsjtForwardUdpPort;
   ValidatePort(udpForwardPortInput, null, CheckForwardPortIsNotReceivePort);
   udpForwardIpInput.value = GT.settings.app.wsjtForwardUdpIp;
-  ValidateIPaddresses(udpForwardIpInput, null);
+  ValidateForwardHosts(udpForwardIpInput, null);
   setForwardIp();
   udpForwardEnable.checked = GT.settings.app.wsjtForwardUdpEnable;
   setUdpForwardEnable(udpForwardEnable);

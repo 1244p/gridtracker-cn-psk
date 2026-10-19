@@ -112,6 +112,8 @@ function applyCallsignsAndDates()
   clearQSOs(GT.settings.app.workingGridEnable, "startupAdifLoadCheck");
 
   applyCallsignsAndDateDiv.style.display = "none";
+  // The reload applies a changed QSL Location Authority too
+  qslAuthorityApplyDiv.style.display = "none";
 }
 
 function selectElementContents(el)

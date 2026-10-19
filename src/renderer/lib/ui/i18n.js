@@ -89,6 +89,11 @@ function setLogbookOptionLabels(select, feed)
     const option = select.querySelector(`option[value="${value}"]`);
     if (option) setI18nText(option, "roster.controls.logbook." + keys[value]);
   }
+  // Phone / CW choices are the Feed Roster's only
+  for (const option of select.querySelectorAll("option.feedLogbookOption"))
+  {
+    option.hidden = !feed;
+  }
 }
 
 function changeLocale()

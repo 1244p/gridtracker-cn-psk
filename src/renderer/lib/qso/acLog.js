@@ -179,7 +179,7 @@ function updateAcLogConnectStatus()
   if (GT.settings.acLog.connect)
   {
     const connected = GT.acLogAPISocket != null && GT.acLogAPISocket.connecting == false;
-    html = `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background-color:${connected ? "#00DD00" : "#FF3333"};margin-left:3px;vertical-align:middle;position:relative;top:-1px;"></span>`;
+    html = `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background-color:${connected ? "#00DD00" : "#FF3333"};margin-left:3px;vertical-align:middle;"></span>`;
   }
   if (acLogConnectStatus.innerHTML != html) acLogConnectStatus.innerHTML = html;
 }

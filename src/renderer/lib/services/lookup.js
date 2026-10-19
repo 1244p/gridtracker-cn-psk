@@ -1025,6 +1025,18 @@ function lookupGridCellStyle(gridLocator, band, mode)
     case "5": // Mix Band, Digi Modes
       suffix = "dg";
       break;
+    case "7": // Spots Band, Phone Modes
+      suffix = `${b}ph`;
+      break;
+    case "8": // Spots Band, CW Mode
+      suffix = `${b}CW`;
+      break;
+    case "9": // Mix Band & Phone Modes
+      suffix = "ph";
+      break;
+    case "10": // Mix Band & CW Mode
+      suffix = "CW";
+      break;
     case "4": // Mix Band & Modes
     default:
       suffix = "";

@@ -124,7 +124,7 @@ function updateLog4OMConnectStatus()
   let html = "";
   if (GT.settings.log4OM.connect)
   {
-    html = `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background-color:${log4OMConnected() ? "#00DD00" : "#FF3333"};margin-left:3px;vertical-align:middle;position:relative;top:-1px;"></span>`;
+    html = `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background-color:${log4OMConnected() ? "#00DD00" : "#FF3333"};margin-left:3px;vertical-align:middle;"></span>`;
   }
   if (log4OMConnectStatus.innerHTML != html) log4OMConnectStatus.innerHTML = html;
 }
