@@ -974,5 +974,6 @@
 	"roster.controls.logbook.spotsBandPhoneMode": "スポットバンド、フォーンモード",
 	"roster.controls.logbook.spotsBandCwMode": "スポットバンド、CWモード",
 	"roster.controls.logbook.mixBandPhoneMode": "ミックスバンド&フォーンモード",
-	"roster.controls.logbook.mixBandCwMode": "ミックスバンド&CWモード"
+	"roster.controls.logbook.mixBandCwMode": "ミックスバンド&CWモード",
+	"gt.button.gtFlag.count": "スポッター: {0}"
 }

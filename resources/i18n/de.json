@@ -975,5 +975,6 @@
 	"roster.controls.logbook.spotsBandPhoneMode": "Spots Band, Phonie Modes",
 	"roster.controls.logbook.spotsBandCwMode": "Spots Band, CW Mode",
 	"roster.controls.logbook.mixBandPhoneMode": "Mix Band & Phonie Modes",
-	"roster.controls.logbook.mixBandCwMode": "Mix Band & CW Mode"
+	"roster.controls.logbook.mixBandCwMode": "Mix Band & CW Mode",
+	"gt.button.gtFlag.count": "Spotter: {0}"
 }

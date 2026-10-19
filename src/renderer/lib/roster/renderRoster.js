@@ -51,8 +51,6 @@ function renderRoster(callRoster, rosterSettings)
 
   columnOverrides.Band = showBands;
   columnOverrides.Mode = showModes;
-  // The Feed Roster's SOTA column only while SOTA Chasing is on
-  if (!sotaActive()) columnOverrides.SOTA = false;
   const rosterColumns = rosterColumnList(CR.rosterSettings.columns, columnOverrides);
 
   if (CR.rosterSettings.compact)

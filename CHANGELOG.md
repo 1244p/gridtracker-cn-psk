@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
-## [v2.261019.0]
+## [v2.261019.1]
 
 ### MD Markup Format
+**Kitchen Sink, Hail Mary, Pre-CABG Release**
+
 #### Call Roster / Feed Roster
 
 - New Settings -> "Columns" tab in each roster: every column in one place, in the roster's column order
@@ -34,7 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 #### Feed Roster
 
 - New Settings -> Features -> Online -> "SOTA Chasing" (shown while DX Feeds is on): Summits on the Air activators from DX Feeds spots
-  - A "SOTA" column, right of POTA, shows the summit named in the spot; its hover gives the summit's name, height and points
+  - A "SOTA" column (off by default, like POTA), right of POTA, shows the summit named in the spot; its hover gives the summit's name, height and points
   - A "SOTA" Wanted highlights summits you haven't chased today (from SOTA_REF in your logs), also in Settings -> Audio Alerts -> Feed Roster ("Wanted Feed Summit" / "Many Feed Summits")
   - A spot on a summit is placed there: its grid becomes the summit's (Feed Roster, distance, and a logged QSO that has no grid)
   - On the map, on their own layer with a new SOTA button in the button panel (shown while SOTA Chasing is on): one snow-capped double-peak marker per summit, black with an orange outline, or orange, for the same three states as the DX Feeds markers; its tooltip lists every spot on it
@@ -76,6 +78,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Where markers are stacked, only the top one is worked
 - A POTA, SOTA or DX Feeds marker of a callsign in a rig's [DX Call] is ringed for easy finding on the map
 - DX Feeds and SOTA markers leave the map once their spots expire, even while no new spots arrive
+- The GridTracker Spotters button's hover shows how many spotters are on the map, with the map's band and mode filters applied ("Spotters: 42")
 - Settings -> Map is regrouped into Base Map, Paths, Grayline, Overlays and Display boxes: day and night side by side, each path's width and colors on one row, and the colors shown as swatches
   - The Night column shows while "Auto Night Map" is on
   - More options have hover help
@@ -138,6 +141,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### HTML List
 
 ```html
+<p><strong>Kitchen Sink, Hail Mary, Pre-CABG Release</strong></p>
 <h4>Call Roster / Feed Roster</h4>
 <ul>
   <li>New Settings -&gt; "Columns" tab in each roster: every column in one place, in the roster's column order
@@ -177,7 +181,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 <ul>
   <li>New Settings -&gt; Features -&gt; Online -&gt; "SOTA Chasing" (shown while DX Feeds is on): Summits on the Air activators from DX Feeds spots
     <ul>
-      <li>A "SOTA" column, right of POTA, shows the summit named in the spot; its hover gives the summit's name, height and points</li>
+      <li>A "SOTA" column (off by default, like POTA), right of POTA, shows the summit named in the spot; its hover gives the summit's name, height and points</li>
       <li>A "SOTA" Wanted highlights summits you haven't chased today (from SOTA_REF in your logs), also in Settings -&gt; Audio Alerts -&gt; Feed Roster ("Wanted Feed Summit" / "Many Feed Summits")</li>
       <li>A spot on a summit is placed there: its grid becomes the summit's (Feed Roster, distance, and a logged QSO that has no grid)</li>
       <li>On the map, on their own layer with a new SOTA button in the button panel (shown while SOTA Chasing is on): one snow-capped double-peak marker per summit, black with an orange outline, or orange, for the same three states as the DX Feeds markers; its tooltip lists every spot on it</li>
@@ -236,6 +240,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   </li>
   <li>A POTA, SOTA or DX Feeds marker of a callsign in a rig's [DX Call] is ringed for easy finding on the map</li>
   <li>DX Feeds and SOTA markers leave the map once their spots expire, even while no new spots arrive</li>
+  <li>The GridTracker Spotters button's hover shows how many spotters are on the map, with the map's band and mode filters applied ("Spotters: 42")</li>
   <li>Settings -&gt; Map is regrouped into Base Map, Paths, Grayline, Overlays and Display boxes: day and night side by side, each path's width and colors on one row, and the colors shown as swatches
     <ul>
       <li>The Night column shows while "Auto Night Map" is on</li>

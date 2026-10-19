@@ -736,8 +736,7 @@ const def_settings = {
       State: true,
       County: false,
       POTA: false,
-      // Shown only while SOTA Chasing is on
-      SOTA: true,
+      SOTA: false,
       Cont: false,
       DEContv2: true,
       Freq: true,

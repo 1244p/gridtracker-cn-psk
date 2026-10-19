@@ -976,5 +976,6 @@
   "roster.controls.logbook.spotsBandPhoneMode": "報告波段, 語音模式",
   "roster.controls.logbook.spotsBandCwMode": "報告波段, CW模式",
   "roster.controls.logbook.mixBandPhoneMode": "混合波段和語音模式",
-  "roster.controls.logbook.mixBandCwMode": "混合波段和CW模式"
+  "roster.controls.logbook.mixBandCwMode": "混合波段和CW模式",
+  "gt.button.gtFlag.count": "報告者: {0}"
 }

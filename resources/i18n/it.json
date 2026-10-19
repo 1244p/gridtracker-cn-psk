@@ -974,5 +974,6 @@
 	"roster.controls.logbook.spotsBandPhoneMode": "Banda dello spot, fonia",
 	"roster.controls.logbook.spotsBandCwMode": "Banda dello spot, CW",
 	"roster.controls.logbook.mixBandPhoneMode": "Banda Mista & fonia",
-	"roster.controls.logbook.mixBandCwMode": "Banda Mista & CW"
+	"roster.controls.logbook.mixBandCwMode": "Banda Mista & CW",
+	"gt.button.gtFlag.count": "Spotter: {0}"
 }

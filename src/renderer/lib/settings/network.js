@@ -144,6 +144,12 @@ function feedSpotAllowChanged()
   GT.settings.app.feeds.notifications = feedNotificationsEnable.checked;
 }
 
+// Button panel GridTracker flag button: its hover, then how many flags are on the map (after the map's view filters)
+function gtFlagButtonHover()
+{
+  gtFlagButton.title = I18N("gt.button.gtFlag.hover") + "\n" + I18N("gt.button.gtFlag.count").replace("{0}", GT.layerSources.gtflags.getFeatures().length);
+}
+
 function updateGTFlagViews()
 {
   if (GT.settings.app.offAirServicesEnable == true && GT.settings.map.offlineMode == false)

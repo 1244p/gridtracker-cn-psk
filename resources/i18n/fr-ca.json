@@ -974,5 +974,6 @@
 	"roster.controls.logbook.spotsBandPhoneMode": "Bande du spot, Voix",
 	"roster.controls.logbook.spotsBandCwMode": "Bande du spot, CW",
 	"roster.controls.logbook.mixBandPhoneMode": "Mixte & Voix",
-	"roster.controls.logbook.mixBandCwMode": "Mixte & CW"
+	"roster.controls.logbook.mixBandCwMode": "Mixte & CW",
+	"gt.button.gtFlag.count": "Spotteurs : {0}"
 }

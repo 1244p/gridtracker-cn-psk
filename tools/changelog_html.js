@@ -1,7 +1,8 @@
 // Converts the "### MD Markup Format" section of CHANGELOG.md to HTML and writes it into the "### HTML List" section
 // (as an ```html fenced block, replacing any previous one). Dry run (prints the HTML) unless "write".
 // Usage (repo root): node tools/changelog_html.js [write]
-// The MD section may only hold "#### Area" headings and "- " bullets nested by two spaces; anything else stops it.
+// The MD section may only hold "#### Area" headings, "- " bullets nested by two spaces, and "**Release Name**" lines
+// (a release's name, at the top; becomes <p><strong>…</strong></p>); anything else stops it.
 const fs = require("fs");
 const write = process.argv[2] === "write";
 const f = "CHANGELOG.md";
@@ -43,6 +44,13 @@ const closeTo = (d) =>
 for (const line of s.slice(a + mdHead.length, b).split(nl))
 {
   if (line.trim() === "") continue;
+  const name = line.match(/^\*\*(.+)\*\*$/);
+  if (name)
+  {
+    closeTo(0);
+    out.push("<p><strong>" + esc(name[1]) + "</strong></p>");
+    continue;
+  }
   const h = line.match(/^#### (.*)$/);
   if (h)
   {
