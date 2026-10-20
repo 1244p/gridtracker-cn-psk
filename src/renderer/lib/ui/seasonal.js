@@ -2,7 +2,7 @@
 // All rights reserved.
 // See LICENSE for more information.
 
-// Seasonal surprises: the Santa Tracker button (Dec 1 to 25, local time; Santa leaves at 00:00 on Dec 24, with a countdown until then) and the New Year fireworks (local midnight
+// Seasonal surprises: the Santa Tracker button (Dec 12 to 25, local time; Santa leaves at 00:00 on Dec 24, with a countdown until then) and the New Year fireworks (local midnight
 // on Jan 1). Nothing here is in Settings or the button panel the rest of the year.
 
 GT.santa = {
@@ -52,7 +52,7 @@ function seasonalCheck()
   const day = now.getDate();
   const year = now.getFullYear();
 
-  const show = month == 11 && day <= 25;
+  const show = month == 11 && day >= 12 && day <= 25;
   santaButton.style.display = show ? "" : "none";
   if (!show && GT.santa.active) santaStop();
 
@@ -62,10 +62,10 @@ function seasonalCheck()
     newYearShow(year);
   }
 
-  // The next change: the button's first moment (Dec 1) and last (the end of Dec 25), and the new year
+  // The next change: the button's first moment (Dec 12) and last (the end of Dec 25), and the new year
   const moments = [
-    new Date(year, 11, 1), new Date(year, 11, 26),
-    new Date(year + 1, 11, 1), new Date(year + 1, 0, 1)
+    new Date(year, 11, 12), new Date(year, 11, 26),
+    new Date(year + 1, 11, 12), new Date(year + 1, 0, 1)
   ].map((date) => date.getTime() - now.getTime()).filter((ms) => ms > 0);
   // A few milliseconds past it, as a timer can fire just before its time
   GT.seasonalTimer = nodeTimers.setTimeout(seasonalCheck, Math.min(SEASONAL_MAX_WAIT, Math.min(...moments) + 25));
