@@ -328,7 +328,6 @@ function renderMap()
 
   createGlobalMapLayer("rangeRings");
   createGlobalMapLayer("award");
-  createGlobalHeatmapLayer("baHeat", 20, 18, ['#f00', '#ff0' ,'#0f0',  '#0ff',  '#00f']);
   createGlobalHeatmapLayer("pskHeat", 20, 15);
   createGlobalMapLayer("qso");
   createGlobalMapLayer("qsoPins");
@@ -384,7 +383,6 @@ function renderMap()
       GT.shadowVector,
       GT.layerVectors.rangeRings,
       GT.layerVectors.award,
-      GT.layerVectors.baHeat,
       GT.layerVectors.pskHeat,
       GT.layerVectors.qso,
       GT.layerVectors.qsoPins,

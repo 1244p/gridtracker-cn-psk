@@ -978,5 +978,9 @@
 	"gt.button.gtFlag.count": "Spotters: {0}",
 	"rosterColumns.DXCC.atno": "ATNO DXCC: never worked",
 	"rosterColumns.DXCC.newBand": "New Band DXCC: not worked on {0}",
-	"rosterColumns.DXCC.newMode": "New Mode DXCC: not worked in {0}"
+	"rosterColumns.DXCC.newMode": "New Mode DXCC: not worked in {0}",
+	"settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
+	"settings.alerts.AudioAlert.atno.hover": "An entity you've never worked on any band or mode, whatever the Logbook choice. Alerts in place of the DXCC alert for that station.",
+	"settings.alerts.AudioAlert.onAtno.label": "On ATNO",
+	"settings.alerts.AudioAlert.onAtno.hover": "Said or played instead of the usual alert when a station is an ATNO: a DXCC never worked, a park never hunted, a summit never chased. Empty: the usual alert."
 }

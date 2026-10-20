@@ -9,9 +9,12 @@ const AWT_MAP =
 function createEmptyAudioAlerts()
 {
   return {
-    huntCallsign: 0, huntGrid: 0, huntDXCC: 0, huntState: 0, huntCounty: 0, 
-    huntPOTA: 0, huntSOTA: 0, huntCQz: 0, huntITUz: 0, huntPX: 0, huntCont: 0, 
-    huntWatcher: 0, huntAward: 0, huntDXM: 0 
+    huntCallsign: 0, huntGrid: 0, huntDXCC: 0, huntState: 0, huntCounty: 0,
+    huntPOTA: 0, huntSOTA: 0, huntCQz: 0, huntITUz: 0, huntPX: 0, huntCont: 0,
+    huntWatcher: 0, huntAward: 0, huntDXM: 0,
+    // How many of the DXCC / POTA / SOTA alerts are ATNOs (Settings -> Audio Alerts, On ATNO); not alert types
+    // themselves (sendAlerts leaves them out of the Multiple count)
+    huntDXCCAtno: 0, huntPOTAAtno: 0, huntSOTAAtno: 0
   };
 }
 
@@ -334,7 +337,13 @@ function processRosterHunting(callRoster, rosterSettings)
 
       if (huntIdx && !(dxccHash in huntIdx.dxcc))
       {
-        if (AAW.huntDXCC) { AH.huntDXCC++; hasAudioAlert = true; }
+        if (AAW.huntDXCC)
+        {
+          AH.huntDXCC++;
+          hasAudioAlert = true;
+          // An ATNO (never worked on any band or mode): its alert can say so (Settings -> Audio Alerts, On ATNO)
+          if (!((callObj.dxcc + "|") in trackerWorked.dxcc)) AH.huntDXCCAtno = (AH.huntDXCCAtno || 0) + 1;
+        }
         if (rwActive.huntDXCC)
         {
           shouldRosterAlert = true;
@@ -532,7 +541,13 @@ function processRosterHunting(callRoster, rosterSettings)
 
       if (!(potaHash in trackerWorked.pota))
       {
-        if (AAW.huntPOTA) { AH.huntPOTA++; hasAudioAlert = true; }
+        if (AAW.huntPOTA)
+        {
+          AH.huntPOTA++;
+          hasAudioAlert = true;
+          // A park never hunted (a not yet known park, "?-????", isn't one)
+          if (callObj.pota != "?-????" && !(callObj.pota in trackerWorked.pota)) AH.huntPOTAAtno = (AH.huntPOTAAtno || 0) + 1;
+        }
         if (rwActive.huntPOTA)
         {
           shouldRosterAlert = true;
@@ -562,7 +577,13 @@ function processRosterHunting(callRoster, rosterSettings)
     {
       if (!(`${dayAsStr}.${callObj.sota}` in trackerWorked.sota))
       {
-        if (AAW.huntSOTA) { AH.huntSOTA++; hasAudioAlert = true; }
+        if (AAW.huntSOTA)
+        {
+          AH.huntSOTA++;
+          hasAudioAlert = true;
+          // A summit never chased
+          if (!(callObj.sota in trackerWorked.sota)) AH.huntSOTAAtno = (AH.huntSOTAAtno || 0) + 1;
+        }
         if (rwActive.huntSOTA)
         {
           shouldRosterAlert = true;

@@ -56,6 +56,13 @@ function loadAllSettings()
   }
   else
   {
+    // Flight path animation speed: screen frames per step (animateSpeed) becomes steps per second (animateFps), the
+    // same speed on a 60 Hz screen; before the defaults are merged in, which would hide that it's missing
+    if (GT.settings.map && !("animateFps" in GT.settings.map) && GT.settings.map.animateSpeed > 0)
+    {
+      GT.settings.map.animateFps = Math.max(1, Math.min(30, Math.round(60 / GT.settings.map.animateSpeed)));
+    }
+    if (GT.settings.map) delete GT.settings.map.animateSpeed;
     GT.settings = deepmerge(def_settings, GT.settings, { arrayMerge: (destinationArray, sourceArray) => sourceArray } );
     for (const key in GT.settings.roster.exceptions)
     {
@@ -548,7 +555,7 @@ GT.LocalOptions = {
 GT.terminatorDegrees = [-0.833 , -6 , -12, -18];
 GT.terminatorDegreesNames = ["Horizon", "Civil", "Nautical", "Astronomical"];
 
-GT.GraylineImageArray = ["img/shadow_on_32.png", "img/shadow_off_32.png"];
+GT.GraylineImageArray = ["img/grayline_on.png", "img/grayline_off.png"];
 GT.gtFlagImageArray = ["img/flag_off.png", "img/flag_on.png"];
 GT.pinImageArray = ["img/gt_grid.png", "img/red_pin_32.png"];
 GT.qsoLockImageArray = ["img/qso_unlocked_32.png", "img/qso_locked_32.png"];
@@ -591,7 +598,8 @@ GT.qslAuthorityTimer = null;
 GT.helpShow = false;
 GT.MyCurrentGrid = "";
 GT.MyGridIsUp = false;
-GT.animateFrame = 0;
+// When the flight path animation last stepped (performance.now), for its steps per second
+GT.animateLastStep = 0;
 GT.nextDimTime = 0;
 GT.nightTime = false;
 GT.currentNightState = false;

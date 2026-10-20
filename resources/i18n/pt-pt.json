@@ -978,5 +978,9 @@
   "gt.button.gtFlag.count": "Spotters: {0}",
   "rosterColumns.DXCC.atno": "DXCC ATNO: nunca contactado",
   "rosterColumns.DXCC.newBand": "DXCC banda nova: não contactado em {0}",
-  "rosterColumns.DXCC.newMode": "DXCC modo novo: não contactado em {0}"
+  "rosterColumns.DXCC.newMode": "DXCC modo novo: não contactado em {0}",
+  "settings.alerts.AudioAlert.atno.label": "DXCC ATNO",
+  "settings.alerts.AudioAlert.atno.hover": "Uma entidade nunca contactada em nenhuma banda ou modo, qualquer que seja a escolha do Logbook. Alerta em vez do alerta DXCC para essa estação.",
+  "settings.alerts.AudioAlert.onAtno.label": "Em ATNO",
+  "settings.alerts.AudioAlert.onAtno.hover": "Dito ou tocado em vez do alerta habitual quando uma estação é um ATNO: um DXCC nunca contactado, um parque nunca caçado, um cume nunca caçado. Vazio: o alerta habitual."
 }

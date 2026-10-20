@@ -1420,7 +1420,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <table>
             <tr>
               <th></th>
-              <th data-i18n="settings.map.col.width.label">Width</th>
+              <th class="mapSliderHead"><span data-i18n="settings.map.col.width.label">Width</span></th>
               <th data-i18n="settings.map.col.color.label">Color</th>
               <th class="nightMapOnly" data-i18n="settings.map.col.nightColor.label">Night Color</th>
             </tr>
@@ -1448,12 +1448,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               </td>
               <td class="nightMapOnly"><div class="mapSwatch" id="spotNightPathColorDiv"><input type="range" min="-1" max="361" value="-1" class="slider" id="spotNightPathColorValue" oninput="spotPathChange();" onkeyup="redrawSpots();" onmouseup="redrawSpots();" /></div></td>
             </tr>
+            <!-- A short rule between the path rows and Animate (under the name and Width columns only) -->
+            <tr class="mapRuleRow"><td colspan="2"><hr /></td></tr>
             <tr>
-              <td class="mapRowLabel"><label data-i18n="settings.map.row.animate.label" for="animateValue">Animate</label></td>
-              <td colspan="3">
-                <input type="checkbox" id="animateValue" data-i18n="settings.map.animatePaths.hover" onclick="changeAnimate()" />
-                <input data-i18n="settings.map.animateSpeed.hover" title="Animation Speed" type="range" min="1" max="20" value="10" step="1" class="slider" id="animateSpeedValue" oninput="changeAnimateSpeedValue()" />
-              </td>
+              <!-- The tick before its name, so the speed slider and its fps line up with the Width sliders above -->
+              <td class="mapRowLabel"><input type="checkbox" id="animateValue" data-i18n="settings.map.animatePaths.hover" onclick="changeAnimate()" /> <label data-i18n="settings.map.row.animate.label" for="animateValue">Animate</label></td>
+              <td colspan="3"><input data-i18n="settings.map.animateSpeed.hover" title="Animation Speed" type="range" min="1" max="30" value="15" step="1" class="slider" id="animateSpeedValue" oninput="changeAnimateSpeedValue()" /><span id="animateFpsTd" class="mapValue">15 fps</span></td>
             </tr>
           </table>
         </div>
@@ -1861,6 +1861,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <th>Type</th>
                 <th data-i18n="settings.alerts.AudioAlert.onSingle">On Single</th>
                 <th data-i18n="settings.alerts.AudioAlert.onMultiple">On Multiple</th>
+                <!-- DXCC, POTA, SOTA and Multiple: said / played in place of the usual alert for an ATNO (alerts.js) -->
+                <th data-i18n="settings.alerts.AudioAlert.onAtno.label">On ATNO</th>
               </tr>
               <tr>
                 <td>

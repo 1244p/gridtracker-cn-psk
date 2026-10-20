@@ -978,5 +978,9 @@
   "gt.button.gtFlag.count": "Spotters: {0}",
   "rosterColumns.DXCC.atno": "ATNO DXCC: nooit gewerkt",
   "rosterColumns.DXCC.newBand": "Nieuwe band DXCC: niet gewerkt op {0}",
-  "rosterColumns.DXCC.newMode": "Nieuwe mode DXCC: niet gewerkt in {0}"
+  "rosterColumns.DXCC.newMode": "Nieuwe mode DXCC: niet gewerkt in {0}",
+  "settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
+  "settings.alerts.AudioAlert.atno.hover": "Een entiteit die u nog nooit hebt gewerkt, op geen enkele band of mode, ongeacht de logboekkeuze. Waarschuwt in plaats van de DXCC-waarschuwing voor dat station.",
+  "settings.alerts.AudioAlert.onAtno.label": "Bij ATNO",
+  "settings.alerts.AudioAlert.onAtno.hover": "Uitgesproken of afgespeeld in plaats van de gewone waarschuwing als een station een ATNO is: een nooit gewerkt DXCC, een nooit gejaagd park, een nooit gejaagde top. Leeg: de gewone waarschuwing."
 }

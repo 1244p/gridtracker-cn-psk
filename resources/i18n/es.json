@@ -971,5 +971,9 @@
   "gt.button.gtFlag.count": "Spotters: {0}",
   "rosterColumns.DXCC.atno": "DXCC ATNO: nunca trabajado",
   "rosterColumns.DXCC.newBand": "DXCC en banda nueva: no trabajado en {0}",
-  "rosterColumns.DXCC.newMode": "DXCC en modo nuevo: no trabajado en {0}"
+  "rosterColumns.DXCC.newMode": "DXCC en modo nuevo: no trabajado en {0}",
+  "settings.alerts.AudioAlert.atno.label": "DXCC ATNO",
+  "settings.alerts.AudioAlert.atno.hover": "Una entidad que nunca ha trabajado en ninguna banda ni modo, sea cual sea el Libro de guardia elegido. Avisa en lugar del aviso DXCC para esa estación.",
+  "settings.alerts.AudioAlert.onAtno.label": "Con ATNO",
+  "settings.alerts.AudioAlert.onAtno.hover": "Se dice o reproduce en lugar del aviso habitual cuando una estación es un ATNO: un DXCC nunca trabajado, un parque nunca cazado, una cumbre nunca cazada. Vacío: el aviso habitual."
 }

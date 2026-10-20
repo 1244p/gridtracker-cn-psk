@@ -196,7 +196,8 @@ const def_settings = {
   map: {
     allGridOpacity: 1,
     animate: true,
-    animateSpeed: 4,
+    // Flight path animation steps per second, 1 to 30 (was animateSpeed, screen frames per step: converted at startup)
+    animateFps: 15,
     CQhilite: true,
     predMode: 0,
     predOpacity: 0.4,
@@ -542,6 +543,19 @@ const def_settings = {
       huntWatcherSpeechMulti: "Many Watchers",
       huntAwardSpeechMulti: "Many Awards",
       huntMultipleSpeechMulti: "Many Wanted Entities",
+
+      // On ATNO: said / played in place of On Single / On Multiple when one of the alerting stations is an ATNO (DXCC
+      // never worked, park never hunted, summit never chased); Multiple's when that comes with other wanted types.
+      // Empty text or no file: the usual alert
+      huntDXCCFileAtno: "Phazzz-3.mp3",
+      huntPOTAFileAtno: "Phazzz-2.mp3",
+      huntSOTAFileAtno: "Phazzz-1.mp3",
+      huntMultipleFileAtno: "Longlaser1.mp3",
+
+      huntDXCCSpeechAtno: "ATNO DXCC",
+      huntPOTASpeechAtno: "ATNO Park",
+      huntSOTASpeechAtno: "ATNO Summit",
+      huntMultipleSpeechAtno: "Many ATNO",
     }
   },
   customAlerts: {},
@@ -823,6 +837,12 @@ for (const key in def_settings.feedAudioAlerts.media)
     def_settings.feedAudioAlerts.media[key] = def_settings.feedAudioAlerts.media[key].replace(/^(Wanted|Many) /, "$1 Feed ");
   }
 }
+// ... and "Feed ATNO DXCC", "Many Feed ATNO" (On ATNO)
+for (const key of ["huntDXCCSpeechAtno", "huntPOTASpeechAtno", "huntSOTASpeechAtno"])
+{
+  def_settings.feedAudioAlerts.media[key] = "Feed " + def_settings.feedAudioAlerts.media[key];
+}
+def_settings.feedAudioAlerts.media.huntMultipleSpeechAtno = "Many Feed ATNO";
 
 // Each roster's default columns, copied before anything can change them (new users' settings start as
 // these very objects): for the roster windows' "Reset Columns to Default"

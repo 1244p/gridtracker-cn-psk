@@ -978,5 +978,9 @@
   "gt.button.gtFlag.count": "Zgłaszający: {0}",
   "rosterColumns.DXCC.atno": "ATNO DXCC: nigdy nie zrobiony",
   "rosterColumns.DXCC.newBand": "Nowe pasmo DXCC: nie zrobiony na {0}",
-  "rosterColumns.DXCC.newMode": "Nowa emisja DXCC: nie zrobiony w {0}"
+  "rosterColumns.DXCC.newMode": "Nowa emisja DXCC: nie zrobiony w {0}",
+  "settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
+  "settings.alerts.AudioAlert.atno.hover": "Podmiot nigdy nie zrobiony na żadnym paśmie ani emisji, niezależnie od wyboru dziennika. Alarmuje zamiast alarmu DXCC dla tej stacji.",
+  "settings.alerts.AudioAlert.onAtno.label": "ATNO",
+  "settings.alerts.AudioAlert.onAtno.hover": "Wypowiadane lub odtwarzane zamiast zwykłego alarmu, gdy stacja jest ATNO: DXCC nigdy nie zrobione, park nigdy nie upolowany, szczyt nigdy nie zdobyty. Puste: zwykły alarm."
 }

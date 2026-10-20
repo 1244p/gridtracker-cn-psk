@@ -107,7 +107,8 @@ function loadMapSettings()
   mapNightSelect.value = GT.settings.map.nightMapIndex;
 
   animateValue.checked = GT.settings.map.animate;
-  animateSpeedValue.value = 21 - GT.settings.map.animateSpeed;
+  animateSpeedValue.value = GT.settings.map.animateFps;
+  animateFpsTd.textContent = GT.settings.map.animateFps + " fps";
   setAnimateView();
   splitQSLValue.checked = GT.settings.map.splitQSL;
   fitQRZvalue.checked = GT.settings.map.fitQRZ;

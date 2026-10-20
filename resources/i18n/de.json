@@ -979,5 +979,9 @@
 	"gt.button.gtFlag.count": "Spotter: {0}",
 	"rosterColumns.DXCC.atno": "ATNO-DXCC: noch nie gearbeitet",
 	"rosterColumns.DXCC.newBand": "Neues Band-DXCC: auf {0} noch nicht gearbeitet",
-	"rosterColumns.DXCC.newMode": "Neue Betriebsart-DXCC: in {0} noch nicht gearbeitet"
+	"rosterColumns.DXCC.newMode": "Neue Betriebsart-DXCC: in {0} noch nicht gearbeitet",
+	"settings.alerts.AudioAlert.atno.label": "ATNO-DXCC",
+	"settings.alerts.AudioAlert.atno.hover": "Ein Gebiet, das Sie noch nie auf irgendeinem Band oder in irgendeiner Betriebsart gearbeitet haben, unabhängig von der Logbuch-Auswahl. Ersetzt für diese Station den DXCC-Alarm.",
+	"settings.alerts.AudioAlert.onAtno.label": "Bei ATNO",
+	"settings.alerts.AudioAlert.onAtno.hover": "Wird statt des üblichen Alarms gesprochen oder abgespielt, wenn eine Station ein ATNO ist: ein nie gearbeitetes DXCC, ein nie gejagter Park, ein nie gejagter Gipfel. Leer: der übliche Alarm."
 }

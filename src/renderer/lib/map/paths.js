@@ -107,6 +107,7 @@ function styleAllFlightPaths() {
 function setAnimateView()
 {
   animateSpeedValue.style.display = animateValue.checked ? "" : "none";
+  animateFpsTd.style.display = animateValue.checked ? "" : "none";
 }
 
 function toggleAnimate()
@@ -155,10 +156,11 @@ function changeAnimate() {
   if (GT.map) GT.map.render();
 }
 
+// Animation steps per second, 1 to 30
 function changeAnimateSpeedValue()
 {
-  GT.settings.map.animateSpeed = 21 - animateSpeedValue.value;
-  
+  GT.settings.map.animateFps = Number(animateSpeedValue.value);
+  animateFpsTd.textContent = GT.settings.map.animateFps + " fps";
 }
 
 function removeFlightPathsAndDimSquares()
@@ -206,12 +208,12 @@ function animatePaths() {
 
   requestAnimationFrame(animatePaths);
 
-  if (GT.settings.map.animateSpeed > 1)
-  {
-    GT.animateFrame++;
-    GT.animateFrame %= GT.settings.map.animateSpeed;
-    if (GT.animateFrame > 0) return; 
-  }
+  // Steps per second by the clock, not by screen frames: the same speed (and work) on a 60 Hz or 120 Hz screen. A frame
+  // up to 2 ms early still steps (frames don't land exactly), and after a pause the clock restarts rather than catching up
+  const now = performance.now();
+  const interval = 1000 / GT.settings.map.animateFps;
+  if (now - GT.animateLastStep < interval - 2) return;
+  GT.animateLastStep = (now - GT.animateLastStep > interval * 2) ? now : GT.animateLastStep + interval;
 
   GT.flightPathOffset++;
   GT.flightPathOffset %= GT.flightPathTotal;

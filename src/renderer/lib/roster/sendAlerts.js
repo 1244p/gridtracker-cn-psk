@@ -78,7 +78,8 @@ function sendAlerts()
     let multi = 0;
     for (const key in audioAlertCounts)
     {
-      if (audioAlertCounts[key] > 0)
+      // The ATNO counts are part of their type's alert, not types of their own
+      if (audioAlertCounts[key] > 0 && !key.endsWith("Atno"))
       {
         multi++;
       }

@@ -736,7 +736,7 @@ function applyAudioAlertsMedia()
 
     const type = media[key + "Type"];
     typeSelect.value = type;
-    for (const suffix of ["FileSingle", "FileMulti"])
+    for (const suffix of ["FileSingle", "FileMulti", "FileAtno"])
     {
       const select = document.getElementById(key + suffix);
       if (select)
@@ -745,7 +745,7 @@ function applyAudioAlertsMedia()
         select.style.display = (type == "tts") ? "none" : "";
       }
     }
-    for (const suffix of ["SpeechSingle", "SpeechMulti"])
+    for (const suffix of ["SpeechSingle", "SpeechMulti", "SpeechAtno"])
     {
       const input = document.getElementById(key + suffix);
       if (input)
@@ -836,6 +836,25 @@ function wantedChanged(what)
   }
 }
 
+// The Audio Alerts rows with an On ATNO cell
+const AUDIO_ALERT_ATNO_KEYS = ["huntDXCC", "huntPOTA", "huntSOTA", "huntMultiple"];
+
+// A row's On ATNO speech or file, by its Type; false when it's empty (then the usual alert plays)
+function playAtnoAlert(media, key)
+{
+  if (media[key + "Type"] == "tts")
+  {
+    const text = (media[key + "SpeechAtno"] || "").trim();
+    if (text == "") return false;
+    speakAlertString(text);
+    return true;
+  }
+  const file = media[key + "FileAtno"];
+  if (!file || file == "none") return false;
+  playAlertMediaFile(file);
+  return true;
+}
+
 // rosterName: "call" or "feed"; each has its own sounds, speech and counts
 function processAudioAlertsFromRoster(wantedAlerts, rosterName = "call")
 {
@@ -851,9 +870,15 @@ function processAudioAlertsFromRoster(wantedAlerts, rosterName = "call")
       }
     }
   }
+  // ATNOs among the DXCC / POTA / SOTA alerts (huntDXCCAtno, ...): their On ATNO plays in place of the usual alert
+  const anyAtno = AUDIO_ALERT_ATNO_KEYS.some((key) => wantedAlerts[key + "Atno"] > 0);
   if (wantedAlerts.huntMultiple > 1)
   {
-    if (media.huntMultipleType == "tts")
+    if (anyAtno && playAtnoAlert(media, "huntMultiple"))
+    {
+      // "Many ATNO"
+    }
+    else if (media.huntMultipleType == "tts")
     {
       speakAlertString(media.huntMultipleSpeechMulti);
     }
@@ -873,7 +898,11 @@ function processAudioAlertsFromRoster(wantedAlerts, rosterName = "call")
       if (key in window)
       {
         let type = key + "Type";
-        if (wantedAlerts[key] == 1)
+        if (wantedAlerts[key] > 0 && wantedAlerts[key + "Atno"] > 0 && playAtnoAlert(media, key))
+        {
+          // "ATNO DXCC", ...
+        }
+        else if (wantedAlerts[key] == 1)
         {
           if (media[type] == "tts")
           {
@@ -1223,6 +1252,36 @@ function loadAudioAlertSettings()
       input.addEventListener("change", wantedMediaSpeechChanged, false);
       ValidateText(input);
       input.style.display = (mediaType == "media") ? "none" : "";
+
+      // On ATNO: DXCC, POTA, SOTA and Multiple have one; the other rows an empty cell
+      parent = row.insertCell();
+      if (AUDIO_ALERT_ATNO_KEYS.includes(key))
+      {
+        id = key + "FileAtno";
+        select = document.createElement("select");
+        value = audioAlertsMedia()[id];
+        select.id = id;
+        select.appendChild(newOption("none", I18N("alerts.addNew.SelectFile")), value == "none");
+        GT.mediaFiles.forEach((filename) =>
+        {
+          select.appendChild(newOption(filename, path.parse(filename).name, value == filename));
+        });
+        select.addEventListener("change", wantedMediaFileChanged, false);
+        parent.appendChild(select);
+        select.value = value;
+        select.style.display = (mediaType == "tts") ? "none" : "";
+
+        input = document.createElement("input");
+        input.id = id = key + "SpeechAtno";
+        input.type = "text";
+        input.size = 22;
+        input.value = audioAlertsMedia()[id];
+        input.className = "inputTextValue";
+        parent.appendChild(input);
+        input.addEventListener("change", wantedMediaSpeechChanged, false);
+        ValidateText(input);
+        input.style.display = (mediaType == "media") ? "none" : "";
+      }
     }
   }
 
@@ -1243,6 +1302,11 @@ function wantedMediaTypeChanged(event)
       window[rootName + "SpeechMulti"].style.display = "";
       window[rootName + "FileMulti"].style.display = "none";
     }
+    if (rootName + "FileAtno" in window)
+    {
+      window[rootName + "SpeechAtno"].style.display = "";
+      window[rootName + "FileAtno"].style.display = "none";
+    }
   }
   else
   {
@@ -1252,6 +1316,11 @@ function wantedMediaTypeChanged(event)
     {
       window[rootName + "SpeechMulti"].style.display = "none";
       window[rootName + "FileMulti"].style.display = "";
+    }
+    if (rootName + "FileAtno" in window)
+    {
+      window[rootName + "SpeechAtno"].style.display = "none";
+      window[rootName + "FileAtno"].style.display = "";
     }
   }
   audioAlertsMedia()[element.id] = element.value;

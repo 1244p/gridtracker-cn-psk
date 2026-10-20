@@ -978,5 +978,9 @@
 	"gt.button.gtFlag.count": "Spotter: {0}",
 	"rosterColumns.DXCC.atno": "DXCC ATNO: mai collegato",
 	"rosterColumns.DXCC.newBand": "DXCC nuova banda: non collegato su {0}",
-	"rosterColumns.DXCC.newMode": "DXCC nuovo modo: non collegato in {0}"
+	"rosterColumns.DXCC.newMode": "DXCC nuovo modo: non collegato in {0}",
+	"settings.alerts.AudioAlert.atno.label": "DXCC ATNO",
+	"settings.alerts.AudioAlert.atno.hover": "Un'entità mai collegata su nessuna banda o modo, qualunque sia la scelta del Logbook. Avvisa al posto dell'avviso DXCC per quella stazione.",
+	"settings.alerts.AudioAlert.onAtno.label": "Su ATNO",
+	"settings.alerts.AudioAlert.onAtno.hover": "Detto o riprodotto al posto dell'avviso abituale quando una stazione è un ATNO: un DXCC mai collegato, un parco mai cacciato, una vetta mai cacciata. Vuoto: l'avviso abituale."
 }

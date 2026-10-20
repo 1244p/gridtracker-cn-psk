@@ -978,5 +978,9 @@
 	"gt.button.gtFlag.count": "スポッター: {0}",
 	"rosterColumns.DXCC.atno": "ATNO DXCC：未交信",
 	"rosterColumns.DXCC.newBand": "新バンドDXCC：{0}で未交信",
-	"rosterColumns.DXCC.newMode": "新モードDXCC：{0}で未交信"
+	"rosterColumns.DXCC.newMode": "新モードDXCC：{0}で未交信",
+	"settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
+	"settings.alerts.AudioAlert.atno.hover": "どのバンド・モードでも未交信のエンティティ（ログブックの選択に関係なく）。その局のDXCCアラートの代わりに通知します。",
+	"settings.alerts.AudioAlert.onAtno.label": "ATNOのとき",
+	"settings.alerts.AudioAlert.onAtno.hover": "局がATNO（未交信のDXCC、未ハントの公園、未チェイスの山頂）のとき、通常のアラートの代わりに読み上げ・再生します。空欄：通常のアラート。"
 }

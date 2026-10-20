@@ -979,5 +979,9 @@
   "gt.button.gtFlag.count": "报告者: {0}",
   "rosterColumns.DXCC.atno": "ATNO DXCC：从未通联",
   "rosterColumns.DXCC.newBand": "新波段DXCC：{0}未通联",
-  "rosterColumns.DXCC.newMode": "新模式DXCC：{0}未通联"
+  "rosterColumns.DXCC.newMode": "新模式DXCC：{0}未通联",
+  "settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
+  "settings.alerts.AudioAlert.atno.hover": "在任何波段或模式下都从未通联过的实体（与日志选择无关）。对该电台替代DXCC提醒。",
+  "settings.alerts.AudioAlert.onAtno.label": "ATNO时",
+  "settings.alerts.AudioAlert.onAtno.hover": "当电台为ATNO（从未通联的DXCC、从未猎取的公园、从未追逐的山峰）时，代替通常的提醒朗读或播放。留空：通常的提醒。"
 }
