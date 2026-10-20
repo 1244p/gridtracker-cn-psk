@@ -276,8 +276,8 @@
     "settings.map.RangeRings.spacing.label": "距离圈间距",
     "settings.map.RangeRings.color.label": "距离圈颜色",
     "settings.logging.tableheader.source": "日志平台/同步",
-    "settings.logging.tableheader.menu": "菜单按钮",
-    "settings.logging.tableheader.startup": "启动时加载",
+    "settings.logging.tableheader.menu": "菜单 按钮",
+    "settings.logging.tableheader.startup": "启动时 加载",
     "settings.logging.tableheader.log": "记录 QSO",
     "settings.logging.tableheader.details": "详细参数",
     "settings.logging.tableheader.test": "测试",
@@ -976,5 +976,8 @@
   "roster.controls.logbook.spotsBandCwMode": "报告波段, CW模式",
   "roster.controls.logbook.mixBandPhoneMode": "混合波段和语音模式",
   "roster.controls.logbook.mixBandCwMode": "混合波段和CW模式",
-  "gt.button.gtFlag.count": "报告者: {0}"
+  "gt.button.gtFlag.count": "报告者: {0}",
+  "rosterColumns.DXCC.atno": "ATNO DXCC：从未通联",
+  "rosterColumns.DXCC.newBand": "新波段DXCC：{0}未通联",
+  "rosterColumns.DXCC.newMode": "新模式DXCC：{0}未通联"
 }

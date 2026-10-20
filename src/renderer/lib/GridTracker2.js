@@ -630,11 +630,14 @@ GT.wsjtHandlers = {
   12: handleWsjtxADIF
 };
 
+// Drawn 4x (92x80) and shown at a quarter, so it's sharp on high-DPI screens; the anchor (the pole's foot) is in the
+// image's own pixels
 GT.gtFlagIcon = new ol.style.Icon({
   src: "img/flag_gt_user.png",
+  scale: 0.25,
   anchorYUnits: "pixels",
   anchorXUnits: "pixels",
-  anchor: [12, 17]
+  anchor: [40, 68]
 });
 
 GT.mapSourceTypes = {

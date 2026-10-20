@@ -1529,11 +1529,32 @@ button:focus {
   flex: 1 1 100%;
 }
 
-/* Wider than the other tabs: Logs On This PC and Logging Programs share a row on a normal-width window */
+/* Wider than the other tabs: Logs On This PC and Logging Programs share a row on a normal-width window. A column as
+   wide as that row needs (no wider), up to the cap: Online Logbooks fills it and PSK-Reporter is centered under it */
 .mapGroups.mapLogging {
-  max-width: 1180px;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: fit-content;
+  max-width: 1100px;
   padding-top: 2px;
   padding-bottom: 2px;
+}
+
+/* The top row: the two boxes side by side, or stacked when they don't fit */
+.mapLoggingTop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+  align-self: stretch;
+}
+
+/* Online Logbooks takes the top row's width rather than setting it (its own content would widen the tab) */
+.mapLogging > .mapGroup.mapFull {
+  flex: none;
+  align-self: stretch;
+  contain: inline-size;
 }
 
 /* A little less space under the boxes, so a full setup fits without scrolling */
@@ -1548,6 +1569,18 @@ button:focus {
 
 .mapLogging .mapGroup > table > tbody > tr + tr > td {
   border-top: 1px solid #333;
+}
+
+/* Fields and lists without their 1px top / bottom margin: each row of them 2px shorter */
+.mapLogging .inputTextValue,
+.mapLogging select {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+/* Ticks centered on the middle of the text's capitals, not its line (which sits 1px lower) */
+.mapLogging input[type="checkbox"] {
+  top: -1px;
 }
 
 /* More room between the services' rows */
@@ -1582,7 +1615,11 @@ button:focus {
 /* Menu Button / At Startup / Log QSO / Connect: each word on its own line, so the tick columns stay narrow */
 .mapGroup th.mapFlagHead {
   white-space: normal;
-  width: 1%;
+  /* Chinese / Japanese break at their spaces too, not between every character */
+  word-break: keep-all;
+  /* As narrow as the longest word, also when a box works out its own width (a percentage only narrows a stretched
+     table, so boxes sized to their content had one-line headers) */
+  width: 1px;
   line-height: 1.1;
   vertical-align: bottom;
 }
@@ -1619,12 +1656,18 @@ button:focus {
   margin-top: 2px;
 }
 
-.mapGroup td.mapResult {
+/* A Test button's result, under it (wraps rather than widen the column; takes no room until there is one) */
+.mapGroup .mapResult {
   font-size: 11px;
   font-weight: bold;
-  white-space: nowrap;
+  white-space: normal;
+  max-width: 120px;
+  margin: 2px auto 0px auto;
 }
 
+.mapGroup .mapResult:empty {
+  display: none;
+}
 /* A label kept for screen readers only (the column header names the field) */
 .mapSrOnly {
   position: absolute;

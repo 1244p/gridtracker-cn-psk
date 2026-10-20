@@ -181,14 +181,18 @@ const ROSTER_COLUMNS = {
     label: () => isFeedRoster() ? I18N("rosterColumns.DXCC.feedHeader") : "DXCC",
     compare: (a, b) => window.opener.myDxccCompare(a.callObj, b.callObj),
     tableHeader: () => ({ html: isFeedRoster() ? I18N("rosterColumns.DXCC.feedHeader") : "DXCC" }),
-    tableData: (callObj) => ({
-      title: GT.dxccInfo[callObj.dxcc].pp,
-      name: `DXCC (${callObj.dxcc})`,
-      rawAttrs: callObj.style.dxcc,
-      // Like Grid: click centers the map on the entity and dazzles it (not in compact mode, where the tile click starts a QSO)
-      onClick: CR.rosterSettings.compact ? null : `centerOnDxcc(${callObj.dxcc})`,
-      html: GT.dxccToAltName[callObj.dxcc]
-    })
+    tableData: (callObj) =>
+    {
+      const marks = dxccNewMarks(callObj);
+      return {
+        title: GT.dxccInfo[callObj.dxcc].pp + marks.title,
+        name: `DXCC (${callObj.dxcc})`,
+        rawAttrs: callObj.style.dxcc,
+        // Like Grid: click centers the map on the entity and dazzles it (not in compact mode, where the tile click starts a QSO)
+        onClick: CR.rosterSettings.compact ? null : `centerOnDxcc(${callObj.dxcc})`,
+        html: marks.before + GT.dxccToAltName[callObj.dxcc] + marks.after
+      };
+    }
   },
 
   // Feed Roster: DXCC entity of the station that reported the spot. The key has "v2" because its default changed to
@@ -510,6 +514,34 @@ const ROSTER_COLUMNS = {
   }
 }
 
+// DXCC column marks, whatever the Logbook choice, from everything worked: a star each side of an entity never worked
+// (ATNO), else after it a diamond if it hasn't been worked on this band and a dot if not in this (exact) mode; the
+// hover says which
+function dxccNewMarks(callObj)
+{
+  if (!(callObj.dxcc > 0)) return { before: "", after: "", title: "" };
+  const worked = GT.tracker.worked.dxcc;
+  const base = callObj.dxcc + "|";
+  if (!(base in worked))
+  {
+    const star = "<span class='dxccNew'>★</span>";
+    return { before: star + " ", after: " " + star, title: "\n" + I18N("rosterColumns.DXCC.atno") };
+  }
+  let marks = "";
+  let title = "";
+  if (callObj.band && !((base + callObj.band) in worked))
+  {
+    marks += "◆";
+    title += "\n" + I18N("rosterColumns.DXCC.newBand").replace("{0}", callObj.band);
+  }
+  if (callObj.mode && !((base + callObj.mode) in worked))
+  {
+    marks += "●";
+    title += "\n" + I18N("rosterColumns.DXCC.newMode").replace("{0}", callObj.mode);
+  }
+  return { before: "", after: marks ? ` <span class='dxccNew'>${marks}</span>` : "", title };
+}
+
 function potaColumnRef(callObj)
 {
   if (callObj.pota)
@@ -529,8 +561,7 @@ function potaColumnHover(callObj)
   if (callObj.pota in GT.pota.parks)
   {
     value += callObj.pota + " - " + GT.pota.parks[callObj.pota].name + "\n";
-  }
-  if (callObj.pota && sotaLogOffered(callObj)) value += I18N("sotaLog.hint");
+  }  if (callObj.pota && sotaLogOffered(callObj)) value += I18N("sotaLog.hint");
 
   return value;
 }

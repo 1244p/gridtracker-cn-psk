@@ -551,7 +551,7 @@ function adifLogQsoCheckBoxChanged(what)
   {
     if (what.checked == true)
     {
-      lotwUpload.style.display = "inline-block";
+      lotwUpload.style.display = "block";
       trustedTestButton.style.display = "inline-block";
     }
     else

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
-## [v2.261019.1]
+## [v2.261019.2]
 
 ### MD Markup Format
 **Kitchen Sink, Hail Mary, Pre-CABG Release**
@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The SOTA column marks what a summit is worth to you with dots beside its reference
   - Two dots before it: you haven't chased a summit in that association yet; one dot: you've chased one there
   - A dot after it: you haven't chased a summit in that region yet
+- The DXCC column marks new ones, whatever the Logbook choice: ★ either side of an ATNO (an entity you've never worked); after the name, ◆ a band you haven't worked it on, ● a mode you haven't worked it in; its hover says which
 - In the Feed Roster, click a park or summit in the POTA / SOTA column to log the QSO by hand (CW, SSB), while no logger such as AC Log is connected and no WSJT-X / JTDX is on its band and mode
   - A park QSO is spotted to POTA, as for a logged decode
 
@@ -161,6 +162,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
       <li>A dot after it: you haven't chased a summit in that region yet</li>
     </ul>
   </li>
+  <li>The DXCC column marks new ones, whatever the Logbook choice: ★ either side of an ATNO (an entity you've never worked); after the name, ◆ a band you haven't worked it on, ● a mode you haven't worked it in; its hover says which</li>
   <li>In the Feed Roster, click a park or summit in the POTA / SOTA column to log the QSO by hand (CW, SSB), while no logger such as AC Log is connected and no WSJT-X / JTDX is on its band and mode
     <ul>
       <li>A park QSO is spotted to POTA, as for a logged decode</li>

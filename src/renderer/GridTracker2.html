@@ -1536,6 +1536,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </div>
     <div id="logSettingsDiv" class="settingsTabcontent">
       <div class="mapGroups mapLogging">
+        <!-- The top two boxes' row sets the tab's width (side by side, or stacked on a narrow window) -->
+        <div class="mapLoggingTop">
         <div class="mapGroup mapHalf">
           <div class="mapGroupTitle" data-i18n="settings.logging.group.pc.label">Logbooks On This Computer</div>
           <table>
@@ -1681,6 +1683,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </tr>
           </table>
         </div>
+        </div>
         <div class="mapGroup mapFull">
           <div class="mapGroupTitle" data-i18n="settings.logging.group.online.label">Online Logbooks</div>
           <table>
@@ -1691,7 +1694,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <th class="mapFlagHead" data-i18n="settings.logging.tableheader.log">Log QSO</th>
               <th data-i18n="settings.logging.tableheader.details">Details</th>
               <th data-i18n="settings.logging.tableheader.test">Test</th>
-              <th data-i18n="settings.logging.tableheader.result">Result</th>
             </tr>
             <tr>
               <td class="mapName" data-i18n="settings.logging.QRZcom.source">QRZ.com</td>
@@ -1702,8 +1704,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <span class="mapFieldLine"><label data-i18n="settings.logging.QRZcom.details.apikey" for="qrzApiKey">API Key</label>
                 <input id="qrzApiKey" type="password" class="inputTextValue" size="21" oninput="ValidateQrzApi(this); adifTextValueChange(this);" /></span>
               </td>
-              <td class="mapCenter"><div data-i18n="settings.logging.QRZcom.test.button" class="button" onclick="if ( ValidateQrzApi(qrzApiKey ) ) grabQrzComLog(true);">Test</div></td>
-              <td class="mapResult" id="qrzTestResult"></td>
+              <td class="mapCenter"><div data-i18n="settings.logging.QRZcom.test.button" class="button" onclick="if ( ValidateQrzApi(qrzApiKey ) ) grabQrzComLog(true);">Test</div><div class="mapResult" id="qrzTestResult"></div></td>
             </tr>
             <tr>
               <td class="mapName" data-i18n="settings.logging.ClubLog.source">ClubLog</td>
@@ -1718,8 +1719,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <span class="mapFieldLine"><label data-i18n="settings.logging.ClubLog.details.email" for="clubEmail">Email</label>
                 <input id="clubEmail" type="text" class="inputTextValue" size="20" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
               </td>
-              <td class="mapCenter"><div data-i18n="settings.logging.ClubLog.test.button" class="button" onclick="if ( ValidateText(clubEmail) && ValidateText(clubPassword) ) grabClubLog(true);">Test</div></td>
-              <td class="mapResult" id="clubTestResult"></td>
+              <td class="mapCenter"><div data-i18n="settings.logging.ClubLog.test.button" class="button" onclick="if ( ValidateText(clubEmail) && ValidateText(clubPassword) ) grabClubLog(true);">Test</div><div class="mapResult" id="clubTestResult"></div></td>
             </tr>
             <tr>
               <td class="mapName" data-i18n="settings.logging.LoTW.source">LotW</td>
@@ -1731,12 +1731,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <input id="lotwLogin" type="text" class="inputTextValue" size="8" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
                 <span class="mapFieldLine"><label data-i18n="settings.logging.LoTW.details.password" for="lotwPassword">Password</label>
                 <input id="lotwPassword" type="password" class="inputTextValue" size="8" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
-                <!-- Shown while Log? is ticked (adif.js, loaders.js) -->
+                <!-- Shown while Log QSO is ticked (adif.js, loaders.js): TQSL Path and Password on their own line, Station
+                     Name on the next -->
                 <div id="lotwUpload">
                   <span class="mapFieldLine"><div data-i18n="settings.logging.LoTW.details.TQSLPath" class="flexButton" style="display: inline-block" id="selectTQSLButton">TQSL Path</div>
                   <div id="tqslFileDiv" style="display: inline-block; margin:3px;" class="roundBorderValue"><span data-i18n="settings.logging.tqsl.noFile">No file selected</span></div></span>
                   <span class="mapFieldLine"><label data-i18n="settings.logging.LoTW.details.TQSLPass" for="lotwTrusted">TQSL Password</label>
                   <input id="lotwTrusted" type="password" class="inputTextValue" size="8" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
+                  <br />
                   <span class="mapFieldLine"><label data-i18n="settings.logging.LoTW.details.station" for="lotwStation">Station Name</label>
                   <select id="lotwStation" class="inputTextValue" onchange="ValidateText(this); adifTextValueChange(this);"></select></span>
                 </div>
@@ -1745,8 +1747,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <div data-i18n="settings.logging.LoTW.test.downloadButton" class="button" onclick="if ( ValidateText(lotwLogin) && ValidateText(lotwPassword) ) grabLOtWLog(true);">Test Download</div>
                 <!-- Shown while Log QSO is ticked (adif.js, loaders.js, as inline-block): its own line under Test Download -->
                 <div class="mapTestLine"><div data-i18n="settings.logging.LoTW.test.TQSLButton" id="trustedTestButton" class="button" onclick="testTrustedQSL(true);">Test TQSL</div></div>
+                <div class="mapResult" id="lotwTestResult"></div>
               </td>
-              <td class="mapResult" id="lotwTestResult"></td>
             </tr>
             <tr>
               <td class="mapName" data-i18n="settings.logging.eQSLcc.source">eQSL.cc</td>
@@ -1763,8 +1765,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <!-- Shown while QTH Nickname is ticked (adif.js, loaders.js) -->
                 <input id="eQSLNickname" style="display: none" type="text" class="inputTextValue" size="12" oninput=" ValidateText(this); adifTextValueChange(this);" /></span>
               </td>
-              <td class="mapCenter"><div data-i18n="settings.logging.eQSLcc.test.button" class="button" onclick="if ( ValidateText(eQSLUser) && ValidateText(eQSLPassword) ) eQSLTest(true);">Test</div></td>
-              <td class="mapResult" id="eQSLTestResult"></td>
+              <td class="mapCenter"><div data-i18n="settings.logging.eQSLcc.test.button" class="button" onclick="if ( ValidateText(eQSLUser) && ValidateText(eQSLPassword) ) eQSLTest(true);">Test</div><div class="mapResult" id="eQSLTestResult"></div></td>
             </tr>
             <tr>
               <td class="mapName" data-i18n="settings.logging.HRDLogNet.source">HRDLOG.net</td>
@@ -1776,10 +1777,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <input id="HRDLOGCallsign" type="text" class="inputTextValue" size="12" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
                 <span class="mapFieldLine"><label data-i18n="settings.logging.HRDLogNet.details.upcode" for="HRDLOGUploadCode">Upload Code</label>
                 <input id="HRDLOGUploadCode" type="password" class="inputTextValue" size="8" oninput=" ValidateText(this); adifTextValueChange(this);" /></span>
-                <span class="mapFieldLine"><a href="http://www.hrdlog.net/docs/Tips.aspx#upcode" target="_blank" data-i18n="settings.logging.HRDLogNet.details.help.label" title="Click to learn how to get upload code">*** How to get upload code ***</a></span>
               </td>
-              <td class="mapCenter"><div data-i18n="settings.logging.HRDLogNet.test.button" class="button" onclick="if ( ValidateText(HRDLOGCallsign) && ValidateText(HRDLOGUploadCode) ) hrdCredentialTest(true);">Test</div></td>
-              <td class="mapResult" id="HRDLogTestResult"></td>
+              <td class="mapCenter"><div data-i18n="settings.logging.HRDLogNet.test.button" class="button" onclick="if ( ValidateText(HRDLOGCallsign) && ValidateText(HRDLOGUploadCode) ) hrdCredentialTest(true);">Test</div><div class="mapResult" id="HRDLogTestResult"></div></td>
             </tr>
             <tr>
               <td class="mapName">Cloudlog/Wavelog</td>
@@ -1789,6 +1788,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <td class="mapDetails">
                 <span class="mapFieldLine"><label data-i18n="settings.logging.CloudLog.details.URL" for="CloudlogURL">URL</label>
                 <input id="CloudlogURL" type="text" class="inputTextValue" size="35" oninput="ValidateText(this); CloudLogCorrectURL(false); adifTextValueChange(this);" /></span>
+                <br />
                 <span class="mapFieldLine"><label data-i18n="settings.logging.CloudLog.details.API" for="CloudlogAPI">API Key</label>
                 <input id="CloudlogAPI" type="password" class="inputTextValue" size="12" oninput="ValidateText(this); adifTextValueChange(this);" /></span>
                 <span class="mapFieldLine"><label data-i18n="settings.logging.CloudLog.details.StationProfile" for="CloudlogStationProfileID">Station Profile</label>
@@ -1796,8 +1796,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                   <option value="1" selected="true" data-i18n="settings.logging.Cloudlog.pressTest">Press Test</option>
                 </select></span>
               </td>
-              <td class="mapCenter"><div data-i18n="settings.logging.CloudLog.test.button" class="button" onclick="CloudlogTest(true);">Test</div></td>
-              <td class="mapResult" id="CloudlogTestResult"></td>
+              <td class="mapCenter"><div data-i18n="settings.logging.CloudLog.test.button" class="button" onclick="CloudlogTest(true);">Test</div><div class="mapResult" id="CloudlogTestResult"></div></td>
             </tr>
             <tr>
               <td class="mapName" data-i18n="settings.logging.HamCQ.source">HamCQ.cn</td>
@@ -1808,8 +1807,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <span class="mapFieldLine"><label data-i18n="settings.logging.HamCQ.details.apiKey" for="HamCQApiKey">API Key</label>
                 <input id="HamCQApiKey" type="password" class="inputTextValue" size="21" oninput=" ValidateText(this); adifTextValueChange(this);" /></span>
               </td>
-              <td class="mapCenter"><div data-i18n="settings.logging.HamCQ.test.button" class="button" onclick="if ( ValidateText(HamCQApiKey) ) HamCQTest(true);">Test</div></td>
-              <td class="mapResult" id="HamCQTestResult"></td>
+              <td class="mapCenter"><div data-i18n="settings.logging.HamCQ.test.button" class="button" onclick="if ( ValidateText(HamCQApiKey) ) HamCQTest(true);">Test</div><div class="mapResult" id="HamCQTestResult"></div></td>
             </tr>
           </table>
         </div>

@@ -128,3 +128,59 @@
     <polygon points="8,85 40,15 55,45 68,32 92,85" fill="none" stroke="#E67300" stroke-width="8.1" stroke-linejoin="round" />
   </g>
 </svg>
+
+<!-- flag_gt_user.png (92x80, drawn at scale 0.25 so it stays sharp on high-DPI screens): a GridTracker user on the map -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23 20" width="92" height="80">
+  <!-- Drawn on the original 23x20 flag's grid, all of it 2 units left so the pennant's point has room at the right (the
+       pole's foot, the map anchor, is at 10,17: 40,68 in the PNG) -->
+  <g transform="translate(-2,0)">
+    <!-- Shadow: the pennant again, down and left, faint (none for the pole) -->
+    <path transform="translate(-1,1)" fill="#000000" fill-opacity="0.3"
+      d="M12.2,1 C14.6,1.3 17,2.2 19.4,3 L23.4,6 L19.4,9 C17,9.8 14.6,10.7 12.2,11 Z" />
+    <!-- Pole -->
+    <rect x="11" y="0" width="1.2" height="18" fill="#000000" />
+    <!-- Pennant: full height past the letters, then to a point -->
+    <path fill="#FB2704" d="M12.2,1 C14.6,1.3 17,2.2 19.4,3 L23.4,6 L19.4,9 C17,9.8 14.6,10.7 12.2,11 Z" />
+    <!-- GT -->
+    <text x="16" y="7.9" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold"
+      font-size="5" fill="#F8FB04">GT</text>
+  </g>
+</svg>
+
+<!-- flag_on.png / flag_off.png (256x256): the button panel GT flag button, GridTracker spotters shown / hidden; the pennant is the map flag's -->
+<!-- flag_on.png -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="256" height="256">
+  <defs>
+    <!-- The pole: white, greying toward the ground -->
+    <linearGradient id="pole" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.6" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#7A7A7A" />
+    </linearGradient>
+  </defs>
+  <!-- The hole: a white ring round the pole's foot -->
+  <ellipse cx="12" cy="25" rx="7" ry="3" fill="none" stroke="#FFFFFF" stroke-width="1.4" />
+  <!-- Pole -->
+  <rect x="11.3" y="2" width="1.4" height="23.5" fill="url(#pole)" />
+  <!-- Pennant (as the map's GT flag): full height past the letters, then to a point -->
+  <path fill="#FB2704" d="M12.7,3.5 C16,3.9 19.3,5.1 22.6,6.3 L28.6,10.5 L22.6,14.7 C19.3,15.9 16,17.1 12.7,17.5 Z" />
+  <text x="18.4" y="13.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold"
+    font-size="7.6" fill="#F8FB04">GT</text>
+</svg>
+
+<!-- flag_off.png -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="256" height="256">
+  <defs>
+    <!-- The pole: white, greying toward the ground -->
+    <linearGradient id="pole" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.6" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#7A7A7A" />
+    </linearGradient>
+  </defs>
+  <!-- The hole: a white ring round the pole's foot -->
+  <ellipse cx="12" cy="25" rx="7" ry="3" fill="none" stroke="#FFFFFF" stroke-width="1.4" />
+  <!-- Pole -->
+  <rect x="11.3" y="2" width="1.4" height="23.5" fill="url(#pole)" />
+  <!-- Pennant outline only (off), the same shape as flag_on.png's -->
+  <path fill="none" stroke="#FB2704" stroke-width="1.3" stroke-linejoin="round"
+    d="M12.7,3.5 C16,3.9 19.3,5.1 22.6,6.3 L28.6,10.5 L22.6,14.7 C19.3,15.9 16,17.1 12.7,17.5 Z" />
+</svg>

@@ -839,6 +839,12 @@ table.sotaLogFields td.sotaLogRst {
   background-color: currentColor;
 }
 
+/* DXCC column: ATNO / New Band / New Mode marks after the entity's name (rosterColumns.js, dxccNewMarks) */
+.dxccNew {
+  font-size: 0.85em;
+  letter-spacing: 1px;
+}
+
 .wantedCol {
   max-width: 160px;
   overflow: hidden;

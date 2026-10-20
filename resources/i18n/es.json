@@ -968,5 +968,8 @@
   "roster.controls.logbook.spotsBandCwMode": "Banda del spot, Modo CW",
   "roster.controls.logbook.mixBandPhoneMode": "Banda mixta y Modos Fonía",
   "roster.controls.logbook.mixBandCwMode": "Banda mixta y Modo CW",
-  "gt.button.gtFlag.count": "Spotters: {0}"
+  "gt.button.gtFlag.count": "Spotters: {0}",
+  "rosterColumns.DXCC.atno": "DXCC ATNO: nunca trabajado",
+  "rosterColumns.DXCC.newBand": "DXCC en banda nueva: no trabajado en {0}",
+  "rosterColumns.DXCC.newMode": "DXCC en modo nuevo: no trabajado en {0}"
 }

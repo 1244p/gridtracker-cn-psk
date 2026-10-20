@@ -275,9 +275,9 @@
     "settings.map.RangeRings.spacing.label": "距離リングの間隔",
     "settings.map.RangeRings.color.label": "距離リングの色",
     "settings.logging.tableheader.source": "ソース/同期",
-    "settings.logging.tableheader.menu": "メニューボタン",
-    "settings.logging.tableheader.startup": "起動時に読み込む",
-    "settings.logging.tableheader.log": "QSOを記録",
+    "settings.logging.tableheader.menu": "メニュー ボタン",
+    "settings.logging.tableheader.startup": "起動時に 読み込む",
+    "settings.logging.tableheader.log": "QSO を記録",
     "settings.logging.tableheader.details": "詳細",
     "settings.logging.tableheader.test": "テスト",
     "settings.logging.tableheader.result": "結果",
@@ -975,5 +975,8 @@
 	"roster.controls.logbook.spotsBandCwMode": "スポットバンド、CWモード",
 	"roster.controls.logbook.mixBandPhoneMode": "ミックスバンド&フォーンモード",
 	"roster.controls.logbook.mixBandCwMode": "ミックスバンド&CWモード",
-	"gt.button.gtFlag.count": "スポッター: {0}"
+	"gt.button.gtFlag.count": "スポッター: {0}",
+	"rosterColumns.DXCC.atno": "ATNO DXCC：未交信",
+	"rosterColumns.DXCC.newBand": "新バンドDXCC：{0}で未交信",
+	"rosterColumns.DXCC.newMode": "新モードDXCC：{0}で未交信"
 }

@@ -975,5 +975,8 @@
   "roster.controls.logbook.spotsBandCwMode": "Pasmo Spotów, CW",
   "roster.controls.logbook.mixBandPhoneMode": "Mix Pasm & Fonia",
   "roster.controls.logbook.mixBandCwMode": "Mix Pasm & CW",
-  "gt.button.gtFlag.count": "Zgłaszający: {0}"
+  "gt.button.gtFlag.count": "Zgłaszający: {0}",
+  "rosterColumns.DXCC.atno": "ATNO DXCC: nigdy nie zrobiony",
+  "rosterColumns.DXCC.newBand": "Nowe pasmo DXCC: nie zrobiony na {0}",
+  "rosterColumns.DXCC.newMode": "Nowa emisja DXCC: nie zrobiony w {0}"
 }
