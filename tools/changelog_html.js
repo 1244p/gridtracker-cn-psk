@@ -2,7 +2,8 @@
 // (as an ```html fenced block, replacing any previous one). Dry run (prints the HTML) unless "write".
 // Usage (repo root): node tools/changelog_html.js [write]
 // The MD section may only hold "#### Area" headings, "- " bullets nested by two spaces, and "**Release Name**" lines
-// (a release's name, at the top; becomes <p><strong>…</strong></p>); anything else stops it.
+// (a release's name, at the top; becomes <p><strong>…</strong></p>) and "> " lines (a note such as a welcome; becomes
+// <p>…</p>); anything else stops it.
 const fs = require("fs");
 const write = process.argv[2] === "write";
 const f = "CHANGELOG.md";
@@ -49,6 +50,13 @@ for (const line of s.slice(a + mdHead.length, b).split(nl))
   {
     closeTo(0);
     out.push("<p><strong>" + esc(name[1]) + "</strong></p>");
+    continue;
+  }
+  const note = line.match(/^> (.+)$/);
+  if (note)
+  {
+    closeTo(0);
+    out.push("<p>" + esc(note[1]) + "</p>");
     continue;
   }
   const h = line.match(/^#### (.*)$/);

@@ -4,10 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
-## [v2.261019.3]
+## [v2.261019.4]
 
 ### MD Markup Format
 **Kitchen Sink, Hail Mary, Pre-CABG Release**
+
+> Welcome Matt HB9HWI! Thank you for your contributions to GridTracker2, including the new SOTA support!
 
 #### Call Roster / Feed Roster
 
@@ -143,6 +145,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ```html
 <p><strong>Kitchen Sink, Hail Mary, Pre-CABG Release</strong></p>
+<p>Welcome Matt HB9HWI! Thank you for your contributions to GridTracker2, including the new SOTA support!</p>
 <h4>Call Roster / Feed Roster</h4>
 <ul>
   <li>New Settings -&gt; "Columns" tab in each roster: every column in one place, in the roster's column order
