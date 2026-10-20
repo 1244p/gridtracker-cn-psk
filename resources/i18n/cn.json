@@ -983,5 +983,19 @@
   "settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
   "settings.alerts.AudioAlert.atno.hover": "在任何波段或模式下都从未通联过的实体（与日志选择无关）。对该电台替代DXCC提醒。",
   "settings.alerts.AudioAlert.onAtno.label": "ATNO时",
-  "settings.alerts.AudioAlert.onAtno.hover": "当电台为ATNO（从未通联的DXCC、从未猎取的公园、从未追逐的山峰）时，代替通常的提醒朗读或播放。留空：通常的提醒。"
+  "settings.alerts.AudioAlert.onAtno.hover": "当电台为ATNO（从未通联的DXCC、从未猎取的公园、从未追逐的山峰）时，代替通常的提醒朗读或播放。留空：通常的提醒。",
+  "gt.button.santa.hover": "切换圣诞老人追踪",
+  "santa.title.label": "圣诞老人追踪",
+  "santa.over.label": "圣诞老人现在位于",
+  "santa.next.label": "下一站",
+  "santa.gifts.label": "已送出礼物",
+  "santa.pole.label": "北极",
+  "newyear.welcome.label": "新年快乐 {year}！",
+  "santa.lost.label": "与圣诞老人失去联系！",
+  "santa.lastseen.label": "最后出现于",
+  "santa.countdown.label": "圣诞老人出发倒计时",
+  "santa.days.label": "天",
+  "santa.hours.label": "小时",
+  "santa.minutes.label": "分钟",
+  "santa.seconds.label": "秒"
 }

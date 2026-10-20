@@ -264,5 +264,40 @@
     "minZoom": 3,
     "maxZoom": 19,
     "offline": false
+  },
+  "Topographical by OpenTopoMap (Intl)": {
+    "sourceType" : "XYZ",
+    "url": "https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    "attributions": "<a href=\"https://opentopomap.org\" target=\"_blank\">OpenTopoMap</a>, OpenStreetMap contributors",
+    "maxZoom": 17,
+    "offline": false
+  },
+  "Satellite by USGS (No Labels)": {
+    "sourceType" : "XYZ",
+    "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}",
+    "attributions": "U.S. Geological Survey",
+    "maxZoom": 16,
+    "offline": false
+  },
+  "Topographical by USGS (English)": {
+    "sourceType" : "XYZ",
+    "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
+    "attributions": "U.S. Geological Survey",
+    "maxZoom": 16,
+    "offline": false
+  },
+  "Satellite Topo by USGS (English)": {
+    "sourceType" : "XYZ",
+    "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile/{z}/{y}/{x}",
+    "attributions": "U.S. Geological Survey",
+    "maxZoom": 16,
+    "offline": false
+  },
+  "Satellite Firefly by Esri (No Labels)": {
+    "sourceType" : "XYZ",
+    "url": "https://fly.maptiles.arcgis.com/arcgis/rest/services/World_Imagery_Firefly/MapServer/tile/{z}/{y}/{x}",
+    "attributions": "Esri",
+    "maxZoom": 20,
+    "offline": false
   }
 }

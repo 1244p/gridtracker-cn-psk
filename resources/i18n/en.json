@@ -982,5 +982,19 @@
 	"settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
 	"settings.alerts.AudioAlert.atno.hover": "An entity you've never worked on any band or mode, whatever the Logbook choice. Alerts in place of the DXCC alert for that station.",
 	"settings.alerts.AudioAlert.onAtno.label": "On ATNO",
-	"settings.alerts.AudioAlert.onAtno.hover": "Said or played instead of the usual alert when a station is an ATNO: a DXCC never worked, a park never hunted, a summit never chased. Empty: the usual alert."
+	"settings.alerts.AudioAlert.onAtno.hover": "Said or played instead of the usual alert when a station is an ATNO: a DXCC never worked, a park never hunted, a summit never chased. Empty: the usual alert.",
+	"gt.button.santa.hover": "Toggle Santa Tracker",
+	"santa.title.label": "Santa Tracker",
+	"santa.over.label": "Santa Is Over",
+	"santa.next.label": "Next Stop",
+	"santa.gifts.label": "Gifts Delivered",
+	"santa.pole.label": "North Pole",
+	"newyear.welcome.label": "Happy New Year {year}!",
+	"santa.lost.label": "Contact Lost With Santa!",
+	"santa.lastseen.label": "Last Seen",
+	"santa.countdown.label": "Santa Leaves In",
+	"santa.days.label": "Days",
+	"santa.hours.label": "Hours",
+	"santa.minutes.label": "Minutes",
+	"santa.seconds.label": "Seconds"
 }

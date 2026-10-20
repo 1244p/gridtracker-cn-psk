@@ -983,5 +983,19 @@
 	"settings.alerts.AudioAlert.atno.label": "ATNO-DXCC",
 	"settings.alerts.AudioAlert.atno.hover": "Ein Gebiet, das Sie noch nie auf irgendeinem Band oder in irgendeiner Betriebsart gearbeitet haben, unabhängig von der Logbuch-Auswahl. Ersetzt für diese Station den DXCC-Alarm.",
 	"settings.alerts.AudioAlert.onAtno.label": "Bei ATNO",
-	"settings.alerts.AudioAlert.onAtno.hover": "Wird statt des üblichen Alarms gesprochen oder abgespielt, wenn eine Station ein ATNO ist: ein nie gearbeitetes DXCC, ein nie gejagter Park, ein nie gejagter Gipfel. Leer: der übliche Alarm."
+	"settings.alerts.AudioAlert.onAtno.hover": "Wird statt des üblichen Alarms gesprochen oder abgespielt, wenn eine Station ein ATNO ist: ein nie gearbeitetes DXCC, ein nie gejagter Park, ein nie gejagter Gipfel. Leer: der übliche Alarm.",
+	"gt.button.santa.hover": "Weihnachtsmann-Tracker umschalten",
+	"santa.title.label": "Weihnachtsmann-Tracker",
+	"santa.over.label": "Der Weihnachtsmann ist bei",
+	"santa.next.label": "Nächster Halt",
+	"santa.gifts.label": "Geschenke geliefert",
+	"santa.pole.label": "Nordpol",
+	"newyear.welcome.label": "Frohes neues Jahr {year}!",
+	"santa.lost.label": "Kontakt zum Weihnachtsmann verloren!",
+	"santa.lastseen.label": "Zuletzt gesehen",
+	"santa.countdown.label": "Der Weihnachtsmann startet in",
+	"santa.days.label": "Tage",
+	"santa.hours.label": "Stunden",
+	"santa.minutes.label": "Minuten",
+	"santa.seconds.label": "Sekunden"
 }

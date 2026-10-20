@@ -982,5 +982,19 @@
   "settings.alerts.AudioAlert.atno.label": "DXCC ATNO",
   "settings.alerts.AudioAlert.atno.hover": "Uma entidade nunca trabalhada em nenhuma banda ou modo, qualquer que seja a escolha do Logbook. Alerta no lugar do alerta DXCC para essa estação.",
   "settings.alerts.AudioAlert.onAtno.label": "Em ATNO",
-  "settings.alerts.AudioAlert.onAtno.hover": "Falado ou tocado no lugar do alerta habitual quando uma estação é um ATNO: um DXCC nunca trabalhado, um parque nunca caçado, um cume nunca caçado. Vazio: o alerta habitual."
+  "settings.alerts.AudioAlert.onAtno.hover": "Falado ou tocado no lugar do alerta habitual quando uma estação é um ATNO: um DXCC nunca trabalhado, um parque nunca caçado, um cume nunca caçado. Vazio: o alerta habitual.",
+  "gt.button.santa.hover": "Ativar ou desativar o rastreador do Papai Noel",
+  "santa.title.label": "Rastreador do Papai Noel",
+  "santa.over.label": "Papai Noel está em",
+  "santa.next.label": "Próxima parada",
+  "santa.gifts.label": "Presentes entregues",
+  "santa.pole.label": "Polo Norte",
+  "newyear.welcome.label": "Feliz Ano Novo {year}!",
+  "santa.lost.label": "Contato perdido com o Papai Noel!",
+  "santa.lastseen.label": "Visto pela última vez",
+  "santa.countdown.label": "O Papai Noel parte em",
+  "santa.days.label": "Dias",
+  "santa.hours.label": "Horas",
+  "santa.minutes.label": "Minutos",
+  "santa.seconds.label": "Segundos"
 }

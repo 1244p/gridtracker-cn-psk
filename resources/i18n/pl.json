@@ -982,5 +982,19 @@
   "settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
   "settings.alerts.AudioAlert.atno.hover": "Podmiot nigdy nie zrobiony na żadnym paśmie ani emisji, niezależnie od wyboru dziennika. Alarmuje zamiast alarmu DXCC dla tej stacji.",
   "settings.alerts.AudioAlert.onAtno.label": "ATNO",
-  "settings.alerts.AudioAlert.onAtno.hover": "Wypowiadane lub odtwarzane zamiast zwykłego alarmu, gdy stacja jest ATNO: DXCC nigdy nie zrobione, park nigdy nie upolowany, szczyt nigdy nie zdobyty. Puste: zwykły alarm."
+  "settings.alerts.AudioAlert.onAtno.hover": "Wypowiadane lub odtwarzane zamiast zwykłego alarmu, gdy stacja jest ATNO: DXCC nigdy nie zrobione, park nigdy nie upolowany, szczyt nigdy nie zdobyty. Puste: zwykły alarm.",
+  "gt.button.santa.hover": "Włącz lub wyłącz śledzenie Świętego Mikołaja",
+  "santa.title.label": "Śledzenie Świętego Mikołaja",
+  "santa.over.label": "Święty Mikołaj jest w",
+  "santa.next.label": "Następny przystanek",
+  "santa.gifts.label": "Dostarczone prezenty",
+  "santa.pole.label": "Biegun Północny",
+  "newyear.welcome.label": "Szczęśliwego Nowego Roku {year}!",
+  "santa.lost.label": "Utracono kontakt ze Świętym Mikołajem!",
+  "santa.lastseen.label": "Ostatnio widziany",
+  "santa.countdown.label": "Święty Mikołaj wyrusza za",
+  "santa.days.label": "Dni",
+  "santa.hours.label": "Godz.",
+  "santa.minutes.label": "Min.",
+  "santa.seconds.label": "Sek."
 }

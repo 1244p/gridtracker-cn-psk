@@ -984,5 +984,19 @@
   "settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
   "settings.alerts.AudioAlert.atno.hover": "在任何波段或模式下都從未通聯過的實體（與日誌選擇無關）。對該電台替代DXCC提醒。",
   "settings.alerts.AudioAlert.onAtno.label": "ATNO時",
-  "settings.alerts.AudioAlert.onAtno.hover": "當電台為ATNO（從未通聯的DXCC、從未獵取的公園、從未追逐的山峰）時，代替通常的提醒朗讀或播放。留空：通常的提醒。"
+  "settings.alerts.AudioAlert.onAtno.hover": "當電台為ATNO（從未通聯的DXCC、從未獵取的公園、從未追逐的山峰）時，代替通常的提醒朗讀或播放。留空：通常的提醒。",
+  "gt.button.santa.hover": "切換聖誕老人追蹤",
+  "santa.title.label": "聖誕老人追蹤",
+  "santa.over.label": "聖誕老人現在位於",
+  "santa.next.label": "下一站",
+  "santa.gifts.label": "已送出禮物",
+  "santa.pole.label": "北極",
+  "newyear.welcome.label": "新年快樂 {year}！",
+  "santa.lost.label": "與聖誕老人失去聯繫！",
+  "santa.lastseen.label": "最後出現於",
+  "santa.countdown.label": "聖誕老人出發倒數",
+  "santa.days.label": "天",
+  "santa.hours.label": "小時",
+  "santa.minutes.label": "分鐘",
+  "santa.seconds.label": "秒"
 }

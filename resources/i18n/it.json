@@ -982,5 +982,19 @@
 	"settings.alerts.AudioAlert.atno.label": "DXCC ATNO",
 	"settings.alerts.AudioAlert.atno.hover": "Un'entità mai collegata su nessuna banda o modo, qualunque sia la scelta del Logbook. Avvisa al posto dell'avviso DXCC per quella stazione.",
 	"settings.alerts.AudioAlert.onAtno.label": "Su ATNO",
-	"settings.alerts.AudioAlert.onAtno.hover": "Detto o riprodotto al posto dell'avviso abituale quando una stazione è un ATNO: un DXCC mai collegato, un parco mai cacciato, una vetta mai cacciata. Vuoto: l'avviso abituale."
+	"settings.alerts.AudioAlert.onAtno.hover": "Detto o riprodotto al posto dell'avviso abituale quando una stazione è un ATNO: un DXCC mai collegato, un parco mai cacciato, una vetta mai cacciata. Vuoto: l'avviso abituale.",
+	"gt.button.santa.hover": "Attiva o disattiva il tracker di Babbo Natale",
+	"santa.title.label": "Tracker di Babbo Natale",
+	"santa.over.label": "Babbo Natale è a",
+	"santa.next.label": "Prossima tappa",
+	"santa.gifts.label": "Regali consegnati",
+	"santa.pole.label": "Polo Nord",
+	"newyear.welcome.label": "Buon Anno {year}!",
+	"santa.lost.label": "Contatto perso con Babbo Natale!",
+	"santa.lastseen.label": "Ultimo avvistamento",
+	"santa.countdown.label": "Babbo Natale parte tra",
+	"santa.days.label": "Giorni",
+	"santa.hours.label": "Ore",
+	"santa.minutes.label": "Minuti",
+	"santa.seconds.label": "Secondi"
 }

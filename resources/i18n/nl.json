@@ -982,5 +982,19 @@
   "settings.alerts.AudioAlert.atno.label": "ATNO DXCC",
   "settings.alerts.AudioAlert.atno.hover": "Een entiteit die u nog nooit hebt gewerkt, op geen enkele band of mode, ongeacht de logboekkeuze. Waarschuwt in plaats van de DXCC-waarschuwing voor dat station.",
   "settings.alerts.AudioAlert.onAtno.label": "Bij ATNO",
-  "settings.alerts.AudioAlert.onAtno.hover": "Uitgesproken of afgespeeld in plaats van de gewone waarschuwing als een station een ATNO is: een nooit gewerkt DXCC, een nooit gejaagd park, een nooit gejaagde top. Leeg: de gewone waarschuwing."
+  "settings.alerts.AudioAlert.onAtno.hover": "Uitgesproken of afgespeeld in plaats van de gewone waarschuwing als een station een ATNO is: een nooit gewerkt DXCC, een nooit gejaagd park, een nooit gejaagde top. Leeg: de gewone waarschuwing.",
+  "gt.button.santa.hover": "Kerstman-tracker aan- of uitzetten",
+  "santa.title.label": "Kerstman-tracker",
+  "santa.over.label": "De Kerstman is bij",
+  "santa.next.label": "Volgende stop",
+  "santa.gifts.label": "Cadeaus bezorgd",
+  "santa.pole.label": "Noordpool",
+  "newyear.welcome.label": "Gelukkig Nieuwjaar {year}!",
+  "santa.lost.label": "Contact met de Kerstman verloren!",
+  "santa.lastseen.label": "Laatst gezien",
+  "santa.countdown.label": "De Kerstman vertrekt over",
+  "santa.days.label": "Dagen",
+  "santa.hours.label": "Uren",
+  "santa.minutes.label": "Minuten",
+  "santa.seconds.label": "Seconden"
 }

@@ -52,6 +52,7 @@ Scripts in [tools/](tools/) (run from the repo root; each file's header has its 
 - [i18n_apply.js](tools/i18n_apply.js): applies a batch of new translation keys (13 values each, in its `LOCALES` order) to every locale file, plus the matching `data-i18n` / `I18N()` source edits. Dry run unless `write`; the header documents the batch module format.
 - [i18n_verify.js](tools/i18n_verify.js): every `data-i18n` / `I18N("…")` key in the given files exists in every locale.
 - [audit_english.js](tools/audit_english.js): lists English-only UI strings of two or more words that don't go through i18n (a heuristic, so review the hits).
+- [santa_route_export.js](tools/santa_route_export.js), [santa_route.js](tools/santa_route.js): the Santa Tracker's stops from the running dev copy, and the shortest route around them written to `resources/data/santa-route.json` (a table read as it is; rerun only when the stops change).
 - [reload_i18n.js](tools/reload_i18n.js): reloads the locale file in the running main window (see Running dev).
 - [eol_check.js](tools/eol_check.js), [bom_check.js](tools/bom_check.js): line endings / BOM of given files; every `.js` with a BOM.
 - [changelog_html.js](tools/changelog_html.js): regenerates CHANGELOG.md's `### HTML List` section from its `### MD Markup Format` section (dry run unless `write`).

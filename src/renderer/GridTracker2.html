@@ -91,6 +91,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <script src="./lib/net.js" type="text/javascript"></script>
   <script src="./lib/ui/hotkeys.js" type="text/javascript"></script>
   <script src="./lib/ui/buttonPanel.js" type="text/javascript"></script>
+  <script src="./lib/ui/seasonal.js" type="text/javascript"></script>
   <script src="./lib/ui/print.js" type="text/javascript"></script>
   <script src="./lib/ui/aboutFx.js" type="text/javascript"></script>
   <script src="./lib/map/maidenhead.js" type="text/javascript"></script>
@@ -237,6 +238,42 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <td align="center">90%</td>
           </tr>
         </table>
+      </div>
+      <!-- Santa Tracker legend: shown while the Santa button is on (seasonal.js) -->
+      <div id="santaDiv" class="roundBorder santaLegend" style="display: none;">
+        <table class="santaTable">
+          <tr>
+            <td colspan="2" class="santaHeader"><span data-i18n="santa.title.label">Santa Tracker</span></td>
+          </tr>
+          <tr id="santaOverTr">
+            <td data-i18n="santa.over.label">Santa Is Over</td>
+            <td><span id="santaOverText" onclick="santaCenter();" style="cursor: pointer;"></span></td>
+          </tr>
+          <tr id="santaNextTr">
+            <td data-i18n="santa.next.label">Next Stop</td>
+            <td id="santaNextText"></td>
+          </tr>
+          <tr id="santaLostTr" style="display: none;">
+            <td colspan="2" class="santaLost">
+              <div class="santaLostBlink" data-i18n="santa.lost.label">Contact Lost With Santa!</div>
+              <div><span data-i18n="santa.lastseen.label">Last Seen</span>: <span id="santaLastSeenText"></span></div>
+            </td>
+          </tr>
+          <tr>
+            <td data-i18n="santa.gifts.label">Gifts Delivered</td>
+            <td id="santaGiftsText">0</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <!-- Santa Tracker countdown to Dec 24 00:00 local, top center of the map (seasonal.js) -->
+    <div id="santaCountdown" class="santaCountdown" style="display: none;">
+      <div class="santaCountdownTitle" data-i18n="santa.countdown.label">Santa Leaves In</div>
+      <div class="santaCountdownUnits">
+        <div class="santaUnit santaUnitRed"><span id="santaCdDays">0</span><small data-i18n="santa.days.label">Days</small></div>
+        <div class="santaUnit santaUnitGreen"><span id="santaCdHours">00</span><small data-i18n="santa.hours.label">Hours</small></div>
+        <div class="santaUnit santaUnitRed"><span id="santaCdMinutes">00</span><small data-i18n="santa.minutes.label">Minutes</small></div>
+        <div class="santaUnit santaUnitGreen"><span id="santaCdSeconds">00</span><small data-i18n="santa.seconds.label">Seconds</small></div>
       </div>
     </div>
     <div id="chevronDiv" class="chevronDivClass" data-i18n="map.showMenu.hover" title="Click me, place holder" onclick="updateLayout(false)">↔</div>
@@ -637,6 +674,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div id="sotaMapButton" onclick="toggleSotaMap();" class="iconButton" style="display:none;" title="Toggle Summits on the Air Spots" data-i18n="settings.map.sotaMap.hover">
           <img id="sotaMapImg" src="img/sota_menu.png" class="buttonImg" />
         </div>
+        <!-- Seasonal: shown on Dec 24 and 25 (seasonal.js) -->
+        <div id="santaButton" onclick="toggleSanta();" class="iconButton" style="display:none;" data-i18n="gt.button.santa.hover" title="Toggle Santa Tracker">
+          <img id="santaImg" src="img/santa_menu.png" class="buttonImg" style="filter: grayscale(1);" />
+        </div>
       </div>
       <div id="trafficDiv" class="roundBorder" style="
             position: relative;
@@ -712,6 +753,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           overflow: hidden;
         " class="roundBorder"></div>
     <div id="myMoonTooltip" style="
+          background-color: black;
+          padding: 5px;
+          text-align: center;
+          display: block;
+          position: absolute;
+          z-index: -499;
+          left: 50px;
+          top: 50px;
+          border: 2px solid white;
+          white-space: nowrap;
+          overflow: hidden;
+        " class="roundBorder"></div>
+    <div id="santaTooltip" style="
           background-color: black;
           padding: 5px;
           text-align: center;

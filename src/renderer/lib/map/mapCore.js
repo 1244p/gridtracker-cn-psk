@@ -348,6 +348,7 @@ function renderMap()
   createGlobalMapLayer("flight");
   createGlobalMapLayer("transmit");
   createGlobalMapLayer("gtflags");
+  createGlobalMapLayer("santa");
   createGlobalMapLayer("temp");
 
   if (GT.settings.map.projection != "EPSG:3857")
@@ -402,6 +403,7 @@ function renderMap()
       GT.layerVectors.flight,
       GT.layerVectors.transmit,
       GT.layerVectors.gtflags,
+      GT.layerVectors.santa,
       GT.layerVectors.temp
     ],
     interactions: ol.interaction.defaults.defaults({
