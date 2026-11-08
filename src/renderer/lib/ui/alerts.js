@@ -499,7 +499,7 @@ function displayAlertPopUp(what, message, target)
     html.push("<th>Repeat</th>");
     html.push("<th>Filename</th>");
     html.push("<th>Alerted</th>");
-    html.push("<th>Last Message</th>");
+    html.push("<th>" + I18N("alerts.lastMessage") + "</th>");
     html.push("<th>When</th>");
     html.push("</tr>");
 
@@ -644,7 +644,7 @@ function displayCustomAlerts()
     html.push("<th>Repeat</th>");
     html.push("<th>Filename</th>");
     html.push("<th>Alerted</th>");
-    html.push("<th>Last Message</th>");
+    html.push("<th>" + I18N("alerts.lastMessage") + "</th>");
     html.push("<th>When</th>");
     html.push("<th>Reset</th>");
     html.push("<th>Delete</th>");

@@ -15,7 +15,7 @@
 -->
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Current Conditions</title>
+    <title data-i18n="conditions.title">Current Conditions</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" href="./lib/css/style.css" />
     <style type="text/css">
@@ -24,7 +24,7 @@
         -webkit-appearance: none;
         -webkit-user-select: none;
         height: 100%;
-        overflow: hidden;
+        overflow: auto;
       }
 
       table,
@@ -36,8 +36,53 @@
         font-size: 12px;
         text-align: center;
       }
+
+      /* Glossary of the abbreviations on the solar image, so the window can explain them in the UI language */
+      #glossaryDiv {
+        margin: 6px 4px 8px 4px;
+        padding: 4px 4px 6px 4px;
+        border: 1px solid #333;
+        border-radius: 4px;
+      }
+
+      #glossaryTitle {
+        color: #aaa;
+        font-size: 11px;
+        margin-bottom: 4px;
+      }
+
+      #glossaryTerms {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px;
+      }
+
+      .glossaryTerm {
+        border: 1px solid #2f7f4f;
+        border-radius: 8px;
+        color: #9f9;
+        cursor: help;
+        font-size: 11px;
+        padding: 1px 6px;
+        white-space: nowrap;
+      }
+
+      .glossaryTerm:hover {
+        background-color: #17301f;
+      }
+
+      #glossaryNote {
+        color: #ddd;
+        font-size: 11px;
+        line-height: 1.35;
+        margin-top: 5px;
+        white-space: normal;
+        min-height: 30px;
+      }
     </style>
     <script src="./lib/first.js"></script>
+    <script src="./lib/ui/i18n.js"></script>
     <script>
 
       function timeNowSec() {
@@ -46,6 +91,27 @@
 
       const C = {};
       C.refreshTimer = null;
+
+      // Abbreviations printed on the solar image, explained by a Chinese/English glossary line under the images
+      const GLOSSARY_TERMS = ["sfi", "sn", "a", "k", "xray", "304a", "ptnflx", "elcflx", "aurora", "bz"];
+
+      function buildGlossary() {
+        const box = document.getElementById("glossaryTerms");
+        const note = document.getElementById("glossaryNote");
+        const hint = I18N("conditions.glossary.hint");
+
+        note.textContent = hint;
+
+        for (const term of GLOSSARY_TERMS) {
+          const chip = document.createElement("span");
+          chip.className = "glossaryTerm";
+          chip.textContent = I18N("conditions.glossary." + term + ".term");
+          chip.title = I18N("conditions.glossary." + term + ".desc");
+          chip.addEventListener("mouseenter", function () { note.textContent = this.title; });
+          chip.addEventListener("mouseleave", function () { note.textContent = hint; });
+          box.appendChild(chip);
+        }
+      }
 
       function refreshConditions() {
         var now = timeNowSec() % 86400;
@@ -71,6 +137,8 @@
       }
 
       function init() {
+        loadChildWindowI18n();
+        buildGlossary();
         refreshConditions();
         GT.conditionsWindowInitialized = true;
       }
@@ -96,7 +164,7 @@
     >
       <div id="conditionsDataDiv">
         <div>
-          <a target="_blank" href="http://www.hamqsl.com" title="Visit www.hamqsl.net"><img onerror="imageLoadFailed()" src="https://www.hamqsl.com/solar101vhf.php?t="/></a>
+          <a target="_blank" href="http://www.hamqsl.com" data-i18n-title="conditions.hamqsl"><img onerror="imageLoadFailed()" src="https://www.hamqsl.com/solar101vhf.php?t="/></a>
         </div>
         <div>
           <table align="center">
@@ -126,6 +194,11 @@
             </tr>
           </table>
         </div>
+      </div>
+      <div id="glossaryDiv">
+        <div id="glossaryTitle" data-i18n="conditions.glossary.title">Glossary</div>
+        <div id="glossaryTerms"></div>
+        <div id="glossaryNote" data-i18n="conditions.glossary.hint">Hover a term for what it means</div>
       </div>
     </div>
   </body>

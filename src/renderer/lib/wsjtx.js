@@ -316,7 +316,7 @@ function handleInstanceStatus(newMessage)
         html.push("<div  style='vertical-align:top;display:inline-block;margin-right:8px;'>");
         html.push("<table class='darkTable' align=center>");
         html.push("<tr><th colspan=7>" + I18N("gt.print.lastDecoded").replace("{0}", GT.lastMessages.length) + "</th></tr>");
-        html.push("<tr><th>Time</th><th>dB</th><th>DT</th><th>Freq</th><th>Mode</th><th>Message</th><th>DXCC</th></tr>");
+        html.push("<tr>" + I18N("wsjtx.msg.header") + "</tr>");
 
         html.push(GT.lastMessages.join(""));
 

@@ -837,13 +837,13 @@ function displayLookupObject(lookup, gridPass, fromCache = false)
       </table>
     </div>`;
 
-  const detailsRows = ["<tr><th colspan='2'>Details</th></tr>"];
+  const detailsRows = ["<tr><th colspan='2'>" + I18N("gt.lookup.details") + "</th></tr>"];
 
   const website = url.length > 0 ? lookupWebsiteUrl(url) : "";
   if (website.length > 0)
   {
     detailsRows.push(
-      `<tr><td>Website</td><td><font color='orange'><b><div style='cursor:pointer' onClick='window.opener.openSite(${lookupJsArg(website)});'>Link</div></b></font></td></tr>`
+      `<tr><td>${I18N("gt.lookup.website")}</td><td><font color='orange'><b><div style='cursor:pointer' onClick='window.opener.openSite(${lookupJsArg(website)});'>${I18N("gt.lookup.link")}</div></b></font></td></tr>`
     );
   }
 
@@ -851,38 +851,38 @@ function displayLookupObject(lookup, gridPass, fromCache = false)
   {
     const bioUrl = p("bioUrl") || "https://www.qrz.com/db/" + p("call");
     detailsRows.push(
-      `<tr><td>Biography</td><td><font color='orange'><b><div style='cursor:pointer' onClick='window.opener.openSite(${lookupJsArg(bioUrl)});'>Link</div></b></font></td></tr>`
+      `<tr><td>${I18N("gt.lookup.biography")}</td><td><font color='orange'><b><div style='cursor:pointer' onClick='window.opener.openSite(${lookupJsArg(bioUrl)});'>${I18N("gt.lookup.link")}</div></b></font></td></tr>`
     );
   }
 
   detailsRows.push(
-    makeRow("Type", lookup, "type"),
-    makeRow("Class", lookup, "class"),
-    makeRow("Codes", lookup, "codes"),
-    makeRow("QTH", lookup, "qth")
+    makeRow(I18N("gt.lookup.type"), lookup, "type"),
+    makeRow(I18N("gt.lookup.class"), lookup, "class"),
+    makeRow(I18N("gt.lookup.codes"), lookup, "codes"),
+    makeRow(I18N("gt.lookup.qth"), lookup, "qth")
   );
 
   const dates = joinIfBothWithDash(p("efdate"), p("expdate"));
   addRowIf(detailsRows, I18N("gt.lookup.effectiveDates"), dates);
 
   const aliases = joinCommaIf(p("aliases"), p("p_call"));
-  addRowIf(detailsRows, "Aliases", aliases, ` title='${lookupHtml(aliases)}'`);
+  addRowIf(detailsRows, I18N("gt.lookup.aliases"), aliases, ` title='${lookupHtml(aliases)}'`);
 
   detailsRows.push(
     makeRow(I18N("gt.lookup.polishOT"), lookup, "plot"),
     makeRow(I18N("gt.lookup.germanDOK"), lookup, "dok"),
     makeYesNoRow(I18N("gt.lookup.sonderDOK"), lookup, "sondok"),
-    `<tr><td>DXCC</td><td>${lookupHtml(p("dxcc"))} - ${lookupHtml(GT.dxccToAltName[p("dxcc")] || "Unknown")}</td></tr>`,
+    `<tr><td>DXCC</td><td>${lookupHtml(p("dxcc"))} - ${lookupHtml(GT.dxccToAltName[p("dxcc")] || I18N("gt.lookup.unknown"))}</td></tr>`,
     makeRow(I18N("rosterColumns.Wanted.cqz"), lookup, "cqzone"),
     makeRow(I18N("rosterColumns.Wanted.ituz"), lookup, "ituzone"),
     makeRow("IOTA", lookup, "iota"),
     makeRow("FIPS", lookup, "fips"),
     makeRow("FRN", lookup, "frn"),
-    makeRow("Timezone", lookup, "TimeZone"),
+    makeRow(I18N("gt.lookup.timezone"), lookup, "TimeZone"),
     makeRow(I18N("gt.lookup.gmtOffset"), lookup, "GMTOffset"),
-    makeRow("County", lookup, "county"),
-    makeRow("Latitude", lookup, "lat"),
-    makeRow("Longitude", lookup, "lon")
+    makeRow(I18N("gt.lookup.county"), lookup, "county"),
+    makeRow(I18N("gt.lookup.latitude"), lookup, "lat"),
+    makeRow(I18N("gt.lookup.longitude"), lookup, "lon")
   );
 
   if (lat.length > 0 && lon.length > 0)
@@ -902,27 +902,27 @@ function displayLookupObject(lookup, gridPass, fromCache = false)
     );
 
     detailsRows.push(
-      `<tr><td>Distance</td><td style='color:cyan'>${distance}${distanceUnit.value.toLowerCase()}</td></tr>`,
-      `<tr><td>Azimuth</td><td style='color:yellow'>${bearing}&deg;</td></tr>`
+      `<tr><td>${I18N("gt.lookup.distance")}</td><td style='color:cyan'>${distance}${distanceUnit.value.toLowerCase()}</td></tr>`,
+      `<tr><td>${I18N("gt.lookup.azimuth")}</td><td style='color:yellow'>${bearing}&deg;</td></tr>`
     );
   }
 
-  detailsRows.push(makeRow("Grid", lookup, "grid", true));
+  detailsRows.push(makeRow(I18N("gt.lookup.grid"), lookup, "grid", true));
 
   if (gtGrid.length > 0 && gtGrid.toUpperCase() != grid.toUpperCase())
   {
-    detailsRows.push(makeRow("GT Grid", lookup, "gtGrid", true));
+    detailsRows.push(makeRow(I18N("gt.lookup.gtGrid"), lookup, "gtGrid", true));
   }
 
   detailsRows.push(
-    makeRow("Born", lookup, "born"),
+    makeRow(I18N("gt.lookup.born"), lookup, "born"),
     makeYesNoRow("LoTW", lookup, "lotw"),
     makeYesNoRow("eQSL", lookup, "eqsl"),
     makeYesNoRow(I18N("gt.lookup.bureauQSL"), lookup, "bqsl"),
     makeYesNoRow(I18N("gt.lookup.mailDirectQSL"), lookup, "mqsl"),
     makeRow(I18N("gt.lookup.qslVia"), lookup, "qsl_via"),
-    makeRow("QRZ Admin", lookup, "user"),
-    makeRow("Prefix", lookup, "prefix"),
+    makeRow(I18N("gt.lookup.qrzAdmin"), lookup, "user"),
+    makeRow(I18N("gt.lookup.prefix"), lookup, "prefix"),
     lookup.source
   );
 
@@ -940,12 +940,12 @@ function displayLookupObject(lookup, gridPass, fromCache = false)
 
   if (GT.settings.callsignLookups.oqrsUseEnable == true && call in GT.oqrsCallsigns)
   {
-    detailsRows.push("<tr><td>ClubLog OQRS</td><td>&#10004;</td></tr>");
+    detailsRows.push("<tr><td>" + I18N("gt.lookup.clublogOqrs") + "</td><td>&#10004;</td></tr>");
   }
 
   if (fromCache)
   {
-    detailsRows.push("<tr><td>Cached</td><td>Yes</td></tr>");
+    detailsRows.push("<tr><td>" + I18N("gt.lookup.cached") + "</td><td>" + I18N("gt.lookup.yes") + "</td></tr>");
   }
 
   const details = `
@@ -958,8 +958,8 @@ function displayLookupObject(lookup, gridPass, fromCache = false)
   const genMessage = `
     <tr>
       <td colspan='2'>
-        <div title='Clear' class='button' onclick='window.opener.clearLookup();'>Clear</div>
-        <div title='Generate Messages' class='button' onclick='window.opener.setCallAndGrid(${lookupJsArg(p("call"))},${lookupJsArg(grid)});'>Generate Messages</div>
+        <div title='${I18N("gt.lookup.clear")}' class='button' onclick='window.opener.clearLookup();'>${I18N("gt.lookup.clear")}</div>
+        <div title='${I18N("gt.lookup.generate")}' class='button' onclick='window.opener.setCallAndGrid(${lookupJsArg(p("call"))},${lookupJsArg(grid)});'>${I18N("gt.lookup.generate")}</div>
       </td>
     </tr>`;
 
@@ -989,10 +989,10 @@ function makeYesNoRow(first, object, key)
   if (value.length > 0)
   {
     let test = value.toUpperCase();
-    if (test == "Y") return "<tr><td>" + first + "</td><td>Yes</td></tr>";
-    if (test == "N") return "<tr><td>" + first + "</td><td>No</td></tr>";
+    if (test == "Y") return "<tr><td>" + first + "</td><td>" + I18N("gt.lookup.yes") + "</td></tr>";
+    if (test == "N") return "<tr><td>" + first + "</td><td>" + I18N("gt.lookup.no") + "</td></tr>";
     if (test == "?") return "";
-    return ("<tr><td>" + first + "</td><td>" + (object[key] == 1 ? "Yes" : "No") + "</td></tr>");
+    return ("<tr><td>" + first + "</td><td>" + (object[key] == 1 ? I18N("gt.lookup.yes") : I18N("gt.lookup.no")) + "</td></tr>");
   }
   return "";
 }
@@ -1059,7 +1059,7 @@ function makeRow(first, object, key, grid = false)
       // the background color of the grid cell if new or
       // unconfirmed and leave as is if confirmed.
       let style = lookupGridCellStyle(object[key]);
-      return ("<tr><td>" + first + "</td><td title='Copy to clipboard' style='cursor:pointer;font-weight:bold;" + style + "' onClick='addTextToClipboard(" + lookupJsArg(object[key]) + ")'>" + lookupHtml(object[key]) + "</td></tr>");
+      return ("<tr><td>" + first + "</td><td title='" + I18N("gt.lookup.copyToClipboard") + "' style='cursor:pointer;font-weight:bold;" + style + "' onClick='addTextToClipboard(" + lookupJsArg(object[key]) + ")'>" + lookupHtml(object[key]) + "</td></tr>");
     }
     else
     {

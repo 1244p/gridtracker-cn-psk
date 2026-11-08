@@ -1,0 +1,61 @@
+# Strings the English audit reports but that are meant to stay as they are.
+# One exact string per line (as the audit prints it); '#' starts a comment.
+# Keep this list short: real interface text belongs in the locale files, not here.
+
+# Language names are shown in their own language in the language picker
+Español
+Français
+Português (Brasil)
+Português (Portugal)
+
+# Brands, services and product names
+GridTracker.org
+GridTracker.org!
+QRZ.com
+ClubLog.org
+N3FJP
+N1MM
+Log4OM
+HrdLog.net
+HRDLOG.net
+HRD Logbook
+HRD Logbook &lt;= v6.8.x
+Cloudlog/Wavelog
+Big CTY
+KC2G
+WPX / USC
+G7VRD: DX Cluster / CW Skimmer, Spothole
+
+# Contributors (name and callsign) in the about box
+Stephen Loomis
+Henry Forte
+Matthew Chambers
+Sebastian Delmont
+Christian Bayer
+Paul Traina
+Jon Angliss
+Beau Gunderson
+Jonathan Fick
+Florian Wolters
+NØTTL
+N2VFL
+NRØQ
+KI2D
+WA4YA
+K6PST
+KF5QHQ
+N7YHF
+KEØYBL
+DF2ET
+HB9HWI
+
+# Diagnostics, developer messages and test markers (not interface text)
+Electron v OpenLayers: v
+Missing 'url' or '_url' in group (
+Core awards.json :
+GT Test -
+✅ fldigi log test ✅
+
+# False positives: fragments of a template expression, not text on screen
+", callObj.DEcall)}
+", callObj.heading)}

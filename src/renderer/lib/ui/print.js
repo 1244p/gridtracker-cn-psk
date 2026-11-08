@@ -68,7 +68,7 @@ function openPrint()
   printWindow.document.write(`
       <html>
         <head>
-            <title>Print HotKeys</title>
+            <title>打印快捷键列表</title>
             <style>
                 body { font-family: sans-serif; }
                 table.darkTable {

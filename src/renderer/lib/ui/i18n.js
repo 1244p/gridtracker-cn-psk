@@ -21,6 +21,22 @@ function loadI18n()
   refreshI18NStrings();
 }
 
+// A title that has its own key (data-i18n-title), so text and tooltip can be translated separately
+function renderI18nTitle(element)
+{
+  const key = element.getAttribute("data-i18n-title");
+  if (!key) return;
+
+  if (key in GT.i18n)
+  {
+    element.title = GT.i18n[key];
+  }
+  else
+  {
+    console.error("Missing Body I18N Title Key: ", key);
+  }
+}
+
 function renderI18n()
 {
   const elements = document.querySelectorAll("[data-i18n]");
@@ -50,6 +66,14 @@ function renderI18n()
     {
       console.error("Missing Body I18N Key: ", key);
     }
+
+    renderI18nTitle(elements[x]);
+  }
+
+  const titled = document.querySelectorAll("[data-i18n-title]");
+  for (let x = 0; x < titled.length; x++)
+  {
+    renderI18nTitle(titled[x]);
   }
 }
 

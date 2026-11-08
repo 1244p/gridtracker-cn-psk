@@ -827,7 +827,7 @@ function postInit()
     section = "UDPListenerForward";
     startForwardListener();
     section = "LastTraffic";
-    addLastTraffic("GridTracker2<br>" + gtShortVersion);
+    addLastTraffic("GridTracker2 网格助手<br>" + gtShortVersion);
     section = "displayRadar";
     displayRadar();
     section = "PredictionInit";

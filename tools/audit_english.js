@@ -8,6 +8,12 @@ const path = require("path");
 const root = process.argv[2] || ".";
 const outFile = process.argv[3] || path.join(os.tmpdir(), "english_audit.txt");
 const en = JSON.parse(fs.readFileSync(path.join(root, "resources/i18n/en.json"), "utf8"));
+// Proper nouns (brands, callsigns, contributor names, language endonyms) that are meant to stay as
+// they are: one per line, "#" starts a comment. They are reported as a count, not as failures.
+const allowFile = path.join(root, "tools/english_allowlist.txt");
+const allow = new Set(fs.existsSync(allowFile)
+  ? fs.readFileSync(allowFile, "utf8").split(/\r?\n/).map(s => s.trim()).filter(s => s && !s.startsWith("#"))
+  : []);
 
 const WORDS = /[A-Za-z][A-Za-z'’-]*/g;
 const multiWord = (s) => (s.replace(/&[a-z#0-9]+;/gi, " ").match(WORDS) || []).length >= 2;
@@ -45,10 +51,11 @@ function auditHtml(file) {
     }
     if (tag === "script" || tag === "style") { if (!m[4]) skipUntil = tag; continue; }
     const i18n = (attrs.match(/data-i18n\s*=\s*["']([^"']+)["']/) || [])[1] || null;
+    const titleI18n = (attrs.match(/data-i18n-title\s*=\s*["']([^"']+)["']/) || [])[1] || null;
     const titleM = attrs.match(/\btitle\s*=\s*"([^"]*)"|\btitle\s*=\s*'([^']*)'/);
     if (titleM) {
       const title = clean(titleM[1] !== undefined ? titleM[1] : titleM[2]);
-      const titleTranslated = i18n && (i18n.endsWith(".hover") || (i18n.endsWith(".label") && (i18n.replace(/\.label$/, ".hover") in en)));
+      const titleTranslated = (titleI18n && (titleI18n in en)) || (i18n && (i18n.endsWith(".hover") || (i18n.endsWith(".label") && (i18n.replace(/\.label$/, ".hover") in en))));
       if (title && multiWord(title) && !titleTranslated) results.push({ file: rel, line: lineOf(src, m.index), kind: "html title", text: title });
     }
     for (const a of ["placeholder", "alt"]) {
@@ -104,10 +111,13 @@ for (const f of walk(path.join(renderer, "lib")).filter(f => f.endsWith(".js")))
 // De-duplicate identical text on the same line
 const seen = new Set();
 const unique = results.filter(r => { const k = r.file + ":" + r.line + ":" + r.text; if (seen.has(k)) return false; seen.add(k); return true; });
+const allowlisted = unique.filter(r => allow.has(r.text));
+const failures = unique.filter(r => !allow.has(r.text));
 const byFile = {};
-for (const r of unique) (byFile[r.file] = byFile[r.file] || []).push(r);
+for (const r of failures) (byFile[r.file] = byFile[r.file] || []).push(r);
 const out = [];
-out.push(`English-only UI strings (2+ words, not through i18n): ${unique.length}`);
+out.push(`English-only UI strings (2+ words, not through i18n): ${failures.length}`);
+out.push(`Allowlisted proper nouns: ${allowlisted.length} (see tools/english_allowlist.txt)`);
 for (const f of Object.keys(byFile).sort((a, b) => byFile[b].length - byFile[a].length)) {
   out.push("", `## ${f} (${byFile[f].length})`);
   for (const r of byFile[f]) out.push(`  ${String(r.line).padStart(5)}  [${r.kind}]  ${r.text.slice(0, 110)}`);

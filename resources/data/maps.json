@@ -158,6 +158,14 @@
     "maxZoom": 4,
     "offline": true
   },
+  "离线地图 (Intl)(Offline)": {
+    "sourceType" : "XYZ",
+    "url": "map/IRZG/{z}/{y}/{x}.png",
+    "attributions": "离线地图",
+    "minZoom": 2,
+    "maxZoom": 4,
+    "offline": true
+  },
   "City Lights by NASA (No Labels)": {
     "sourceType" : "XYZ",
     "url": "https://tagloomis.com/maps/CityLights2016/{z}/{x}/{-y}.png",

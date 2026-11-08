@@ -124,6 +124,24 @@ function loadMaidenHeadData()
   GT.shapeData = requireJson("data/shapes.json");
   GT.StateData = requireJson("data/state.json");
 
+  // Locale overlay for map shape names: a plain string renames the upstream shape, an object replaces
+  // the whole shape. Kept apart from shapes.json so upstream geometry updates stay authoritative.
+  let langShapes = requireJson("data/" + GT.settings.app.locale + "-shapes.json");
+  if (langShapes)
+  {
+    for (const key in langShapes)
+    {
+      if (typeof langShapes[key] === "string")
+      {
+        if (key in GT.shapeData) GT.shapeData[key].properties.name = langShapes[key];
+      }
+      else if (langShapes[key] && langShapes[key].properties)
+      {
+        GT.shapeData[key] = langShapes[key];
+      }
+    }
+  }
+
   for (let key in GT.StateData)
   {
     for (let x = 0; x < GT.StateData[key].mh.length; x++)
@@ -155,6 +173,23 @@ function loadMaidenHeadData()
 
   GT.cqZones = requireJson("data/cqzone.json");
   GT.ituZones = requireJson("data/ituzone.json");
+
+  // Same overlay rule for CQ zone names
+  let langCqZone = requireJson("data/" + GT.settings.app.locale + "-cqzone.json");
+  if (langCqZone)
+  {
+    for (const key in langCqZone)
+    {
+      if (typeof langCqZone[key] === "string")
+      {
+        if (key in GT.cqZones) GT.cqZones[key].name = langCqZone[key];
+      }
+      else if (langCqZone[key] && langCqZone[key].geo)
+      {
+        GT.cqZones[key] = langCqZone[key];
+      }
+    }
+  }
 
   for (let key in GT.StateData)
   {

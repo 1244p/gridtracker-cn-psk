@@ -48,7 +48,7 @@ function makeTitleInfo(mapWindow)
   let band = GT.settings.app.gtBandFilter.length == 0 ? "Mixed" : GT.settings.app.gtBandFilter == "auto" ? GT.settings.app.myBand : GT.settings.app.gtBandFilter;
   let mode = GT.settings.app.gtModeFilter.length == 0 ? "Mixed" : GT.settings.app.gtModeFilter == "auto" ? GT.settings.app.myMode : GT.settings.app.gtModeFilter;
 
-  let news = `GridTracker2 [Band: ${band} Mode: ${mode}`;
+  let news = `GridTracker2 网格助手 [Band: ${band} Mode: ${mode}`;
   let end = "]";
 
   if (mapWindow)

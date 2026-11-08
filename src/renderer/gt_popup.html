@@ -16,7 +16,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Data Breakout</title>
+    <title data-i18n="popup.dataBreakout">Data Breakout</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" href="./lib/css/style.css" />
     <style type="text/css">
@@ -38,6 +38,7 @@
       }
     </style>
     <script src="./lib/first.js"></script>
+    <script src="./lib/ui/i18n.js"></script>
     <script>
       function startLookup(call, grid)
       {
@@ -47,6 +48,7 @@
 
       function init()
       {
+        loadChildWindowI18n();
         GT.popupWindowInitialized = true
       }
 

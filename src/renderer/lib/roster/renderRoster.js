@@ -28,17 +28,17 @@ function renderRoster(callRoster, rosterSettings)
 
   if (totalCount != visibleCount)
   {
-    countParts.push(`${totalCount} heard`);
+    countParts.push(`${totalCount} ` + I18N("roster.title.heard"));
   }
 
-  countParts.push(`${visibleCount} in roster`);
+  countParts.push(`${visibleCount} ` + I18N("roster.title.inRoster"));
 
   if (huntedCount != visibleCount)
   {
-    countParts.push(`${huntedCount} wanted`);
+    countParts.push(`${huntedCount} ` + I18N("roster.title.wanted"));
   }
 
-  window.document.title = `${feedRoster ? "Feed Roster" : "Call Roster"}: ${countParts.join(" • ")}`;
+  window.document.title = `${feedRoster ? I18N("roster.tabs.feed") : I18N("roster.tabs.call")}: ${countParts.join(" • ")}`;
   let multiInstance = false;
   if (!feedRoster && listShortInstances().length > 0)
   {
