@@ -554,10 +554,16 @@ function checkForUpdates() {
 
   try {
     if (disableAutoUpdate == true) {
-      autoUpdater.checkForUpdates();
+      autoUpdater.checkForUpdates().catch((e) => {
+        log.error("Failed to update check");
+        log.error(e && e.message ? e.message : e);
+      });
     }
     else {
-      autoUpdater.checkForUpdatesAndNotify();
+      autoUpdater.checkForUpdatesAndNotify().catch((e) => {
+        log.error("Failed to update check");
+        log.error(e && e.message ? e.message : e);
+      });
     }
   }
   catch (e) {
