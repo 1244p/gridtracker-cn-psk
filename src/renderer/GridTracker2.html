@@ -100,6 +100,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <script src="./lib/GridTracker2.js" type="text/javascript"></script>
   <script src="./lib/services/mqttPsk.js" type="text/javascript"></script>
   <script src="./lib/map/countyLookup.js" type="text/javascript"></script>
+  <script src="./lib/psk/pskWatcher.js" type="text/javascript"></script>
+  <script src="./lib/psk/pskLayer.js" type="text/javascript"></script>
+  <script src="./lib/psk/pskPanel.js" type="text/javascript"></script>
 </head>
 
 <body id="mainBody" onload="startupApplication();">
@@ -115,13 +118,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <div>
       <h3><i data-i18n="appname-sub-title">An Amateur Radio Companion</i></h3>
     </div>
-    <div id="startupStatusDiv">Initial Startup</div>
+    <div id="startupStatusDiv" data-i18n="startupStatusDiv">Initial Startup</div>
   </div>
   <div id="main" style="display: none;">
     <div id="mapDiv" class="mapDivClass"></div>
+    <div id="pskPanelHost" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1200;"></div>
     <div id="mouseTrackDiv" class="mouseTrackClass"></div>
     <div id="warnSoundcardDiv" class="absoluteCenterDiv" style="display:none;border-color:orange;border-style:solid;border-width: 5px;padding:5px;font-weight:bold;color:cyan;" >
-      <div id="warnSoundcardHtml">This is some test text!!!</div>
+      <div id="warnSoundcardHtml"></div>
       <div data-i18n="updatePopup.ok" class="button" style="margin:5px;" onclick="warnSoundcardDiv.style.display='none'"></div>
     </div>
     <div id="legendDiv" class="legendDivClass">
@@ -215,10 +219,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
               <div style="display: flex;">
                 <div style="flex: 3; display: flex;">
                   <div style="flex: 1; text-align: left;">0km</div>
-                  <div style="flex: 1; text-align: left;">2m TI</div>
+                  <div style="flex: 1; text-align: left;" data-i18n="gt.tropoLegend.2m">2m TI</div>
                   <div style="flex: 1; text-align: right;">&gt;500km</div>
                 </div>
-                <div style="flex: 1; text-align: center; margin-left: 2px;">6m Es</div>
+                <div style="flex: 1; text-align: center; margin-left: 2px;" data-i18n="gt.tropoLegend.6m">6m Es</div>
               </div>
             </td>
           </tr>
@@ -384,14 +388,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             height: 49px;
             margin-bottom: 1px;
             padding: 0px;
-          " title="Band Activity" oncontextmenu="toggleBaWindow()">
+          " title="Band Activity" data-i18n-title="bandactivity.title" oncontextmenu="toggleBaWindow()">
         <div data-i18n="sidebarNoDataYet" id="graphDiv" style="bottom: 0; position: absolute; width: 100%; padding: 0px; margin-bottom: 2px">
          ...no data yet...
         </div>
       </div>
 
       <div id="actionDiv" style="border: 1px solid blue; margin: 1px; margin-bottom: 1px; padding: 3px"
-        class="roundBorder" title="Quick Stats">
+        class="roundBorder" title="Quick Stats" data-i18n-title="quickStats.title">
         <table align="center">
           <tr>
             <td data-i18n="quickStats.CallRX.label" style="cursor: pointer"
@@ -649,6 +653,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div id="buttonPsk24CheckBoxDiv" onclick="grabPsk24()" class="iconButton" data-i18n="gt.button.psk24.hover" title="Your PSK 24hour report">
           <img id="pskImg" src="img/psk_24_32.png" class="buttonImg" />
         </div>
+        <div id="pskWatchButton" onclick="togglePskWatchPanel();" oncontextmenu="togglePskWatchPanel(false);" class="iconButton" data-i18n="psk.button.hover" title="PSK Reporter Watch">
+          <img id="pskWatchImg" src="img/psk_24_32.png" class="buttonImg" style="filter: grayscale(1);" />
+        </div>
         <div id="buttonQRZCheckBoxDiv" onclick="if ( ValidateQrzApi(qrzApiKey ) ) grabQrzComLog()" class="iconButton" data-i18n="gt.button.qrz.hover" title="Download log from QRZ.com">
             <img id="qrzLogImg" src="img/Log_Button_QRZ.png" class="buttonImg" />
         </div>
@@ -661,7 +668,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <div id="buttonAcLogCheckBoxDiv" onclick="grabAcLog()" class="iconButton" data-i18n="gt.button.n3fjp.hover" title="Download log from N3FJP Logger">
           <img id="AcLogImg" src="img/Log_Button_N3FJP.png" class="buttonImg" />
       </div>
-        <div id="potaButton" onClick="togglePotaMap();" class="iconButton" title="Parks On The Air">
+        <div id="potaButton" onClick="togglePotaMap();" class="iconButton" title="Parks On The Air" data-i18n-title="award.pota.full">
           <img id="potaImg" src="img/pota.png" class="buttonImg" />
         </div>
         <div id="gtFlagButton" onclick="toggleGtMap();" onmouseenter="gtFlagButtonHover();" class="iconButton" data-i18n="gt.button.gtFlag.hover" title="Toggle View GridTracker Spotters">
@@ -1947,7 +1954,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <input type="checkbox" id="huntDXM" onchange="wantedChanged(this);" />
               </td>
               <td>
-                <label data-i18n="roster.secondary.wanted.marathon" for="huntDXM" title="DX Marathon">Marathon</label>
+                <label data-i18n="roster.secondary.wanted.marathon" for="huntDXM" title="DX Marathon" data-i18n-title="award.marathon.full">Marathon</label>
               </td>
             </tr>
             <tr>
@@ -1963,7 +1970,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <input type="checkbox" id="huntPOTA" onchange="wantedChanged(this);" />
               </td>
               <td>
-                <label data-i18n="roster.secondary.wanted.pota" for="huntPOTA" title="Parks On The Air">POTA</label>
+                <label data-i18n="roster.secondary.wanted.pota" for="huntPOTA" title="Parks On The Air" data-i18n-title="award.pota.full">POTA</label>
              </td>
               </tr>
             <!-- Feed Roster only, while SOTA Chasing is on -->
@@ -1972,7 +1979,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <input type="checkbox" id="huntSOTA" onchange="wantedChanged(this);" />
               </td>
               <td>
-                <label data-i18n="roster.secondary.wanted.sota" for="huntSOTA" title="Summits on the Air">SOTA</label>
+                <label data-i18n="roster.secondary.wanted.sota" for="huntSOTA" title="Summits on the Air" data-i18n-title="award.sota.full">SOTA</label>
               </td>
             </tr>
             <tr>
@@ -1980,7 +1987,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <input type="checkbox" id="huntCQz" onchange="wantedChanged(this);" />
               </td>
               <td>
-                <label data-i18n="roster.secondary.wanted.cqzone" for="huntCQz" title="CQ Zones">CQz</label>
+                <label data-i18n="roster.secondary.wanted.cqzone" for="huntCQz" title="CQ Zones" data-i18n-title="award.cqz.full">CQz</label>
               </td>
             </tr>
             <tr>
@@ -1988,7 +1995,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 <input type="checkbox" id="huntITUz" onchange="wantedChanged(this);" />
               </td>
               <td>
-                <label data-i18n="roster.secondary.wanted.ituzone" for="huntITUz" title="ITU Zones">ITUz</label>
+                <label data-i18n="roster.secondary.wanted.ituzone" for="huntITUz" title="ITU Zones" data-i18n-title="award.ituz.full">ITUz</label>
               </td>
             </tr>
 

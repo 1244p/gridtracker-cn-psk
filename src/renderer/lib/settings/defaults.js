@@ -23,6 +23,7 @@ const validSettings = [
   "mapMemory",
   "map",
   "msg",
+  "psk",
   "reception",
   "roster",
   "feedRoster",
@@ -123,7 +124,7 @@ const def_settings = {
       }
     },
     loadAdifAtStartup: false,
-    locale: "en",
+    locale: "cn",
     lookupLoginCq: "",
     lookupLoginQrz: "",
     lookupLoginQth: "",
@@ -342,6 +343,17 @@ const def_settings = {
     msgPushoverScheduleStart: 0,
     msgPushoverScheduleEnd: 0,
 
+  },
+  // PSK Reporter watch (lib/psk): a callsign watched from either end, live from the MQTT feed and as retrieved history
+  psk: {
+    enabled: false,
+    call: "",
+    side: "heard",
+    band: "",
+    historyMinutes: 15,
+    showLines: true,
+    panelOpen: false,
+    tableOpen: false
   },
   reception: {
     viewHistoryTimeSec: 900,
